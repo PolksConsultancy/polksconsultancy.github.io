@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat UI with Media</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header {
+            padding: 15px;
+            background-color: #4a76a8;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .incoming {
+            align-self: flex-start;
+            background-color: #e5e5ea;
+            color: black;
+            border-bottom-left-radius: 5px;
+        }
+
+        .outgoing {
+            align-self: flex-end;
+            background-color: #4a76a8;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .media-attachment {
+            margin-top: 8px;
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 100%;
+        }
+
+        .media-attachment img, .media-attachment video {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+        }
+
+        .media-attachment .file {
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .media-attachment .file-icon {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .chat-input button {
+            background-color: #4a76a8;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .attachment-btn {
+            background-color: transparent;
+            color: #4a76a8;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Chatview Template
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        
+        <div class="chat-input">
+            <button class="attachment-btn" id="attachment-btn">📎</button>
+            <input type="file" id="file-input" class="hidden" accept="image/*, video/*, .pdf, .doc, .docx">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button id="send-btn">➤</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageInput = document.getElementById('message-input');
+            const sendBtn = document.getElementById('send-btn');
+            const attachmentBtn = document.getElementById('attachment-btn');
+            const fileInput = document.getElementById('file-input');
+            
+            // Sample messages (in a real app, these would come from a server/database)
+            const sampleMessages = [
+                {
+                    type: 'incoming',
+                    text: 'Hey there! How are you doing?',
+                    time: '10:30 AM',
+                    media: null
+                },
+                {
+                    type: 'outgoing',
+                    text: "I'm good, thanks! How about you?",
+                    time: '10:32 AM',
+                    media: null
+                },
+                {
+                    type: 'incoming',
+                    text: 'Check out this photo I took yesterday',
+                    time: '10:33 AM',
+                    media: {
+                        type: 'image',
+                        url: 'https://via.placeholder.com/300x200?text=Sample+Image'
+                    }
+                },
+                {
+                    type: 'outgoing',
+                    text: 'Nice photo! Here is the document you asked for',
+                    time: '10:35 AM',
+                    media: {
+                        type: 'file',
+                        url: '#',
+                        name: 'Document.pdf'
+                    }
+                }
+            ];
+            
+            // Display sample messages
+            sampleMessages.forEach(msg => {
+                addMessage(msg.type, msg.text, msg.time, msg.media);
+            });
+            
+            // Send message on button click
+            sendBtn.addEventListener('click', sendMessage);
+            
+            // Send message on Enter key
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Handle attachment button click
+            attachmentBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            // Handle file selection
+            fileInput.addEventListener('change', function() {
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    let mediaType;
+                    
+                    if (file.type.startsWith('image/')) {
+                        mediaType = 'image';
+                    } else if (file.type.startsWith('video/')) {
+                        mediaType = 'video';
+                    } else {
+                        mediaType = 'file';
+                    }
+                    
+                    // In a real app, you would upload the file to a server first
+                    // For demo, we'll just display it directly
+                    const fileUrl = URL.createObjectURL(file);
+                    
+                    addMessage('outgoing', '', getCurrentTime(), {
+                        type: mediaType,
+                        url: fileUrl,
+                        name: file.name
+                    });
+                    
+                    fileInput.value = ''; // Reset file input
+                }
+            });
+            
+            function sendMessage() {
+                const text = messageInput.value.trim();
+                if (text) {
+                    addMessage('outgoing', text, getCurrentTime(), null);
+                    messageInput.value = '';
+                    
+                    // Simulate reply after 1 second
+                    setTimeout(() => {
+                        addMessage('incoming', 'Thanks for your message!', getCurrentTime(), null);
+                    }, 1000);
+                }
+            }
+            
+            function addMessage(type, text, time, media) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                
+                if (text) {
+                    messageDiv.innerHTML = `
+                        <div class="message-text">${text}</div>
+                        <div class="message-time">${time}</div>
+                    `;
+                }
+                
+                if (media) {
+                    let mediaHtml = '';
+                    
+                    if (media.type === 'image') {
+                        mediaHtml = `
+                            <div class="media-attachment">
+                                <img src="${media.url}" alt="Attached image">
+                            </div>
+                        `;
+                    } else if (media.type === 'video') {
+                        mediaHtml = `
+                            <div class="media-attachment">
+                                <video controls>
+                                    <source src="${media.url}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        `;
+                    } else if (media.type === 'file') {
+                        mediaHtml = `
+                            <div class="media-attachment">
+                                <div class="file">
+                                    <span class="file-icon">📄</span>
+                                    <span>${media.name}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    if (!text) {
+                        messageDiv.innerHTML = mediaHtml + `<div class="message-time">${time}</div>`;
+                    } else {
+                        messageDiv.innerHTML += mediaHtml;
+                    }
+                }
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function getCurrentTime() {
+                const now = new Date();
+                let hours = now.getHours();
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                return `${hours}:${minutes} ${ampm}`;
+            }
+        });
+    </script>
+</body>
+</html>

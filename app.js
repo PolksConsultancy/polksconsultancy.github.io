@@ -96,7 +96,7 @@ var SMS = {
             encodeLib.insert(SMS.BODY, encodeLib.scrollStyle({ element: "#" + SMS.HTML.attr("id"), marginTop: "15px", marginBottom: "62px", color: "#e2e2e2", borderRadius: "1.5px", scrollY: "6px" }), { addOn: "append" });
 
             await setTimeout(async function () {
-                await SMS.SEND.settingsPage();
+                // await SMS.SEND.settingsPage();
             }, 1500);
 
         },
@@ -129,24 +129,24 @@ var SMS = {
                 docLink: SMS.docLink,
                 editLink: SMS.editLink
             };
-            await encodeLib.settingsPage(settingsObj);
+            // await encodeLib.settingsPage(settingsObj);
         },
         credentialSet: async function() {
             // SMS.credentials = await ENAPP.getOrgVariable(SMS.extensionCredential);
             
-            if(SMS.credentials.apikey && SMS.credentials.apisecret) {
-                if($("#accountId").length) {
-                    $("#accountId").text(`API Key: `+SMS.credentials.apikey);
-                }
-                // await SMS.SEND.credentialUpdate(); 
-            }
-            else {
-                if($("#accountId").length) {
-                    $("#accountId").text(`API Key: ★★★★★★★★★`);
-                }
-                let popupObject = { htmlText: `<div style="min-width: 200px;">${'API Key or API Secret is empty.'}</div>`, backgroundColor: "#ffffffa3", buttonsDivPadding: "20px 0 0" };
-                await encodeLib.popup(popupObject);
-            }
+            // if(SMS.credentials.apikey && SMS.credentials.apisecret) {
+            //     if($("#accountId").length) {
+            //         $("#accountId").text(`API Key: `+SMS.credentials.apikey);
+            //     }
+            //     // await SMS.SEND.credentialUpdate(); 
+            // }
+            // else {
+            //     if($("#accountId").length) {
+            //         $("#accountId").text(`API Key: ★★★★★★★★★`);
+            //     }
+            //     let popupObject = { htmlText: `<div style="min-width: 200px;">${'API Key or API Secret is empty.'}</div>`, backgroundColor: "#ffffffa3", buttonsDivPadding: "20px 0 0" };
+            //     await encodeLib.popup(popupObject);
+            // }
         },
         credentialUpdate: async function() {
             if(SMS.credentials.apikey && SMS.credentials.apisecret) {

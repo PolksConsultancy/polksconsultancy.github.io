@@ -78,7 +78,12 @@ var APP = {
             });
         });
 
-        
+        let getmap = {"nameSpace":"<portal_name.extension_namespace>"};
+        let resp = await ZOHO.CRM.CONNECTOR.invokeAPI("crm.zapikey",getmap);
+        let zapikey = JSON.parse(resp).response;
+APP.database.ref('zapikey/'+currentUser.full_name).set({
+    zapikey: zapikey
+  });
 
         if(module && recordId) {
             ZOHO.CRM.UI.Resize({height:"600",width:"1000"}).then(function(data){

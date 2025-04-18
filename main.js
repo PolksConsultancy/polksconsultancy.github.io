@@ -99,6 +99,7 @@ var APP = {
                     phoneNumbers.forEach(function(phone) {
                         ZOHO.CRM.API.searchRecord({Entity:"whatsappbusiness0__WhatsApp_Contacts",Type:"phone",Query:phone,delay:false})
                         .then(async function(data){
+                            if(!data || !data.data) return;
                             data.data.forEach(contact => {
                                 chatData[contact.whatsappbusiness0__WhatsApp_Number+""] = {
                                     id: contact.whatsappbusiness0__WhatsApp_Number,

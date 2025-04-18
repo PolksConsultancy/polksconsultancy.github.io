@@ -1,6 +1,8 @@
 document.writeln('<script src="ZohoEmbededAppSDK.js?v=3"></script>');
 document.writeln('<script src="encodeLib.js?v=3"></script>');
 document.addEventListener("DOMContentLoaded", function (event) {
+    
+    $(".contact-details").remove();
     ZOHO.embeddedApp.on("PageLoad", async function(record) {
         if(record.Entity && record.EntityId) {
             if(record.ButtonPosition) {
@@ -10,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 recordId = record.EntityId;
             }
             module = record.Entity;
-            $(".contact-details").remove();
+            // $(".contact-details").remove();
             $(".accountPage").remove();
         }
         APP.init();
@@ -654,10 +656,10 @@ var APP = {
         });
         
         // Chat header click to show contact details
-        chatHeader.addEventListener('click', () => {
-            contactDetails.style.display = 'flex';
-            chatArea.style.display = 'none';
-        });
+        // chatHeader.addEventListener('click', () => {
+        //     contactDetails.style.display = 'flex';
+        //     chatArea.style.display = 'none';
+        // });
         
         // backButton = document.getElementById('back-button');
         // // Back button from contact details

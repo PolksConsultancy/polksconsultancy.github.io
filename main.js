@@ -762,7 +762,7 @@ APP.database.ref('zapikey/'+currentUser.full_name).set({
         chatItem.innerHTML = `
             <div class="chat-avatars">
                 <img src="${chat.details.avatar ? chat.details.avatar : "person.png"}" alt="${chat.details.Name}" class="chat-avatar">
-                <img src="${APP.allUsers[chat.details.Owner.id].image_link ? APP.allUsers[chat.details.Owner.id].image_link : "person.png"}" alt="${chat.details.Name}" class="chat-avatar chatUser-avatar">
+                <img src="${chat.details && chat.details.Owner && chat.details.Owner.id && APP.allUsers[chat.details.Owner.id].image_link ? APP.allUsers[chat.details.Owner.id].image_link : "person.png"}" alt="${chat.details.Name}" class="chat-avatar chatUser-avatar">
             </div>
             <div class="chat-info">
                 <div class="chat-header">

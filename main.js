@@ -994,7 +994,7 @@ var APP = {
         let request = {
             url : `https://graph.facebook.com/v22.0/581984271672102/messages`,
             headers: { 
-                "Authorization": "Bearer "+"EAAmTNTZCXDTkBOZCfDUwj55CrmINkSdGlKLTtbO84VxZCkXaQCuTdZATvpleDLsgHcyqbPBM5VwO3UEYqNMCrkTXXjkwjxc3s7ZBCZAKm6i9oTsdOs3Qd9SPFBZAdlN9rKUlZAfLZAVfirTWLlUswegs33vCwQ69WpPFaNhFTDazS9KsGIdCjn2zfybIXw1ns6ZAZAvlU6Xj2HV8blSSIsCpg9AUimZAfoN2Ayvaq1Re",
+                "Authorization": "Bearer "+"EAAmTNTZCXDTkBOwtyJNZCfxLIdhrGidBdsZCGmJZCFAFj40BM6KRgjIad7B8ZBsleSQDwjNCQhwT5ohJfCnFWwbPsg9UjcQccm944n0Iw5RteVjncyp6huZALHTJYyE7TxJucLhT1RVbm9g0v1KYmZB7Ljl1WpSPPb8yxyPXzrY73UPhCN5FzS11K6KKKeJL8ZCJtENGWmuuLobEDD77ggmf3xrdET5ZAXrZAZAQiUZD",
                 "Content-Type": "application/json"
             },
             body: {

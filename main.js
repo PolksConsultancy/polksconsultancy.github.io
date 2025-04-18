@@ -120,15 +120,17 @@ var APP = {
         }
         else {
             await ZOHO.CRM.API.getAllRecords({Entity:"whatsappbusiness0__WhatsApp_Contacts",sort_order:"asc",per_page:200,page:1}).then(async function(data){
-                data.data.forEach(contact => {
-                    chatData[contact.whatsappbusiness0__WhatsApp_Number+""] = {
-                        id: contact.whatsappbusiness0__WhatsApp_Number,
-                        unread: 0,
-                        details: contact,
-                        notifications: {},
-                        messages: []
-                    };
-                });
+                if(data && data.data) {
+                    data.data.forEach(contact => {
+                        chatData[contact.whatsappbusiness0__WhatsApp_Number+""] = {
+                            id: contact.whatsappbusiness0__WhatsApp_Number,
+                            unread: 0,
+                            details: contact,
+                            notifications: {},
+                            messages: []
+                        };
+                    });
+                } 
                 $("#loader").remove();
                 await APP.renderChatList("", chatData);
                 await APP.realtimeListener();

@@ -1005,7 +1005,7 @@ APP.database.ref('zapikey/'+currentUser.full_name).set({
         let request = {
             url : `https://graph.facebook.com/v22.0/581984271672102/messages`,
             headers: { 
-                "Authorization": "Bearer "+"EAAmTNTZCXDTkBOyBUuGj0e3pJ6RqVSGF3cgVszTjZCCYYmEjGy9VFELYTYFcSKVmRU5kcWExVbJ7qEhdU8PzhSi8ynEwuGzkz9JspZA8XTAdWGaKKyilLkrrwUxYP6diRa9Y1uOD3wHCtSJpFBQvwZAP9z4cSYr8C2WNd0EFsdC6MMdVMrIkQ9nM0IShEltmhITnfjSQtTSAx3ZBKGDwQ1a57nW4izYEJGiIZD",
+                "Authorization": "Bearer "+"",
                 "Content-Type": "application/json"
             },
             body: {
@@ -1051,13 +1051,6 @@ APP.database.ref('zapikey/'+currentUser.full_name).set({
     firebaseSetup: function() {
         // Your Firebase config
         var firebaseConfig = {
-            apiKey: "AIzaSyBo03-xCIbQSvb9HdYjhC8FRLwMUuYzI4U",
-            authDomain: "enprojecttest.firebaseapp.com",
-            databaseURL: "https://enprojecttest-default-rtdb.firebaseio.com",
-            projectId: "enprojecttest",
-            storageBucket: "enprojecttest.firebasestorage.app",
-            messagingSenderId: "771895717983",
-            appId: "1:771895717983:web:25295df2887ad04c79abea"
             };
     
             // Initialize Firebase

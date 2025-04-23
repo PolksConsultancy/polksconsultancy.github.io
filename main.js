@@ -153,7 +153,7 @@ var APP = {
                         }
                         else {
                             let recordData = {};
-                            recordData[APP.extensionFieldName] = phone.replaceAll(" ", "").replaceAll("+", "");
+                            recordData[APP.extensionFieldName] = APP.selectedRecord.Full_Name;
                             recordData[APP.extensionFieldWhatsAppNumber] = phone.replaceAll(" ", "").replaceAll("+", "");
                             ZOHO.CRM.API.insertRecord({Entity:APP.extensionContacts,APIData:recordData,Trigger:["workflow"]}).then(function(data){
                                 console.log(data);

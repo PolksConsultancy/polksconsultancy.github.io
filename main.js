@@ -1,6 +1,7 @@
 document.writeln('<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>'); document.writeln('<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&display=swap">');
 document.writeln('<script src="ZohoEmbededAppSDK.js?v=3"></script>');
 document.addEventListener("DOMContentLoaded", function (event) {
+    // $(".contact-details").remove();
     ZOHO.embeddedApp.on("PageLoad", async function(record) {
         if(record.Entity && record.EntityId) {
             if(record.ButtonPosition) {
@@ -11,6 +12,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }
             APP.module = record.Entity;
             $(".contact-details").remove();
+            $(".search-container").remove();
+            $(".filter-container").remove();
             $(".accountPage").remove();
         }
         APP.init();
@@ -23,14 +26,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
 var APP = {
 
     extensionName: 'WhatsApp Business',
-    extensionAPI: 'whatsappbusiness0__',
+    extensionAPI: 'whatsappbusiness0__', // whatsappbusiness0__
     extensionSignal: "incomingmessages",
     extensionFunction: 'webhook',
     credentials: {},
     currentUser: {},
     allUsers: {},
     currentChatId: "",
-    chatData: {},
+    contacts: {},
     editLink: "",
     supportMail: "support@polksconsultancy.com",
     docLink: "",
@@ -108,6 +111,7 @@ var APP = {
     recordChatSetup: async function() {
         APP.selectedModule = APP.module;
         await APP.popupResize();
+        APP.contactList = document.getElementById('chat-list');
         await ZOHO.CRM.META.getFields({"Entity":APP.module}).then(function(data){
             let phoneFields = [];
             let phoneNumbers = [];
@@ -122,39 +126,30 @@ var APP = {
                 phoneFields.forEach(function(phoneField) {
                     if(resp.data[0][phoneField]) {phoneNumbers.push(resp.data[0][phoneField]);}
                 });
-                phoneNumbers.forEach(function(phone) {
-                    APP.chatData[phone] = {
+                phoneNumbers.forEach(async function(phone, i) {
+                    APP.contacts[phone] = {
                         id: phone,
                         unread: 0,
                         details: {},
                         notifications: {},
                         messages: []
                     };
-                    ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts,Type:"phone",Query:phone,delay:false}).then(async function(data){
+                    await ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts,Type:"phone",Query:phone,delay:false}).then(async function(data){
                         if(data && data.data) {
                             let contact = {};
-                            data.data.forEach(thisContact => {
+                            data.data.forEach(async thisContact => {
                                 contact = thisContact;
-                                APP.chatData[contact.whatsappbusiness0__WhatsApp_Number] = {
-                                    id: contact.whatsappbusiness0__WhatsApp_Number,
+                                APP.contacts[contact[APP.extensionFieldWhatsAppNumber]] = {
+                                    id: contact[APP.extensionFieldWhatsAppNumber],
                                     unread: 0,
                                     details: contact,
                                     notifications: {},
                                     messages: []
                                 };
+                                await APP.startChatListAddFunction(APP.contacts[thisContact[APP.extensionFieldWhatsAppNumber]]);
                             });
-                            let searchRecord = await ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory,Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${contact[APP.extensionFieldWhatsAppNumber]})`});
-                            if(searchRecord.data) {
-                                APP.chatData[contact[APP.extensionFieldWhatsAppNumber]].messages = APP.chatData[contact[APP.extensionFieldWhatsAppNumber]].messages.concat(searchRecord.data);
-                                APP.chatData[contact[APP.extensionFieldWhatsAppNumber]].messages.sort(function(a, b) {
-                                    var keyA = new Date(a.Created_Time), keyB = new Date(b.Created_Time);
-                                    // Compare the 2 dates
-                                    if (keyA < keyB) return -1;
-                                    if (keyA > keyB) return 1;
-                                    return 0;
-                                });
-                            }                            
-                            await APP.renderChatList("", APP.chatData);
+                            let contactElement = APP.createContactElement(APP.contacts[phone]);
+                            APP.contactList.appendChild(contactElement);
                         }
                         else {
                             let recordData = {};
@@ -163,60 +158,234 @@ var APP = {
                             ZOHO.CRM.API.insertRecord({Entity:APP.extensionContacts,APIData:recordData,Trigger:["workflow"]}).then(function(data){
                                 console.log(data);
                             });
+                            let contactElement = APP.createContactElement(APP.contacts[phone]);
+                            APP.contactList.appendChild(contactElement);
                         }
                     });
                 });
                 $(APP.loaderElement).remove();
-                await APP.renderChatList("", APP.chatData);
-                await APP.realtimeListener();   
+                await APP.realtimeListener(); 
             });
         });
     },
     inboxChatSetup: async function() {
-        await ZOHO.CRM.API.getAllRecords({Entity:APP.extensionContacts, sort_order:"asc", per_page:200, page:1}).then(async function(data){
-            if(data && data.data) {
-                // let contact = {};
-                data.data.forEach(async contact => {
-                    // contact = thisContact;
-                    APP.chatData[contact[APP.extensionFieldWhatsAppNumber]] = {
+
+        APP.filterModeAll = document.getElementById('filterMode-all');
+        APP.filterModeYours = document.getElementById('filterMode-yours');
+        APP.filterModeInactive = document.getElementById('filterMode-inactive');
+        APP.filterModeModules = document.getElementById('filterMode-modules');
+        // APP.contactList = document.getElementById('filterMode-users');
+
+        APP.filterModeAll.addEventListener('click', async function() {
+            $(".filter-container .rowOptionsButton.selected").removeClass("selected");
+            this.setAttribute("class", "rowOptionsButton selected");
+            APP.filterMode = "all";
+            APP.contactList.innerHTML = "";
+            APP.filterModes[APP.filterMode].contacts.forEach(contactId => {
+                let contactElement = APP.createContactElement(APP.contacts[contactId]);
+                APP.contactList.appendChild(contactElement);
+            });
+            APP.loadContacts();
+        });
+
+        APP.filterModeYours.addEventListener('click', async function() {
+            $(".filter-container .rowOptionsButton.selected").removeClass("selected");
+            this.setAttribute("class", "rowOptionsButton selected");
+            APP.filterMode = "yours";
+            APP.contactList.innerHTML = "";
+            APP.filterModes[APP.filterMode].contacts.forEach(contactId => {
+                let contactElement = APP.createContactElement(APP.contacts[contactId]);
+                APP.contactList.appendChild(contactElement);
+            });
+            APP.loadContacts();
+        });
+
+        APP.filterModeInactive.addEventListener('click', async function() {
+            $(".filter-container .rowOptionsButton.selected").removeClass("selected");
+            this.setAttribute("class", "rowOptionsButton selected");
+            APP.filterMode = "inActive";
+            APP.contactList.innerHTML = "";
+            APP.filterModes[APP.filterMode].contacts.forEach(contactId => {
+                let contactElement = APP.createContactElement(APP.contacts[contactId]);
+                APP.contactList.appendChild(contactElement);
+            });
+            APP.loadContacts();
+        });
+
+        APP.filterModeModules.addEventListener('click', async function() {
+            // $(".filter-container .rowOptionsButton.selected").removeClass("selected");
+            // this.setAttribute("class", "rowOptionsButton selected");
+            // APP.filterMode = "all";
+            // APP.contactList.innerHTML = "";
+            // APP.filterModes[APP.filterMode].contacts.forEach(contactId => {
+            //     let contactElement = APP.createContactElement(APP.contacts[contactId]);
+            //     APP.contactList.appendChild(contactElement);
+            // });
+            // APP.loadContacts();
+        });
+
+        APP.contactList = document.getElementById('chat-list');
+        APP.chatLoader = `<div id="contactloader" class="enContent " style="height: 100%;background-color: white;color: black;overflow: hidden;line-height: initial;resize: none;display: flex;align-items: center;justify-content: center;flex-direction: column;font-size: inherit;font-weight: inherit;word-break: break-word;word-wrap: break-word;box-sizing: border-box;width: 100%;padding: 0;cursor: default;font-family: sans-serif;z-index: 10000000;left: 0;top: 0;max-width: 100%;min-width: 0;text-align: left;white-space: normal;position: relative;height: 60px;"><div style="display: flex; align-items: center; justify-content: center; flex-direction: column; width: 100%; height: 100%;   max-width: 100%; min-width: 0; overflow: hidden; word-break: break-word; word-wrap: break-word; white-space: normal; text-align: left;    " class="content"><div class="enLoadingInner" title="loading…"><svg class="enLoadingSVG" width="17" height="17" viewBox="0 0 46 46" role="status"><circle class="enLoadingSvgCircle" cx="23" cy="23" r="20" fill="none" stroke-width="6" style="stroke: rgb(57 82 234);"></circle></svg></div></div></div>`;
+        APP.isLoading = false;
+        
+        APP.contactsPerPage = 200;
+        APP.filterModes = {};
+        APP.filterModeTypes = ["all", "yours", "leads", "contacts", "inActive", "users"];
+
+        APP.filterModeTypes.forEach(function(mode) {
+            APP.filterModes[mode] = {
+                currentPage: 1,
+                pageCompleted: false,
+                contacts: []
+            };
+        });
+
+        APP.filterMode = "all";
+        
+        // Initial load
+        await APP.loadContacts();
+        $(APP.loaderElement).remove();
+        await APP.realtimeListener();
+        
+        // Scroll event listener
+        APP.contactList.addEventListener('scroll', function() {
+            if(APP.isLoading) return;
+            let scrollTop = APP.contactList.scrollTop;
+            let scrollHeight = APP.contactList.scrollHeight;
+            let clientHeight = APP.contactList.clientHeight;
+            if(scrollTop + clientHeight >= scrollHeight - 100) {
+                APP.loadContacts();
+            }
+        });
+    },
+    loadContacts: async function() {
+        if(APP.filterModes[APP.filterMode].pageCompleted) {
+            return;
+        }
+        APP.isLoading = true;
+        $("#chat-list").append(APP.chatLoader);
+        APP.loadingIndicator = document.getElementById('contactloader');
+        setTimeout(async function() {
+            let loadedContacts = await APP.getContacts(APP.filterModes[APP.filterMode].currentPage);
+            loadedContacts.forEach(contact => {
+                let contactElement = APP.createContactElement(contact);
+                APP.contactList.appendChild(contactElement);
+            });
+            APP.filterModes[APP.filterMode].currentPage++;
+            APP.loadingIndicator.remove();
+            APP.isLoading = false;
+            APP.loadingIndicator.style.display = 'none';
+        }, 1000);
+    },
+    getContacts: async function() {
+        if(APP.filterMode == "leads" || APP.filterMode == "contacts") {
+            let filterModule = APP.filterMode[0].toUpperCase()+APP.filterMode.substring(1).substring(0, APP.filterMode.length-2);
+            return await ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts,Type:"criteria",Query:`(${APP.extensionFieldModule}:equals:${filterModule})`, per_page:APP.contactsPerPage, page:APP.filterModes[APP.filterMode].currentPage}).then(async function(data){
+                return await APP.getContactsResponse(data);
+            });
+        }
+        else if(APP.filterMode == "yours" || APP.filterMode == "users") {
+            let userId = APP.filterMode == "yours" ? APP.currentUser.id : APP.selectedUser.id;
+            return await ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts,Type:"criteria",Query:`(${APP.extensionFieldOwner}:equals:${userId})`, per_page:APP.contactsPerPage, page:APP.filterModes[APP.filterMode].currentPage}).then(async function(data){
+                return await APP.getContactsResponse(data);
+            });
+        }
+        else {
+            return await ZOHO.CRM.API.getAllRecords({Entity:APP.extensionContacts, sort_by: APP.extensionFieldActiveTime, sort_order:"desc", per_page:APP.contactsPerPage, page:APP.filterModes[APP.filterMode].currentPage}).then(async function(data){
+                return await APP.getContactsResponse(data);
+            });
+        }
+    },
+    getContactsResponse: function(data) {
+        if(data && data.info && !data.info.more_records) {
+            APP.filterModes[APP.filterMode].pageCompleted = true;
+        }
+        let loadedContacts = [];
+        if(data && data.data) {
+            data.data.forEach(async contact => {
+                if(!APP.contacts[contact[APP.extensionFieldWhatsAppNumber]]) {
+                    APP.contacts[contact[APP.extensionFieldWhatsAppNumber]] = {
                         id: contact[APP.extensionFieldWhatsAppNumber],
                         unread: 0,
                         details: contact,
                         notifications: {},
                         messages: []
                     };
-                    await APP.startChatListAddFunction(contact);
-                    // await APP.renderChatList("", APP.chatData);
-                });
-            }
-            else {
-                
-            }
-            $(APP.loaderElement).remove();
-            //await APP.renderChatList("", APP.chatData);
-            await APP.realtimeListener();
-        });
+                }
+                if(!APP.filterModes[APP.filterMode].contacts.includes(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]])) {
+                    let currentTime = new Date();
+                    let oneWeekAgo = currentTime.setDate(currentTime.getDate() - 7);
+                    if(APP.filterMode != "inActive") { // || new Date(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].details.Modified_Time) < oneWeekAgo
+                        APP.filterModes[APP.filterMode].contacts.push(contact[APP.extensionFieldWhatsAppNumber]);
+                        loadedContacts.push(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]]);
+                    }
+                }
+                await APP.startChatListAddFunction(contact);
+            });
+        }
+        return loadedContacts;
+    },
+    createContactElement: function(chat) {
+        chatList = document.getElementById('chat-list');
+        var chatItem = document.createElement('div');
+        chatItem.id = "chatid-"+chat.id;
+        chatItem.className = `chat-item ${chat.id === APP.currentChatId ? 'active' : ''}`;
+        chatItem.dataset.id = chat.id;
+        
+        chatItem.innerHTML = `
+            <div class="chat-avatars">
+                <img src="${chat.details && chat.details.avatar ? chat.details.avatar : "person.png"}" alt="${chat.details && chat.details.Name ? chat.details.Name : chat.id}" class="chat-avatar">
+                <img src="${chat.details && chat.details.Owner && chat.details.Owner.id && APP.allUsers[chat.details.Owner.id].image_link ? APP.allUsers[chat.details.Owner.id].image_link : "user-thumbnail.png"}" alt="${chat.details && chat.details.Name ? chat.details.Name : chat.id}" class="chat-avatar chatUser-avatar">
+            </div>
+            <div class="chat-info">
+                <div class="chat-header">
+                    <div class="chat-header-deatils">
+                        <div class="chat-name">${chat.details && chat.details.Name ? chat.details.Name : chat.id}</div>
+                        ${APP.module && APP.recordId ? '' : `<div class="chat-module">${chat.details[APP.extensionFieldModule] ? chat.details[APP.extensionFieldModule] : 'Contact'}</div>`}
+                    </div>
+                    <div class="chat-time">${chat.details && chat.details.Modified_Time ? APP.getCurrentTime(chat.details.Modified_Time) : 'New'}</div>
+                </div>
+                <div class="chat-preview">
+                    <div class="chat-message">${chat.details && chat.details[APP.extensionFieldLastMessage] ? chat.details[APP.extensionFieldDirection] && chat.details[APP.extensionFieldDirection] == "incoming" ? chat.details[APP.extensionFieldLastMessage] : "You: "+chat.details[APP.extensionFieldLastMessage] : 'Start Coversation'}</div>
+                    ${chat.unread > 0 ? `<div class="unread-count">${chat.unread}</div>` : ''}
+                </div>
+            </div>
+        `;
+        return chatItem;
     },
     startChatListAddFunction: async function(contact) {
-        await ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory,Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${contact[APP.extensionFieldWhatsAppNumber]})`}).then(function(searchRecord) {
+        if(APP.filterModes || !APP.filterModes[APP.filterMode].contacts.length)
+        ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory,Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${contact[APP.extensionFieldWhatsAppNumber]})`}).then(function(searchRecord) {
             if(searchRecord.data) {
-                APP.chatData[contact[APP.extensionFieldWhatsAppNumber]].messages = APP.chatData[contact[APP.extensionFieldWhatsAppNumber]].messages.concat(searchRecord.data);
-                APP.chatData[contact[APP.extensionFieldWhatsAppNumber]].messages.sort(function(a, b) {
-                    var keyA = new Date(a.Created_Time), keyB = new Date(b.Created_Time);
-                    // Compare the 2 dates
-                    if (keyA < keyB) return -1;
-                    if (keyA > keyB) return 1;
-                    return 0;
-                });
-                APP.addChat(APP.chatData[contact[APP.extensionFieldWhatsAppNumber]]);
+                if(!APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].messages.length) {
+                    APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].messages = APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].messages.concat(searchRecord.data);
+                    APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].messages.sort(function(a, b) {
+                        var keyA = new Date(a.Created_Time), keyB = new Date(b.Created_Time);
+                        // Compare the 2 dates
+                        if (keyA < keyB) return -1;
+                        if (keyA > keyB) return 1;
+                        return 0;
+                    });
+                }
+                if($("#chatid-"+contact[APP.extensionFieldWhatsAppNumber]).length) {
+                    $("#chatid-"+contact.id+" .chat-message").html(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].details[APP.extensionFieldLastMessage]);
+                    $("#chatid-"+contact.id+" .chat-time").html(APP.getCurrentTime(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].details[APP.extensionFieldActiveTime]));
+                }
+                else {
+                    let contactElement = APP.createContactElement(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]]);
+                    APP.contactList.appendChild(contactElement);
+                }
             }
         });
     },
+    sortingArrOfOject: function() {
+
+    },
     currentChatUnreadNotification: function() {
-        if(Object.keys(APP.chatData[APP.currentChatId].notifications).length) {
-            Object.keys(APP.chatData[APP.currentChatId].notifications).forEach(function(key) {              
-                APP.chatData[APP.currentChatId].messages.push(APP.chatData[APP.currentChatId].notifications[key]);
-                delete APP.chatData[APP.currentChatId].notifications[key];
+        if(Object.keys(APP.contacts[APP.currentChatId].notifications).length) {
+            Object.keys(APP.contacts[APP.currentChatId].notifications).forEach(function(key) {              
+                APP.contacts[APP.currentChatId].messages.push(APP.contacts[APP.currentChatId].notifications[key]);
+                delete APP.contacts[APP.currentChatId].notifications[key];
                 setTimeout(() => {
                     APP.database.ref('incomingMessages/'+key).remove().then(() => {
                         console.log("Data deleted successfully");
@@ -227,14 +396,88 @@ var APP = {
             });
         }
     },
+    reactionElementOpen: async function() {
+        let reactionElement = `<div class="reactionPoupButton" id="reactionPoupButton"><div class="rectionBUttonOuter"><div class="rectionButton"><div class="reactionButtonIn"><div><img alt="👍" class="reactionButtonImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: 0px -64px;display: inline-block;vertical-align: top;zoom: 1;border: 0;background-size: 160px 160px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/38.webp);transform: scale(.9375);visibility: visible;width: 32px;height: 32px;image-rendering: -webkit-optimize-contrast;"></div></div></div>
+
+                                    <div class="rectionButton"><div class="reactionButtonIn"><div><img alt="❤️" class="reactionButtonImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: 0px -64px;display: inline-block;vertical-align: top;zoom: 1;border: 0;background-size: 160px 160px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/38.webp);transform: scale(.9375);visibility: visible;width: 32px;height: 32px;image-rendering: -webkit-optimize-contrast;background-position: -128px -128px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/7.webp);"></div></div></div>
+                                    
+                                    <div class="rectionButton"><div class="reactionButtonIn"><div><img alt="😂" class="reactionButtonImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: 0px -64px;display: inline-block;vertical-align: top;zoom: 1;border: 0;background-size: 160px 160px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/38.webp);transform: scale(.9375);visibility: visible;width: 32px;height: 32px;image-rendering: -webkit-optimize-contrast;background-position: -64px -96px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/82.webp);"></div></div></div>
+                                    
+                                    <div class="rectionButton"><div class="reactionButtonIn"><div><img alt="🙏" class="reactionButtonImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: 0px -64px;display: inline-block;vertical-align: top;zoom: 1;border: 0;background-size: 160px 160px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/38.webp);transform: scale(.9375);visibility: visible;width: 32px;height: 32px;image-rendering: -webkit-optimize-contrast;background-position: -96px -96px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/88.webp);"></div></div></div>
+                                    <div class="reactionAddButton"><div class="reactionButtonIn"><div style="
+                                        text-transform: uppercase;
+                                        background-color: #f2f2f7;
+                                        border-radius: 50%;
+                                        transition-timing-function: cubic-bezier(.4,0,.2,1);
+                                        padding-top: 0;
+                                        width: 32px;
+                                        padding-bottom: 0;
+                                        height: 32px;
+                                        justify-content: center;
+                                        padding-left: 0;
+                                        transition-property: box-shadow;
+                                        font-weight: 500;
+                                        display: flex;
+                                        cursor: pointer;
+                                        box-shadow: none;
+                                        align-items: center;
+                                        padding-right: 0;
+                                        font-size: .875rem;
+                                        transition-duration: .08s;
+                                        color: #ffffff;
+                                    "><span aria-hidden="true" data-icon="plus" class="x1t495xr"><svg viewBox="0 0 24 24" width="26" preserveAspectRatio="xMidYMid meet" class=""><title>plus</title><path fill="currentColor" d="M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6V13z"></path></svg></span></div></div></div></div></div>`;
+
+        
+        $("body").append(reactionElement);
+
+
+
+    },
+    positionNotificationBox: function(clickX, clickY) {
+        let notificationBox = document.getElementById("reactionPoupButton");
+        const boxWidth = notificationBox.offsetWidth;
+        const boxHeight = notificationBox.offsetHeight;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Calculate available space in all directions
+        const spaceRight = viewportWidth - clickX;
+        const spaceLeft = clickX;
+        const spaceBelow = viewportHeight - clickY;
+        const spaceAbove = clickY;
+        
+        // Reset positioning
+        notificationBox.style.left = '';
+        notificationBox.style.right = '';
+        notificationBox.style.top = '';
+        notificationBox.style.bottom = '';
+        
+        // Position horizontally
+        if (spaceRight >= boxWidth || spaceRight >= spaceLeft) {
+          // Position to the right of click
+          notificationBox.style.left = `${clickX}px`;
+        } else {
+          // Position to the left of click
+          notificationBox.style.right = `${viewportWidth - clickX}px`;
+        }
+        
+        // Position vertically
+        if (spaceBelow >= boxHeight || spaceBelow >= spaceAbove) {
+          // Position below click
+          notificationBox.style.top = `${clickY}px`;
+        } else {
+          // Position above click
+          notificationBox.style.bottom = `${viewportHeight - clickY}px`;
+        }
+      },  
     init: async function() {
 
         APP.extensionFieldName = "Name";
         APP.extensionFieldOwner = "Owner";
-        APP.extensionFieldMessage = APP.extensionAPI + "WhatsApp_Message";        
-        APP.extensionFieldLastMessage = APP.extensionAPI + "Last_Message";
+        APP.extensionFieldMessage = APP.extensionAPI + "WhatsApp_Message";    // WhatsApp_Message
         APP.extensionFieldWhatsAppNumber = APP.extensionAPI + "WhatsApp_Number";
         APP.extensionFieldModule = APP.extensionAPI + "Module";
+        APP.extensionFieldLastMessage = APP.extensionAPI + "Last_Message";
         APP.extensionFieldDeal = APP.extensionAPI + "Deal";
         APP.extensionFieldContact = APP.extensionAPI + "Contact";
         APP.extensionFieldLead = APP.extensionAPI + "Lead";
@@ -245,6 +488,7 @@ var APP = {
         APP.extensionFieldMsgId = APP.extensionAPI + "MsgId";
         APP.extensionFieldLastMsgId = APP.extensionAPI + "Last_Message_ID";
         APP.extensionFieldDirection = APP.extensionAPI + "Direction";
+        APP.extensionFieldActiveTime = APP.extensionAPI + "Active_Time";
 
         APP.extensionHistory = APP.extensionAPI + "WhatsApp_Business_History";
         APP.extensionContacts = APP.extensionAPI + "WhatsApp_Contacts";
@@ -253,6 +497,10 @@ var APP = {
         await APP.currentUserSet();
         await APP.allUsersGet();
         await APP.dealStageListSet();
+
+        APP.reactionElementOpen();
+
+        APP.selectedUser = APP.currentUser;
 
         if(APP.module && APP.recordId) {
             await APP.recordChatSetup();
@@ -289,9 +537,19 @@ var APP = {
 
         // Search chats
         var searchInput = document.getElementById('search-input');
-        searchInput.addEventListener('input', (e) => {
-            APP.renderChatList(e.target.value);
-        });
+        if(searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                let filter = e.target.value;
+                var chatList = document.getElementById('chat-list');
+                chatList.innerHTML = '';
+                let filteredChats = filter ? Object.values(APP.contacts).filter(chat => chat.id.toLowerCase().includes(filter.toLowerCase())) : Object.values(APP.contacts);
+                console.log(filteredChats);
+                Object.values(filteredChats).forEach(chat => {
+                    let contactElement = APP.createContactElement(chat);
+                    APP.contactList.appendChild(contactElement);
+                });
+            });
+        }
 
         if(document.querySelector("#leadSelectOption"))
         document.querySelector("#leadSelectOption").addEventListener('click', (e) => {
@@ -308,7 +566,17 @@ var APP = {
         });
 
         $('#filterModuleList').on('change', function() {
-            APP.moduleFilter(this.value);
+            $(".filter-container .rowOptionsButton.selected").removeClass("selected");
+            this.parentNode.parentNode.setAttribute("class", "rowOptionsButton selected");
+            let value = this.value;
+            $(".filterMode-module-selected").text(value ? value+'s' : 'All Modules');
+            var chatList = document.getElementById('chat-list');
+            chatList.innerHTML = '';
+            let filteredChats = value ? Object.values(APP.contacts).filter(chat => chat.details[APP.extensionFieldModule] && chat.details[APP.extensionFieldModule].toLowerCase().includes(value.toLowerCase())) : value == "" ? Object.values(APP.contacts) : '';
+            Object.values(filteredChats).forEach(chat => {
+                let contactElement = APP.createContactElement(chat);
+                APP.contactList.appendChild(contactElement);
+            });
         });
 
         document.addEventListener('click', (e) => {
@@ -317,6 +585,16 @@ var APP = {
             }
             else {
                 $(".dropdownOuter").css({transform: "scale(0)"});
+            }
+            let thisElement = $(".message-text-to-react");
+            if(thisElement.is(e.target) || thisElement.has(e.target).length != 0) {
+                
+                $(".reactionPoupButton").css({transform: "scale(1)"});
+                console.log(e.clientX, $(e.target).width(), e.layerX, e.clientX + $(e.target).width()-e.layerX, $(e.target));
+                APP.positionNotificationBox(e.clientX + $(e.target).width()-e.offsetX, e.clientY + $(e.target).height()-e.layerY);
+            }
+            else {
+                $(".reactionPoupButton").css({transform: "scale(0)"});
             }
             if($(e.target).attr('id') == "dealMapConfirmCondainer") {   
                 $("#dealMapConfirmCondainer").remove();        
@@ -342,33 +620,48 @@ var APP = {
         var chatItem = e.target.closest('.chat-item');
         if(chatItem && APP.currentChatId != chatItem.dataset.id) {
             APP.currentChatId = chatItem.dataset.id;
-
-            if(!APP.chatData[APP.currentChatId].details[APP.extensionFieldModule]) {
+            if(APP.contacts[APP.currentChatId].details[APP.extensionFieldContact]) {
+                APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Contact";
+                await APP.showRecordDetailsView("Contacts");
+            }
+            else if(APP.contacts[APP.currentChatId].details[APP.extensionFieldLead]) {
+                // APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Lead";
+                // await APP.showRecordDetailsView("Leads");
                 await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query:APP.currentChatId.replaceAll(" ", ""), delay:false}).then( async function(data){
                     if(!data || !data.data) {
-                        await ZOHO.CRM.API.searchRecord({Entity: "Leads", Type:"phone",Query:APP.currentChatId.replaceAll(" ", ""), delay:false}).then(async function(resp){
-                            if(!resp || !resp.data) {
-                                let response = await ZOHO.CRM.API.insertRecord({Entity: "Contacts",APIData:{Last_Name: APP.currentChatId, phone: APP.currentChatId.replaceAll(" ", "")},Trigger:["workflow"]}).then(function(data){});
-                                APP.chatData[APP.currentChatId].details[APP.extensionFieldModule] = "Contact";
-                                APP.chatData[APP.currentChatId].details[APP.extensionAPI+APP.chatData[APP.currentChatId].details[APP.extensionFieldModule]] = response.data[0].id;
-                                await APP.showRecordDetailsView(APP.chatData[APP.currentChatId].details[APP.extensionFieldModule]+"s");
-                            }
-                            else {
-                                APP.chatData[APP.currentChatId].details[APP.extensionFieldModule] = "Lead";
-                                APP.chatData[APP.currentChatId].details[APP.extensionAPI+APP.chatData[APP.currentChatId].details[APP.extensionFieldModule]] = resp.data[0].id;
-                                await APP.showRecordDetailsView(APP.chatData[APP.currentChatId].details[APP.extensionFieldModule]+"s");
-                            }
-                        });
+                        APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Lead";
+                        await APP.showRecordDetailsView("Leads");
                     }
                     else {
-                        APP.chatData[APP.currentChatId].details[APP.extensionFieldModule] = "Contact";
-                        APP.chatData[APP.currentChatId].details[APP.extensionAPI+APP.chatData[APP.currentChatId].details[APP.extensionFieldModule]] = data.data[0].id;
-                        await APP.showRecordDetailsView(APP.chatData[APP.currentChatId].details[APP.extensionFieldModule]+"s");
+                        APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Contact";
+                        APP.contacts[APP.currentChatId].details[APP.extensionFieldContact] = data.data[0].id;
+                        await APP.showRecordDetailsView("Contacts");
                     }
                 });
             }
             else {
-                await APP.showRecordDetailsView(APP.chatData[APP.currentChatId].details[APP.extensionFieldModule]+"s");
+                await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query:APP.currentChatId.replaceAll(" ", ""), delay:false}).then( async function(data){
+                    if(!data || !data.data) {
+                        await ZOHO.CRM.API.searchRecord({Entity: "Leads", Type:"phone",Query:APP.currentChatId.replaceAll(" ", ""), delay:false}).then(async function(resp){
+                            if(!resp || !resp.data) {
+                                let response = await ZOHO.CRM.API.insertRecord({Entity: "Lead",APIData:{Last_Name: APP.currentChatId, phone: APP.currentChatId.replaceAll(" ", "")},Trigger:["workflow"]}).then(function(data){});
+                                APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Lead";
+                                APP.contacts[APP.currentChatId].details[APP.extensionFieldLead] = response.data[0].id;
+                                await APP.showRecordDetailsView("Leads");
+                            }
+                            else {
+                                APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Lead";
+                                APP.contacts[APP.currentChatId].details[APP.extensionFieldLead] = resp.data[0].id;
+                                await APP.showRecordDetailsView("Leads");
+                            }
+                        });
+                    }
+                    else {
+                        APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Contact";
+                        APP.contacts[APP.currentChatId].details[APP.extensionFieldContact] = data.data[0].id;
+                        await APP.showRecordDetailsView("Contacts");
+                    }
+                });
             }
 
             $(".active").removeClass("active");
@@ -378,9 +671,9 @@ var APP = {
                 chatItem.querySelector(".unread-count").remove();
             }
 
-            APP.chatData[APP.currentChatId].unread = 0;
+            APP.contacts[APP.currentChatId].unread = 0;
 
-            if(Object.keys(APP.chatData[APP.currentChatId].messages).length) {
+            if(Object.keys(APP.contacts[APP.currentChatId].messages).length) {
                 APP.currentChatUnreadNotification();
                 APP.renderMessages(APP.currentChatId);
                 return;
@@ -388,9 +681,9 @@ var APP = {
             else {
                 let searchRecord = await ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory,Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${APP.currentChatId})`});
                 if(searchRecord.data) {
-                    APP.chatData[APP.currentChatId].messages = APP.chatData[APP.currentChatId].messages.concat(searchRecord.data);
+                    APP.contacts[APP.currentChatId].messages = APP.contacts[APP.currentChatId].messages.concat(searchRecord.data);
                     APP.currentChatUnreadNotification();
-                    APP.chatData[APP.currentChatId].messages.sort(function(a, b) {
+                    APP.contacts[APP.currentChatId].messages.sort(function(a, b) {
                         var keyA = new Date(a.Created_Time), keyB = new Date(b.Created_Time);
                         // Compare the 2 dates
                         if (keyA < keyB) return -1;
@@ -412,11 +705,16 @@ var APP = {
         if(module == "Leads") {
             $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
         $("#leadSelectOption").addClass("rowOptionsButtonSelected");
+        // ZOHO.CRM.API.updateRecord({
+        //     Entity: "Contacts",
+        //     APIData: updateData
+        // });
         }
         else if(module == "Contacts") {
             $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
         $("#contactSelectOption").addClass("rowOptionsButtonSelected");
         }
+        
         let contactFieldList = ["First_Name", "Last_Name", "Account_Name", "Email", "Phone", "Mobile", "Secondary_Email", "Description", "Lead_Source", "Assistant", "Asst_Phone", "Home_Phone", "Other_Phone", "Created_Time", "id", "Full_Name"];
         let leadFieldList = ["First_Name", "Last_Name", "Company", "Email", "Phone", "Mobile", "Description", "Website", "Lead_Status", "Lead_Source", "Created_Time", "id", "Full_Name"];
         let fieldArr = module == "Leads" ? leadFieldList : contactFieldList;
@@ -424,16 +722,17 @@ var APP = {
         .then(function(data){
             if(!data || !data.data) return;
             record = data.data[0];
+            APP.contacts[APP.currentChatId].details.Name = record.Full_Name;
             if(module == "Leads") {
                 APP.leadRecord = record;
             }
             else if(module == "Contacts") {
                 APP.contactRecord = record;
             }
-            console.log(record);
+            console.log(record); 
             let fieldFlowElement = "";
             fieldArr.forEach(function(field) {
-                let fieldValue = field == "Account_Name" && record[field] && record[field].name ? record[field].name : record[field] ? record[field] : "";
+                let fieldValue = field == "Created_Time" && record[field] ? new Date(record[field]).toDateString() : field == "Account_Name" && record[field] && record[field].name ? record[field].name : record[field] ? record[field] : "";
                 if(fieldValue) {
                     fieldFlowElement += `<div class="field-row">
                 <div class="field-label">${field.replaceAll('_', ' ')}</div>
@@ -459,8 +758,7 @@ var APP = {
                                                         <div class="rowOptionsButtonIn">
                                                         <div>Create Contact</div>
                                                         </div>
-                                                    </button>` : ''}               
-                                                      
+                                                    </button>` : ''}
                                                 </div>
                                             </div>
                                             </div>
@@ -504,7 +802,7 @@ var APP = {
         padding: 0px 0px 35px 0px;
         left: 5px;
     ">Creating..</div>`;
-    $(".contact-info").append(`<div id="dealMapConfirmCondainer"><div class="map-container">${k}</div></div>`);
+    $("body").append(`<div id="dealMapConfirmCondainer"><div class="map-container">${k}</div></div>`);
                             
         APP.leadToContactCreate(APP.leadRecord);
     },
@@ -567,7 +865,7 @@ var APP = {
                         </td>
                     </tr>`;
     });
-    $(".contact-info").append(`<div id="dealMapConfirmCondainer">
+    $("body").append(`<div id="dealMapConfirmCondainer">
     <div class="map-container">
             <h4>Contact to Deal Field Mapping</h4>
             <p class="map-description">
@@ -706,102 +1004,84 @@ var APP = {
             </div>`;
     },
     moduleFilter: function(value) {
-        if(!value) {
-            APP.renderChatList('', APP.chatData);
-            return;
-        }
-        let filteredChats = Object.values(APP.chatData).filter(chat => chat.details[APP.extensionFieldModule].toLowerCase().includes(value.toLowerCase()));
-        APP.renderChatList('', filteredChats);
-    },
-    renderChatList: async function(filter = '', chatListData) {
-        var chatList = document.getElementById('chat-list');
-        chatList.innerHTML = '';
-        let filteredChats = chatListData ? chatListData : filter ? 
-            Object.values(APP.chatData).filter(chat => chat.id.toLowerCase().includes(filter.toLowerCase())) : 
-            Object.values(APP.chatData);
-        console.log(filteredChats);
-        Object.values(filteredChats).forEach(chat => {
-            APP.addChat(chat);
-        });
+        
+        
     },
     moveContactToTop: function(contactId) {
         var contactList = document.getElementById('chat-list');
-                const contacts = Array.from(document.querySelectorAll('.chat-item'));
-            if (contacts.length < 2) return;
-                const contactToMove = contacts.find(c => c.getAttribute('data-id') === contactId.toString());
-                console.log(contactToMove);
-                if (!contactToMove || contacts[0].getAttribute('data-id') === contactId.toString()) return;
-                
-                // Remove the contact from its current position
-                contactToMove.remove();
-                
-                // Get the current top contact
-                const currentTopContact = contacts[0];
-                
-                // Add the contact to the top of the list
-                contactList.insertBefore(contactToMove, currentTopContact);
-                
-                // Add animation class
-                contactToMove.classList.add('move-up');
-                
-                // Remove animation class after animation completes
-                setTimeout(() => {
-                    contactToMove.classList.remove('move-up');
-                }, 500);
-                
-                // Add slight animation to other contacts moving down
-                if (currentTopContact) {
-                    currentTopContact.classList.add('move-down');
-                    setTimeout(() => {
-                        currentTopContact.classList.remove('move-down');
-                    }, 500);
-                }
-            },
-    addChat: function(chat) {
-        chatList = document.getElementById('chat-list');
-        var chatItem = document.createElement('div');
-        chatItem.id = "chatid-"+chat.id;
-        chatItem.className = `chat-item ${chat.id === APP.currentChatId ? 'active' : ''}`;
-        chatItem.dataset.id = chat.id;
+        let contacts = Array.from(document.querySelectorAll('.chat-item'));
+        if (contacts.length < 2) return;
+        const contactToMove = contacts.find(c => c.getAttribute('data-id') === contactId.toString());
+        console.log(contactToMove);
+        if (!contactToMove || contacts[0].getAttribute('data-id') === contactId.toString()) return;
         
-        chatItem.innerHTML = `
-            <div class="chat-avatars">
-                <img src="${chat.details && chat.details.avatar ? chat.details.avatar : "person.png"}" alt="${chat.details && chat.details.Name ? chat.details.Name : chat.id}" class="chat-avatar">
-                <img src="${chat.details && chat.details.Owner && chat.details.Owner.id && APP.allUsers[chat.details.Owner.id].image_link ? APP.allUsers[chat.details.Owner.id].image_link : "user-thumbnail.png"}" alt="${chat.details && chat.details.Name ? chat.details.Name : chat.id}" class="chat-avatar chatUser-avatar">
-            </div>
-            <div class="chat-info">
-                <div class="chat-header">
-                    <div class="chat-header-deatils">
-                        <div class="chat-name">${chat.details && chat.details.Name ? chat.details.Name : chat.id}</div>
-                        <div class="chat-module">${chat.details[APP.extensionFieldModule] ? chat.details[APP.extensionFieldModule] : 'Contact'}</div>
-                    </div>
-                    <div class="chat-time">${chat.details && chat.details.Modified_Time ? APP.getCurrentTime(chat.details.Modified_Time) : 'New'}</div>
-                </div>
-                <div class="chat-preview">
-                    <div class="chat-message">${chat.details && chat.details.whatsappbusiness0__Last_Message ? chat.details.whatsappbusiness0__Direction && chat.details.whatsappbusiness0__Direction == "incoming" ? chat.details.whatsappbusiness0__Last_Message : "You: "+chat.details.whatsappbusiness0__Last_Message : 'Start Coversation'}</div>
-                    ${chat.unread > 0 ? `<div class="unread-count">${chat.unread}</div>` : ''}
-                </div>
-            </div>
-        `;
+        // Remove the contact from its current position
+        contactToMove.remove();
         
-        chatList.prepend(chatItem);
-        chatList.scrollTop = 0;
+        // Get the current top contact
+        const currentTopContact = contacts[0];
+        
+        // Add the contact to the top of the list
+        contactList.insertBefore(contactToMove, currentTopContact);
+        
+        // Add animation class
+        contactToMove.classList.add('move-up');
+        
+        // Remove animation class after animation completes
+        setTimeout(() => {
+            contactToMove.classList.remove('move-up');
+        }, 500);
+        
+        // Add slight animation to other contacts moving down
+        if (currentTopContact) {
+            currentTopContact.classList.add('move-down');
+            setTimeout(() => {
+                currentTopContact.classList.remove('move-down');
+            }, 500);
+        }
     },
     renderMessages: function(chatId) {
         var messagesContainer = document.getElementById('messages-container');
         var chatHeader = document.getElementById('chat-header');
         messagesContainer.innerHTML = '';
         
-        var chat = Object.values(APP.chatData).find(c => c.id == chatId);
+        var chat = Object.values(APP.contacts).find(c => c.id == chatId);
         
         if (!chat) return;
         
         // Update chat header
         var chatHeaderInfo = chatHeader.querySelector('.chat-header-info');
         chatHeaderInfo.innerHTML = `
+        <div class="chat-header-info-head">
             <img src="${chat.avatar ? chat.avatar: 'person.png'}" alt="${chatId}" class="profile-pic">
-            <div class="chat-header-name">${chatId}</div>
+            <div class="chat-header-name"><span class="chat-header-nameText">${chat.details.Name}</span><span class="chat-header-nameId">+${chat.id}</span></div>
+        </div>
+        <div class="chat-header-info-body">
+            <div class="rowOptions" id="createModuleSelectOptionInRecord">
+                ${APP.module == "Contacts" ? `<button class="rowOptionsButton" id="contactCreateSelectOption">
+                    <div class="rowOptionsButtonIn">
+                    <div>Create Deal</div>
+                    </div>
+                </button>` : ''}
+                ${APP.module == "Leads" ? `<button class="rowOptionsButton" id="leadCreateSelectOption">
+                    <div class="rowOptionsButtonIn">
+                    <div>Create Contact</div>
+                    </div>
+                </button>` : ''}
+            </div>
+        </div>
         `;
+
+        if(APP.module == "Contacts" && document.querySelector("#contactCreateSelectOption")) {
+            document.querySelector("#contactCreateSelectOption").addEventListener('click', (e) => {
+                APP.contactToDealCreateConfirmation(APP.contactRecord);
+            });
+        }
+        else if(APP.module == "Leads" && document.querySelector("#leadCreateSelectOption")) {
+            document.querySelector("#leadCreateSelectOption").addEventListener('click', (e) => {
+                APP.leadToContactCreateConfirmation(APP.contactRecord);
+            });
+        }
         
         // Render messages
         chat.messages.forEach(message => {
@@ -865,27 +1145,27 @@ var APP = {
 
                     let messageInColor = "White";
                     let messageOutColor = "#d9fdd3";
-                    let incoming = message.whatsappbusiness0__Direction == 'incoming' ? true : false;
+                    let incoming = message[APP.extensionFieldDirection] == 'incoming' ? true : false;
                     let messageDirection = incoming ? 'message-in' : 'message-out';
                     let messageboxHook = incoming ? `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-in</title><path opacity="0.13" fill="#0000000" d="M1.533,3.568L8,12.193V1H2.812 C1.042,1,0.474,2.156,1.533,3.568z"></path><path fill="currentColor" d="M1.533,2.568L8,11.193V0L2.812,0C1.042,0,0.474,1.156,1.533,2.568z"></path></svg></span>` : `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-out</title><path opacity="0.13" d="M5.188,1H0v11.193l6.467-8.625 C7.526,2.156,6.958,1,5.188,1z"></path><path fill="currentColor" d="M5.188,0H0v11.193l6.467-8.625C7.526,1.156,6.958,0,5.188,0z"></path></svg></span>`;
                     let messageToReact = incoming ? `<div class="message-text-to-react-out"><div class="message-text-to-react-in"><div><div class="message-text-to-react"><span class="message-text-to-react-icon"><svg viewBox="0 0 15 15" width="15" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>react</title><path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.5C0 11.6305 3.36946 15 7.5 15C11.6527 15 15 11.6305 15 7.5C15 3.36946 11.6305 0 7.5 0C3.36946 0 0 3.36946 0 7.5ZM10.995 8.69333C11.1128 8.67863 11.2219 8.66503 11.3211 8.65309C11.61 8.63028 11.8076 8.91918 11.6784 9.13965C10.8573 10.6374 9.29116 11.793 7.50455 11.793C5.71794 11.793 4.15181 10.6602 3.33072 9.16246C3.18628 8.91918 3.37634 8.63028 3.66524 8.65309C3.79123 8.66749 3.93521 8.68511 4.09426 8.70457C4.94292 8.80842 6.22074 8.96479 7.48174 8.96479C8.81855 8.96479 10.1378 8.80025 10.995 8.69333ZM5.41405 7.37207C6.05761 7.37207 6.60923 6.72851 6.60923 6.02978C6.60923 5.30348 6.05761 4.6875 5.41405 4.6875C4.77048 4.6875 4.21886 5.33106 4.21886 6.02978C4.20967 6.75609 4.77048 7.37207 5.41405 7.37207ZM10.7807 6.05619C10.7807 6.74114 10.24 7.37201 9.60912 7.37201C8.97825 7.37201 8.4375 6.76818 8.4375 6.05619C8.4375 5.37124 8.97825 4.74037 9.60912 4.74037C10.24 4.74037 10.7807 5.34421 10.7807 6.05619Z" fill="currentColor"></path></svg></span></div></div></div></div>` : `<div class="message-text-to-react-out"><div class="message-text-to-react-in"><div><div class="message-text-to-react"><span class="message-text-to-react-icon"><svg viewBox="0 0 15 15" width="15" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>react</title><path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.5C0 11.6305 3.36946 15 7.5 15C11.6527 15 15 11.6305 15 7.5C15 3.36946 11.6305 0 7.5 0C3.36946 0 0 3.36946 0 7.5ZM10.995 8.69333C11.1128 8.67863 11.2219 8.66503 11.3211 8.65309C11.61 8.63028 11.8076 8.91918 11.6784 9.13965C10.8573 10.6374 9.29116 11.793 7.50455 11.793C5.71794 11.793 4.15181 10.6602 3.33072 9.16246C3.18628 8.91918 3.37634 8.63028 3.66524 8.65309C3.79123 8.66749 3.93521 8.68511 4.09426 8.70457C4.94292 8.80842 6.22074 8.96479 7.48174 8.96479C8.81855 8.96479 10.1378 8.80025 10.995 8.69333ZM5.41405 7.37207C6.05761 7.37207 6.60923 6.72851 6.60923 6.02978C6.60923 5.30348 6.05761 4.6875 5.41405 4.6875C4.77048 4.6875 4.21886 5.33106 4.21886 6.02978C4.20967 6.75609 4.77048 7.37207 5.41405 7.37207ZM10.7807 6.05619C10.7807 6.74114 10.24 7.37201 9.60912 7.37201C8.97825 7.37201 8.4375 6.76818 8.4375 6.05619C8.4375 5.37124 8.97825 4.74037 9.60912 4.74037C10.24 4.74037 10.7807 5.34421 10.7807 6.05619Z" fill="currentColor"></path></svg></span></div></div></div></div>`;
                     let messageTime = APP.getCurrentTime(message.Created_Time);
-                    let messageText = message.whatsappbusiness0__WhatsApp_Message;
+                    let messageText = message[APP.extensionFieldMessage];
                     let messageChatImg = `<div class="message-chat-img-div"><img alt="" draggable="false" class="message-chat-img" tabindex="-1" src="${incoming ? 'person.png' : APP.currentUser.image_link ? APP.currentUser.image_link : 'person.png'}"></div>`;
                     let messageOwnerName = !incoming && message.Owner && typeof(message.Owner) == "object" && message.Owner.name ? `<div class="message-owner"><span class="message-owner-name">${message.Owner.name}</span></div>` : !incoming && message.Owner && typeof(message.Owner) == "string" && APP.allUsers[message.Owner] && APP.allUsers[message.Owner].full_name ? `<div class="message-owner"><span class="message-owner-name">${APP.allUsers[message.Owner].full_name}</span></div>` : '';
 
                     let startConvIcon = "";
                     let startConvImag = "";
                     let startConvOwner = "";
-                    if(APP.lastMessageDirection != message.whatsappbusiness0__Direction) {
-                        APP.lastMessageDirection = message.whatsappbusiness0__Direction;
+                    if(APP.lastMessageDirection != message[APP.extensionFieldDirection]) {
+                        APP.lastMessageDirection = message[APP.extensionFieldDirection];
                         messageElement.className = "message-content startConversation";
                         startConvIcon = messageboxHook;
                         startConvImag = messageChatImg;
                         startConvOwner = messageOwnerName;
                     }
 
-                    let messageStatus = incoming ? '' : `<div class="message-status-out"><span class="message-status">${message.whatsappbusiness0__Status == "sent" ? APP.sentStatus : message.whatsappbusiness0__Status == "delivered" ? APP.deliveredStatus : message.whatsappbusiness0__Status == "read" ? APP.readStatus : APP.addedStatus}</span></div>`;
+                    let messageStatus = incoming ? '' : `<div class="message-status-out"><span class="message-status">${message[APP.extensionFieldStatus] == "sent" ? APP.sentStatus : message[APP.extensionFieldStatus] == "delivered" ? APP.deliveredStatus : message[APP.extensionFieldStatus] == "read" ? APP.readStatus : APP.addedStatus}</span></div>`;
                     messageElement.innerHTML = `<div class="message-content-inner" data-id="">
                                                 <div class="${ messageDirection }">
                                                     <div class="message-content-main">
@@ -971,10 +1251,10 @@ var APP = {
         var messageText = messageInput.textContent.trim();
         
         if (!messageText) return;
-        if (!APP.chatData[APP.currentChatId]) return;
+        if (!APP.contacts[APP.currentChatId]) return;
 
         let historyRecordData = {};
-        historyRecordData[APP.extensionFieldName] = "WhatsApp Message to "+APP.chatData[APP.currentChatId].details.Name;
+        historyRecordData[APP.extensionFieldName] = "WhatsApp Message to "+APP.contacts[APP.currentChatId].details.Name;
         historyRecordData[APP.extensionFieldOwner] = APP.currentUser.id;
         historyRecordData[APP.extensionFieldWhatsAppNumber] = APP.currentChatId;
         historyRecordData[APP.extensionFieldFrom] = "";
@@ -996,7 +1276,7 @@ var APP = {
         sendButton.classList.remove('active');
 
         let contactRecordData = {};
-        contactRecordData[APP.extensionFieldName] = APP.chatData[APP.currentChatId].details.Name;
+        contactRecordData[APP.extensionFieldName] = APP.contacts[APP.currentChatId].details.Name;
         // contactRecordData[APP.extensionFieldOwner] = APP.currentUser.id;
         contactRecordData[APP.extensionFieldWhatsAppNumber] = APP.currentChatId;
         contactRecordData[APP.extensionFieldLastMessage] = messageText;
@@ -1009,13 +1289,13 @@ var APP = {
             contactRecordData[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
         }
 
-        $("#chatid-"+APP.currentChatId+" .chat-message").html(APP.chatData[APP.currentChatId].details.whatsappbusiness0__Last_Message);
-        $("#chatid-"+APP.currentChatId+" .chat-time").html(APP.getCurrentTime(APP.chatData[APP.currentChatId].details.Modified_Time));
+        $("#chatid-"+APP.currentChatId+" .chat-message").html(contactRecordData[APP.extensionFieldLastMessage]);
+        $("#chatid-"+APP.currentChatId+" .chat-time").html(APP.getCurrentTime(contactRecordData[APP.extensionFieldActiveTime]));
 
         let request = {
             url : `https://graph.facebook.com/v22.0/581984271672102/messages`,
             headers: { 
-                "Authorization": "Bearer "+"EAAmTNTZCXDTkBOzNn0tFwnIakPhTokoN40K3AgjrqANJKpqX52WOuZAqnZA2gHZBWRcodI44o36XDJhAUH9XqVpLOVHby1t1VQJJHwZCPkuGeUZBAvzn0WJ5t6RE6yR4jpsH2ijLv3ZCOV5LVLv2w34duDMpJEiJvjyCELxeuFbZCCfZAwzOxK1htUfuhxh8UZAQSNomybgC2Nu2CKvZAxH5pEgYVY4fTdZCzRTVCjMZD",
+                "Authorization": "Bearer "+"EAAmTNTZCXDTkBO3gpqAHGHNuZBicKy7ehR1zQh01ZAdcrFtGbjvfArlqnamegWQLi3qLJCgLOFQdN10w94MuZBDIJZA2aERKZCsuJBBJAHZA1ntLqox2iSxjjVAbneJZCmSIusrow26adrRRfqdVuXlcBmuBY6ATYwVsyuv7zQVxMuVIGuc0ZCgNxHnnZC7HiGM89Heo1ogGGQt0S8LvmsZAW8UFhPXLBAc3FnQiO3s",
                 "Content-Type": "application/json"
             },
             body: {
@@ -1046,9 +1326,9 @@ var APP = {
                 historyRecordData[APP.extensionFieldStatus] = "faild";
                 contactRecordData[APP.extensionFieldStatus] = "faild";
             }
-            APP.chatData[APP.currentChatId].messages.push(historyRecordData);
-            // APP.chatData[APP.currentChatId].details = contactRecordData;
-            APP.chatData[APP.currentChatId].details = Object.assign(APP.chatData[APP.currentChatId].details, contactRecordData);
+            APP.contacts[APP.currentChatId].messages.push(historyRecordData);
+            // APP.contacts[APP.currentChatId].details = contactRecordData;
+            APP.contacts[APP.currentChatId].details = Object.assign(APP.contacts[APP.currentChatId].details, contactRecordData);
             if(APP.module && APP.recordId) {
                 historyRecordData[APP.extensionAPI+APP.module.substring(0, APP.module.length-1)] = APP.recordId;
                 contactRecordData[APP.extensionAPI+APP.module.substring(0, APP.module.length-1)] = APP.recordId;
@@ -1100,8 +1380,8 @@ var APP = {
                 return;
             }
             let historyRecordData = {};
-            historyRecordData[APP.extensionFieldName] = "incoming from "+ data.messages[0].from && APP.chatData[data.messages[0].from] && APP.chatData[data.messages[0].from].details && APP.chatData[data.messages[0].from].details[APP.extensionFieldName] ? APP.chatData[data.messages[0].from].details[APP.extensionFieldName] : data.messages[0].from;
-            historyRecordData[APP.extensionFieldOwner] = data.messages[0].from && APP.chatData[data.messages[0].from] && APP.chatData[data.messages[0].from].details && APP.chatData[data.messages[0].from].details[APP.extensionFieldOwner] && APP.chatData[data.messages[0].from].details[APP.extensionFieldOwner].id ? APP.chatData[data.messages[0].from].details[APP.extensionFieldOwner].id : APP.currentUser.id;
+            historyRecordData[APP.extensionFieldName] = "incoming from "+ data.messages[0].from && APP.contacts[data.messages[0].from] && APP.contacts[data.messages[0].from].details && APP.contacts[data.messages[0].from].details[APP.extensionFieldName] ? APP.contacts[data.messages[0].from].details[APP.extensionFieldName] : data.messages[0].from;
+            historyRecordData[APP.extensionFieldOwner] = data.messages[0].from && APP.contacts[data.messages[0].from] && APP.contacts[data.messages[0].from].details && APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner] && APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner].id ? APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner].id : APP.currentUser.id;
             historyRecordData[APP.extensionFieldWhatsAppNumber] = data.messages[0].from;
             historyRecordData[APP.extensionFieldFrom] = data.messages[0].from;
             historyRecordData[APP.extensionFieldTo] = "";
@@ -1116,13 +1396,13 @@ var APP = {
             }
 
             historyRecordData["Created_Time"] = APP.toIsoString(new Date());
-            if(APP.chatData[data.messages[0].from]) {
-                APP.chatData[data.messages[0].from]["notifications"][key] = historyRecordData;
+            if(APP.contacts[data.messages[0].from]) {
+                APP.contacts[data.messages[0].from]["notifications"][key] = historyRecordData;
             }
             else {
                 let newContactNotification = {};
                 newContactNotification[key] = historyRecordData;
-                APP.chatData[data.messages[0].from] = {
+                APP.contacts[data.messages[0].from] = {
                     id: data.messages[0].from,
                     unread: 0,
                     details: {},
@@ -1131,8 +1411,8 @@ var APP = {
                 };
             }
             if(APP.currentChatId == data.messages[0].from) {                
-                APP.chatData[data.messages[0].from].messages.push(historyRecordData);
-                delete APP.chatData[data.messages[0].from].notifications[key];
+                APP.contacts[data.messages[0].from].messages.push(historyRecordData);
+                delete APP.contacts[data.messages[0].from].notifications[key];
                 APP.addMessage(historyRecordData);
                 setTimeout(() => {
                     APP.database.ref('incomingMessages/'+key).remove().then(() => {
@@ -1143,8 +1423,8 @@ var APP = {
                 }, 2000);
             }
             let contactRecordData = {};
-            contactRecordData[APP.extensionFieldName] = data.messages[0].from && APP.chatData[data.messages[0].from] && APP.chatData[data.messages[0].from].details && APP.chatData[data.messages[0].from].details[APP.extensionFieldName] ? APP.chatData[data.messages[0].from].details[APP.extensionFieldName] : data.messages[0].from;
-            contactRecordData[APP.extensionFieldOwner] = data.messages[0].from && APP.chatData[data.messages[0].from] && APP.chatData[data.messages[0].from].details && APP.chatData[data.messages[0].from].details[APP.extensionFieldOwner] && APP.chatData[data.messages[0].from].details[APP.extensionFieldOwner].id ? APP.chatData[data.messages[0].from].details[APP.extensionFieldOwner].id : "";
+            contactRecordData[APP.extensionFieldName] = data.messages[0].from && APP.contacts[data.messages[0].from] && APP.contacts[data.messages[0].from].details && APP.contacts[data.messages[0].from].details[APP.extensionFieldName] ? APP.contacts[data.messages[0].from].details[APP.extensionFieldName] : data.messages[0].from;
+            contactRecordData[APP.extensionFieldOwner] = data.messages[0].from && APP.contacts[data.messages[0].from] && APP.contacts[data.messages[0].from].details && APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner] && APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner].id ? APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner].id : "";
             contactRecordData[APP.extensionFieldWhatsAppNumber] = data.messages[0].from;
             contactRecordData[APP.extensionFieldLastMessage] = data.messages[0].text.body;
             contactRecordData[APP.extensionFieldActiveTime] = APP.toIsoString(new Date(data.messages[0].timestamp));
@@ -1157,25 +1437,26 @@ var APP = {
             }
 
             if(APP.currentChatId != data.messages[0].from) {
-                APP.chatData[data.messages[0].from].unread += 1;
+                APP.contacts[data.messages[0].from].unread += 1;
             }
 
-            // APP.chatData[data.messages[0].from].details = contactRecordData;
-            APP.chatData[data.messages[0].from].details = Object.assign(APP.chatData[data.messages[0].from].details, contactRecordData);
+            // APP.contacts[data.messages[0].from].details = contactRecordData;
+            APP.contacts[data.messages[0].from].details = Object.assign(APP.contacts[data.messages[0].from].details, contactRecordData);
             
             if($("#chatid-"+data.messages[0].from).length) {
                 if(!$("#chatid-"+data.messages[0].from+" .unread-count").length && APP.currentChatId != data.messages[0].from) {
-                    $("#chatid-"+data.messages[0].from+" .chat-preview").append(`<div class="unread-count">${APP.chatData[data.messages[0].from].unread}</div>`);
+                    $("#chatid-"+data.messages[0].from+" .chat-preview").append(`<div class="unread-count">${APP.contacts[data.messages[0].from].unread}</div>`);
                 }
                 else if(APP.currentChatId != data.messages[0].from) {
-                    $("#chatid-"+data.messages[0].from+" .unread-count").html(APP.chatData[data.messages[0].from].unread);
+                    $("#chatid-"+data.messages[0].from+" .unread-count").html(APP.contacts[data.messages[0].from].unread);
                 }
-                $("#chatid-"+data.messages[0].from+" .chat-message").html(APP.chatData[data.messages[0].from].details.whatsappbusiness0__Last_Message);
-                $("#chatid-"+data.messages[0].from+" .chat-time").html(APP.getCurrentTime(APP.chatData[data.messages[0].from].details.Modified_Time));
+                $("#chatid-"+data.messages[0].from+" .chat-message").html(APP.contacts[data.messages[0].from].details[APP.extensionFieldLastMessage]);
+                $("#chatid-"+data.messages[0].from+" .chat-time").html(APP.getCurrentTime(APP.contacts[data.messages[0].from].details.Modified_Time));
                 APP.moveContactToTop(data.messages[0].from);
             }
             else {
-                APP.addChat(APP.chatData[data.messages[0].from]);
+                let contactElement = APP.createContactElement(APP.contacts[data.messages[0].from]);
+                APP.contactList.appendChild(contactElement);
             }
             
         }, (error) => {
@@ -1193,18 +1474,18 @@ var APP = {
                 return;
             }
 
-            if(data.statuses[0].recipient_id && APP.chatData[data.statuses[0].recipient_id]) {
+            if(data.statuses[0].recipient_id && APP.contacts[data.statuses[0].recipient_id]) {
                 let chatMessage = {};
-                APP.chatData[data.statuses[0].recipient_id].messages.find((o, i) => {
+                APP.contacts[data.statuses[0].recipient_id].messages.find((o, i) => {
                     if(o[APP.extensionFieldMsgId] === data.statuses[0].id) {
-                        APP.chatData[data.statuses[0].recipient_id].messages[i][APP.extensionFieldStatus] = data.statuses[0].status;
-                        chatMessage = APP.chatData[data.statuses[0].recipient_id].messages[i];
+                        APP.contacts[data.statuses[0].recipient_id].messages[i][APP.extensionFieldStatus] = data.statuses[0].status;
+                        chatMessage = APP.contacts[data.statuses[0].recipient_id].messages[i];
                         return true;
                     }
                 });
 
                 if(chatMessage && chatMessage[APP.extensionFieldMessage]) {
-                    let chat = Object.values(APP.chatData).find(c => c.id == data.statuses[0].recipient_id);
+                    let chat = Object.values(APP.contacts).find(c => c.id == data.statuses[0].recipient_id);
                     let contactRecordData = {};
                     contactRecordData[APP.extensionFieldName] = chat && chat.details && chat.details[APP.extensionFieldName] ? chat.details[APP.extensionFieldName] : data.statuses[0].recipient_id;
                     contactRecordData[APP.extensionFieldOwner] = chat && chat.details && chat.details[APP.extensionFieldOwner] && chat.details[APP.extensionFieldOwner].id ? chat.details[APP.extensionFieldOwner].id : "";
@@ -1214,16 +1495,16 @@ var APP = {
                     contactRecordData[APP.extensionFieldDirection] = "outgoing";
                     contactRecordData[APP.extensionFieldStatus] = data.statuses[0].status;
 
-                    // APP.chatData[data.statuses[0].recipient_id].details = contactRecordData;
-                    APP.chatData[data.statuses[0].recipient_id].details = Object.assign(APP.chatData[data.statuses[0].recipient_id].details, contactRecordData);
+                    // APP.contacts[data.statuses[0].recipient_id].details = contactRecordData;
+                    APP.contacts[data.statuses[0].recipient_id].details = Object.assign(APP.contacts[data.statuses[0].recipient_id].details, contactRecordData);
                     
                     if($("#chatid-"+data.statuses[0].recipient_id).length) {
-                        $("#chatid-"+data.statuses[0].recipient_id+" .chat-message").html(`${data.statuses[0].status == "sent" ? APP.sentStatus : data.statuses[0].status == "delivered" ? APP.deliveredStatus : data.statuses[0].status == "read" ? APP.readStatus : APP.addedStatus}`+APP.chatData[data.statuses[0].recipient_id].details[APP.extensionFieldLastMessage]);
-                        $("#chatid-"+data.statuses[0].recipient_id+" .chat-time").html(APP.getCurrentTime(APP.chatData[data.statuses[0].recipient_id].details.Modified_Time));
+                        $("#chatid-"+data.statuses[0].recipient_id+" .chat-message").html(`${data.statuses[0].status == "sent" ? APP.sentStatus : data.statuses[0].status == "delivered" ? APP.deliveredStatus : data.statuses[0].status == "read" ? APP.readStatus : APP.addedStatus}`+APP.contacts[data.statuses[0].recipient_id].details[APP.extensionFieldLastMessage]);
+                        $("#chatid-"+data.statuses[0].recipient_id+" .chat-time").html(APP.getCurrentTime(APP.contacts[data.statuses[0].recipient_id].details.Modified_Time));
                         // APP.moveContactToTop(data.messages[0].from);
                     }
                     else {
-                        // APP.addChat(APP.chatData[data.messages[0].from]);
+                        // APP.addChat(APP.contacts[data.messages[0].from]);
                     }
                 }
             }
@@ -1346,7 +1627,7 @@ var APP = {
         });
         
         previewSend.addEventListener('click', () => {
-            var chat = Object.values(APP.chatData).find(c => c.id == APP.currentChatId);
+            var chat = Object.values(APP.contacts).find(c => c.id == APP.currentChatId);
             var newMessage = {
                 text: '[Photo]',
                 time: APP.getCurrentTime(),
@@ -1434,6 +1715,7 @@ var APP = {
         
         
         // Profile pic click to show settings
+        if(profilePic)
         profilePic.addEventListener('click', () => {
             settingsPage.style.display = 'flex';
             sidebar.style.display = 'none';

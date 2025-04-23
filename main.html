@@ -29,14 +29,24 @@
                     <div class="sidebar">
                         <div class="sidebar-header">
                             <div class="sidebar-header-filter">
-                                <img src="person.png" alt="Profile" class="profile-pic" id="profile-pic">
-                                <div class="map-container" id="chatListFilter">
+                                <!-- <img src="person.png" alt="Profile" class="profile-pic" id="profile-pic"> -->
+                                <div title="Chats" class="x104kibb x1iyjqo2 x4osyxg x1198e8h x6ikm8r x10wlt62 x1mzt3pk xo442l1 x1ua5tub x117nqv4 x1aueamr x1wm35g xj8l9r2" style="
+                                overflow-x: hidden;
+                                overflow-y: hidden;
+                                margin-top: -3px;
+                                max-height: 46px;
+                                width: 100%;
+                            "><h1 class="x1qlqyl8 x1pd3egz xcgk4ki" style="
+    font-size: 20px;
+    font-weight: 700;
+">Chats</h1></div>
+                                <!-- <div class="map-container" id="chatListFilter">
                                 <select id="filterModuleList">
                                     <option value="" selected="">All Modules</option>
                                     <option value="Contact">Contacts</option>
                                     <option value="Lead">Leads</option>
                                 </select>
-                            </div>
+                            </div> -->
                             </div>
                             <div class="sidebar-icons">
                                 <i class="fas fa-ellipsis-vertical"></i>
@@ -48,8 +58,42 @@
                                 <input type="text" placeholder="Search or start new chat" id="search-input">
                             </div>
                         </div>
+                        <div class="filter-container">
+                            <div class="rowOptions" id="filterModeElements">
+                                <button class="rowOptionsButton selected" id="filterMode-all">
+                                    <div class="rowOptionsButtonIn">
+                                        <div>All</div>
+                                    </div>
+                                </button>
+                                <button class="rowOptionsButton" id="filterMode-yours">
+                                    <div class="rowOptionsButtonIn">
+                                        <div>Yours</div>
+                                    </div>
+                                </button>
+                                <button class="rowOptionsButton" id="filterMode-inactive">
+                                    <div class="rowOptionsButtonIn">
+                                        <div>Inactive</div>
+                                    </div>
+                                </button>
+                                <button class="rowOptionsButton" id="filterMode-modules" onclick="">
+                                    <div class="rowOptionsButtonIn">
+                                        <div class="filterMode-module-selected">All Modules</div>
+                                        <select id="filterModuleList">
+                                            <option value="" selected="">All Modules</option>
+                                            <option value="Contact">Contacts</option>
+                                            <option value="Lead">Leads</option>
+                                        </select>
+                                    </div>
+                                </button>
+                                <!-- <button class="rowOptionsButton" id="filterMode-users">
+                                    <div class="rowOptionsButtonIn">
+                                        <div>All Users</div>
+                                    </div>
+                                </button> -->
+                            </div>
+                        </div>
                         <div class="chat-list" id="chat-list">
-                            <!-- Chat items will be populated by JavaScript -->
+                                <!-- Chat items will be populated by JavaScript -->
                         </div>
                     </div>
             
@@ -58,8 +102,11 @@
                         <div class="initialChatDiv">Start Conversation</div>
                         <div class="chat-header" id="chat-header">
                             <div class="chat-header-info">
-                                <img src="person.png" alt="Contact" class="profile-pic">
-                                <div class="chat-header-name">Contact</div>
+                                <div class="chat-header-info-head">
+                                    <img src="person.png" alt="Contact" class="profile-pic">
+                                    <div class="chat-header-name">Contact</div>
+                                </div>
+                                <div class="chat-header-info-body"></div>
                             </div>
                             <div class="chat-header-icons">
                                 <i class="fas fa-ellipsis-vertical"></i>
@@ -285,5 +332,5 @@
             </div>
         </div>
     </div>
-
+    
 </body></html>

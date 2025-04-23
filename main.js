@@ -170,6 +170,7 @@ var APP = {
     },
     inboxChatSetup: async function() {
 
+
         APP.filterModeAll = document.getElementById('filterMode-all');
         APP.filterModeYours = document.getElementById('filterMode-yours');
         APP.filterModeInactive = document.getElementById('filterMode-inactive');
@@ -209,7 +210,7 @@ var APP = {
                 let contactElement = APP.createContactElement(APP.contacts[contactId]);
                 APP.contactList.appendChild(contactElement);
             });
-            APP.loadContacts();
+            // APP.loadContacts();
         });
 
         APP.filterModeModules.addEventListener('click', async function() {
@@ -223,23 +224,7 @@ var APP = {
             // });
             // APP.loadContacts();
         });
-
-        APP.contactList = document.getElementById('chat-list');
-        APP.chatLoader = `<div id="contactloader" class="enContent " style="height: 100%;background-color: white;color: black;overflow: hidden;line-height: initial;resize: none;display: flex;align-items: center;justify-content: center;flex-direction: column;font-size: inherit;font-weight: inherit;word-break: break-word;word-wrap: break-word;box-sizing: border-box;width: 100%;padding: 0;cursor: default;font-family: sans-serif;z-index: 10000000;left: 0;top: 0;max-width: 100%;min-width: 0;text-align: left;white-space: normal;position: relative;height: 60px;"><div style="display: flex; align-items: center; justify-content: center; flex-direction: column; width: 100%; height: 100%;   max-width: 100%; min-width: 0; overflow: hidden; word-break: break-word; word-wrap: break-word; white-space: normal; text-align: left;    " class="content"><div class="enLoadingInner" title="loading…"><svg class="enLoadingSVG" width="17" height="17" viewBox="0 0 46 46" role="status"><circle class="enLoadingSvgCircle" cx="23" cy="23" r="20" fill="none" stroke-width="6" style="stroke: rgb(57 82 234);"></circle></svg></div></div></div>`;
-        APP.isLoading = false;
         
-        APP.contactsPerPage = 200;
-        APP.filterModes = {};
-        APP.filterModeTypes = ["all", "yours", "leads", "contacts", "inActive", "users"];
-
-        APP.filterModeTypes.forEach(function(mode) {
-            APP.filterModes[mode] = {
-                currentPage: 1,
-                pageCompleted: false,
-                contacts: []
-            };
-        });
-
         APP.filterMode = "all";
         
         // Initial load
@@ -247,16 +232,7 @@ var APP = {
         $(APP.loaderElement).remove();
         await APP.realtimeListener();
         
-        // Scroll event listener
-        APP.contactList.addEventListener('scroll', function() {
-            if(APP.isLoading) return;
-            let scrollTop = APP.contactList.scrollTop;
-            let scrollHeight = APP.contactList.scrollHeight;
-            let clientHeight = APP.contactList.clientHeight;
-            if(scrollTop + clientHeight >= scrollHeight - 100) {
-                APP.loadContacts();
-            }
-        });
+        
     },
     loadContacts: async function() {
         if(APP.filterModes[APP.filterMode].pageCompleted) {
@@ -492,6 +468,36 @@ var APP = {
 
         APP.extensionHistory = APP.extensionAPI + "WhatsApp_Business_History";
         APP.extensionContacts = APP.extensionAPI + "WhatsApp_Contacts";
+
+        
+
+        APP.contactList = document.getElementById('chat-list');
+        APP.chatLoader = `<div id="contactloader" class="enContent " style="height: 100%;background-color: white;color: black;overflow: hidden;line-height: initial;resize: none;display: flex;align-items: center;justify-content: center;flex-direction: column;font-size: inherit;font-weight: inherit;word-break: break-word;word-wrap: break-word;box-sizing: border-box;width: 100%;padding: 0;cursor: default;font-family: sans-serif;z-index: 10000000;left: 0;top: 0;max-width: 100%;min-width: 0;text-align: left;white-space: normal;position: relative;height: 60px;"><div style="display: flex; align-items: center; justify-content: center; flex-direction: column; width: 100%; height: 100%;   max-width: 100%; min-width: 0; overflow: hidden; word-break: break-word; word-wrap: break-word; white-space: normal; text-align: left;    " class="content"><div class="enLoadingInner" title="loading…"><svg class="enLoadingSVG" width="17" height="17" viewBox="0 0 46 46" role="status"><circle class="enLoadingSvgCircle" cx="23" cy="23" r="20" fill="none" stroke-width="6" style="stroke: rgb(57 82 234);"></circle></svg></div></div></div>`;
+        APP.isLoading = false;
+        
+        APP.contactsPerPage = 200;
+        APP.filterModes = {};
+        APP.filterModeTypes = ["all", "yours", "leads", "contacts", "inActive", "users"];
+
+        APP.filterModeTypes.forEach(function(mode) {
+            APP.filterModes[mode] = {
+                currentPage: 1,
+                pageCompleted: false,
+                contacts: []
+            };
+        });
+
+        // Scroll event listener
+        APP.contactList.addEventListener('scroll', function() {
+            if(APP.isLoading) return;
+            let scrollTop = APP.contactList.scrollTop;
+            let scrollHeight = APP.contactList.scrollHeight;
+            let clientHeight = APP.contactList.clientHeight;
+            if(scrollTop + clientHeight >= scrollHeight - 100) {
+                APP.loadContacts();
+            }
+        });
+
 
         await APP.firebaseSetup();
         await APP.currentUserSet();

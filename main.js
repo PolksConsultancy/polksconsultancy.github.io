@@ -29,7 +29,7 @@ var APP = {
     allUsers: {},
     currentContactId: "",
     contacts: {},
-    at: "EAAmTNTZCXDTkBO12kuG89IADE0GBwaCXD9vyy62dMxEYn7CN4rWF3pCfp2NZAaOE7e0sRecxta3jknsdx5tA7TKnJsfI9DkG3wrVTkBKbJmxEQN2ThYptkgZApIgvpgTCkmw0UbWzBB4EGW6SD14YHKWl0xZBmQ6ZC7SMm7p1fYUPBobs7rgQQeClETc9vKwZAzuQo9yAPHZBpRYz5FrSdOMH0UdMQZA7nPFhJPC",
+    at: "EAAmTNTZCXDTkBO5aIUQ7YiejVRF1QhZBSVlsUquzV2uAumtrRnJ1WHMIxfsXEG7IjjozVOZCe6f1av0PiefNJ2tGCrEMvFm9fr26peXBPqDNpz1eNsYXobW6h7avW7LB8wl92oSMnFTOHekmvSNPxdrOa3q0zDHNjiEPdscRdk4RYDRoDOSUJ5VH4Fe8jxL92EuMFrK7WZCuZAEnmFhc34DAHMZCs3zAcpZC2MZD",
     realtimeDuplicateChaeckArr: [],
     lastMessageDirection: "",
     dealStagesList: "",

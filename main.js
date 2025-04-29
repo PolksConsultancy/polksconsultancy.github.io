@@ -1,7 +1,7 @@
-document.writeln('<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>'); document.writeln('<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&display=swap">');
+document.writeln('<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>');
+document.writeln('<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&display=swap">');
 document.writeln('<script src="ZohoEmbededAppSDK.js?v=3"></script>');
 document.addEventListener("DOMContentLoaded", function (event) {
-    // $(".contact-details").remove();
     ZOHO.embeddedApp.on("PageLoad", async function(record) {
         if(record.Entity && record.EntityId) {
             if(record.ButtonPosition) {
@@ -11,246 +11,419 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 APP.recordId = record.EntityId;
             }
             APP.module = record.Entity;
-            $(".contact-details").remove();
-            $(".search-container").remove();
-            $(".filter-container").remove();
-            $(".accountPage").remove();
         }
         APP.init();
     });
     ZOHO.embeddedApp.init();
 });
 
- let isTyping = false;
+let isTyping = false;
 
 var APP = {
 
     extensionName: 'WhatsApp Business',
-    extensionAPI: 'whatsappbusiness0__', // whatsappbusiness0__
+    extensionAPI: 'telnyxforzohocrm__', // whatsappbusiness0__
     extensionSignal: "incomingmessages",
     extensionFunction: 'webhook',
-    credentials: {},
     currentUser: {},
     allUsers: {},
-    currentChatId: "",
+    currentContactId: "",
     contacts: {},
-    editLink: "",
-    supportMail: "support@polksconsultancy.com",
-    docLink: "",
-    videoLink: "",
+    at: "EAAmTNTZCXDTkBOZCW9Q4skQZBZAkuaKSpEZBl6IPK3z1cP3pFH912XiFbZB6nOHIwWaV9xF6xuadKHtMWyI3gKhsRsYOYH0Xu6zXZCLqSuW7563LCfZAkwlXmOdCI6eUdKzjYMfNN7JHPvqPctAIRSKqJWXOVY7HiiWKDwBxb5ZBjlY3WDp0CQhM4oEV1oM16rBZC7HAFXn3uhADrYJFGZBVmzqAGteXaBZCjRD9GEcZD",
     realtimeDuplicateChaeckArr: [],
     lastMessageDirection: "",
     dealStagesList: "",
     currentUserIconElement: "#profile-pic",
     sidebarElement: ".sidebar",
     loaderElement: "#loader",
+    sendModeType: 'single',
+    isBulk: false,
+    selectedContacts: [],
     logo: `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="40" viewBox="0 0 180 40" fill="none"> <g clip-path="url(#clip0_2864_5776)"> <g clip-path="url(#clip1_2864_5776)"> <path d="M9.84909 0.5H0.978027L13.633 29.2527C13.7297 29.4724 14.0421 29.4702 14.1358 29.2495L18.3447 19.3485L9.84909 0.5Z" fill="black"/> <path d="M36.8708 0.5C36.8708 0.5 23.2742 31.6392 21.453 34.5108C19.3363 37.8492 17.9334 39.1235 15.3375 39.5318C15.3135 39.5355 15.2957 39.5563 15.2957 39.5807C15.2957 39.6081 15.318 39.6304 15.3453 39.6304H23.4696C26.989 39.6304 29.527 36.6915 30.9335 34.0962C32.532 31.1464 45.8982 0.5 45.8982 0.5H36.8708Z" fill="black"/> </g> <path d="M72.2275 25.4738C72.2088 25.5149 72.1505 25.5149 72.1317 25.4738L65.408 10.7144H61.6304C61.6304 10.7144 68.5601 26.376 69.2523 27.5462C69.9287 28.6898 70.7473 29.6326 72.1797 29.6326C73.6121 29.6326 74.4307 28.6898 75.1072 27.5462C75.7994 26.376 82.7291 10.7144 82.7291 10.7144H78.9515L72.2275 25.4738Z" fill="black"/> <path d="M92.7333 26.7567C89.0796 26.7567 86.6868 24.3696 86.6868 20.0652C86.6868 15.7609 89.0796 13.3741 92.7333 13.3741C96.374 13.3741 98.7795 15.7609 98.7795 20.0652C98.7795 24.3696 96.374 26.7567 92.7333 26.7567ZM92.7333 10.2828C87.0121 10.2828 83.3322 14.0002 83.3322 20.0652C83.3322 26.1306 87.0121 29.848 92.7333 29.848C98.4415 29.848 102.134 26.1306 102.134 20.0652C102.134 14.0002 98.4415 10.2828 92.7333 10.2828Z" fill="black"/> <path d="M121.463 10.7132V29.4176H117.59L108.564 15.7429V29.4176H105.261V10.7132H109.146L118.173 24.4791V10.7132H121.463Z" fill="black"/> <path d="M130.314 21.748L133.567 14.1088C133.585 14.0659 133.646 14.0659 133.664 14.1088L136.917 21.748H130.314ZM133.615 10.4994C132.255 10.4994 131.424 11.5346 130.876 12.5698C130.314 13.6306 123.598 29.4176 123.598 29.4176H127.049L128.977 24.8884H138.254L140.182 29.4176H143.633C143.633 29.4176 136.917 13.6306 136.355 12.5698C135.807 11.5346 134.975 10.4994 133.615 10.4994Z" fill="black"/> <path d="M152.969 22.2046H158.876C158.849 25.1108 156.144 26.7568 153.278 26.7568C149.683 26.7568 147.328 24.3695 147.328 20.0653C147.328 15.418 149.508 13.3468 153.479 13.3468C155.965 13.3468 158.033 14.3666 158.468 16.7169H161.893C161.293 12.602 157.515 10.2827 153.278 10.2827C147.648 10.2827 144.028 14.0001 144.028 20.0653C144.028 26.1305 147.648 29.7753 153.278 29.7753C155.651 29.7753 158.045 28.4987 158.888 27.1503L158.877 29.4175H162.037V19.3422H152.969V22.2046Z" fill="black"/> <path d="M179.022 13.8435V10.7132H165.616V29.4176H179.022V26.287H168.918V21.3698H178.234V18.2392H168.918V13.8435H179.022Z" fill="black"/> </g> <defs> <clipPath id="clip0_2864_5776"> <rect width="178.043" height="39.1304" fill="white" transform="translate(0.978271 0.5)"/> </clipPath> <clipPath id="clip1_2864_5776"> <rect width="45" height="39.1304" fill="white" transform="translate(0.978271 0.5)"/> </clipPath> </defs> </svg>`,
-    loader: `<div id="loader" class="enContent " style="height: 100%; background-color: white;color: black; overflow: hidden;  line-height: initial; resize: none; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: inherit; font-weight: inherit; word-break: break-word; word-wrap: break-word; box-sizing: border-box;   width: 100%; padding: 0; cursor: default;   font-family: sans-serif;      z-index: 10000000; position: absolute; left: 0;  top: 0;      max-width: 100%; min-width: 0; text-align: left; white-space: normal;     "><div style="display: flex; align-items: center; justify-content: center; flex-direction: column; width: 100%; height: 100%;   max-width: 100%; min-width: 0; overflow: hidden; word-break: break-word; word-wrap: break-word; white-space: normal; text-align: left;    " class="content"><div class="enLoadingInner" title="loading…"><svg class="enLoadingSVG" width="17" height="17" viewBox="0 0 46 46" role="status"><circle class="enLoadingSvgCircle" cx="23" cy="23" r="20" fill="none" stroke-width="6" style="stroke: rgb(57 82 234);"></circle></svg></div></div></div>`,
+    init: async function() {
+
+        APP.extensionFieldId = "id";
+        APP.extensionFieldName = "Name";
+        APP.extensionFieldOwner = "Owner";
+        APP.extensionFieldMessage = APP.extensionAPI + "WhatsApp_Message";    // WhatsApp_Message
+        APP.extensionFieldEncodeMessage = APP.extensionAPI + "Encode_Message";
+        APP.extensionFieldWhatsAppNumber = APP.extensionAPI + "WhatsApp_Number";
+        APP.extensionFieldModule = APP.extensionAPI + "Module";
+        APP.extensionFieldLastMessage = APP.extensionAPI + "Last_Message0";
+        APP.extensionFieldContact = APP.extensionAPI + "Contact";
+        APP.extensionFieldLead = APP.extensionAPI + "Lead";
+        APP.extensionFieldAccount = APP.extensionAPI + "Account";
+        APP.extensionFieldFrom = APP.extensionAPI + "From";
+        APP.extensionFieldTo = APP.extensionAPI + "To";
+        APP.extensionFieldStatus = APP.extensionAPI + "Status";
+        APP.extensionFieldMsgId = APP.extensionAPI + "Message_Id";
+        APP.extensionFieldDirection = APP.extensionAPI + "Direction";
+        APP.extensionFieldActiveTime = APP.extensionAPI + "Active_Time";  
+        APP.extensionFieldTimestamp = APP.extensionAPI + "Timestamp";        
+        APP.extensionFieldReactionFrom = APP.extensionAPI + "Reaction_From";        
+        APP.extensionFieldReactionTo = APP.extensionAPI + "Reaction_To";
+
+        APP.extensionHistory = APP.extensionAPI + "WhatsApp_Business_History";
+        APP.extensionContacts = APP.extensionAPI + "WhatsApp_Contacts";
+        APP.extensionAPIAt = APP.extensionAPI+"at"
+
+        await APP.inboxChatSetup();
+        await APP.clickFunctions();
+        await APP.settingsPopup();
+        
+
+    },
+    clickFunctions: function() {
+
+
+        let contactList = document.getElementById('chat-list');
+        contactList.addEventListener('click', async (e) => { 
+            if(e.target.closest('.contactItem')) {
+                APP.contactListClickFunction(e);
+            }
+        });
+
+        // Send message
+        var sendButton = document.getElementById('send-button');
+        sendButton.addEventListener('click', APP.sendMessage);
+        var messageInput = document.getElementById('message-input');
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                APP.sendMessage();
+            }
+        });
+
+        // Typing indicator
+        var messageInput = document.getElementById('message-input');
+        messageInput.addEventListener('input', () => {
+            if (messageInput.textContent.trim() && !isTyping) {
+                sendButton.classList.add('active');
+            } else if (!messageInput.textContent.trim() && isTyping) {
+                sendButton.classList.remove('active');
+            }
+            isTyping = !!messageInput.textContent.trim();
+        });
+
+        // Search chats
+        var searchInput = document.getElementById('search-input');
+        if(searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                let filter = e.target.value;
+                var chatList = document.getElementById('chat-list');
+                chatList.innerHTML = '';
+                let filteredChats = filter ? Object.values(APP.contacts).filter(chat => chat.id.toLowerCase().includes(filter.toLowerCase())) : Object.values(APP.contacts);
+                Object.values(filteredChats).forEach(chat => {
+                    let contactElement = APP.createContactElement(chat);
+                    APP.contactList.appendChild(contactElement);
+                });
+            });
+        }
+
+        if(document.querySelector("#leadSelectOption"))
+        document.querySelector("#leadSelectOption").addEventListener('click', (e) => {
+            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
+            $("#leadSelectOption").addClass("rowOptionsButtonSelected");
+            APP.showRecordDetailsView("Leads");
+        });
+
+        if(document.querySelector("#contactSelectOption"))
+        document.querySelector("#contactSelectOption").addEventListener('click', (e) => {
+            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
+            $("#contactSelectOption").addClass("rowOptionsButtonSelected");
+            APP.showRecordDetailsView("Contacts");
+        });
+
+        $('#filterModuleList').on('change', function() {
+            $(".filter-container .rowOptionsButton.selected").removeClass("selected");
+            this.parentNode.parentNode.setAttribute("class", "rowOptionsButton selected");
+            let value = this.value;
+            $(".filterMode-module-selected").text(value ? value+'s ▼' : 'All Modules ▼');
+            var chatList = document.getElementById('chat-list');
+            chatList.innerHTML = '';
+            let filteredChats = value ? Object.values(APP.contacts).filter(chat => chat.details[APP.extensionFieldModule] && chat.details[APP.extensionFieldModule].toLowerCase().includes(value.toLowerCase())) : value == "" ? Object.values(APP.contacts) : '';
+            Object.values(filteredChats).forEach(chat => {
+                let contactElement = APP.createContactElement(chat);
+                APP.contactList.appendChild(contactElement);
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            APP.outerClickFunctions(e);
+        });
+
+        APP.unusedCodes();
+    },
+    outerClickFunctions: function(e) {
+
+        let thisElement, thisElement2, thisElement3 = "";
+
+        if($(e.target).hasClass('chatUser-avatar')) {
+            $(".dropdownOuter").css({transform: "scale(1)", top: $(e.target).parent().position().top+$(e.target).parent().height()+2, left: $(e.target).parent().position().left+$(e.target).parent().width()-37});
+        }
+        else {
+            $(".dropdownOuter").css({transform: "scale(0)"});
+        }
+
+        thisElement = $(".message-text-to-react-icon");
+        if(thisElement.is(e.target) || thisElement.has(e.target).length != 0) {
+            $(".reactionPoupButton").css({transform: "scale(1)"});
+            $(e.target).parent().parent().parent().parent().addClass("reactionOpened");
+            $(".reactionPoupButton .reactionButtonImg").attr("msgid", $(e.target).attr("msgid"));
+            APP.positionNotificationBox(e.clientX + $(e.target).width()-e.offsetX, e.clientY + $(e.target).height()-e.layerY);
+        }
+        else {
+            $(".reactionPoupButton").css({transform: "scale(0)"});
+        }
+
+        thisElement = $(".emojiListBox");
+        thisElement2 = $(".message-input");
+        thisElement3 = $("#emoji-btn");
+        if(thisElement.is(e.target) || thisElement.has(e.target).length != 0 || thisElement2.is(e.target) || thisElement2.has(e.target).length != 0 || thisElement3.is(e.target) || thisElement3.has(e.target).length != 0) {
+
+        }
+        else {
+            $(".emojiListBox").hide();
+        }
+
+        if($(e.target).attr('id') == "dealMapConfirmCondainer") {   
+            $("#dealMapConfirmCondainer").remove();        
+            return;
+        }
+
+        thisElement = $("#filterMode-all");
+        if(thisElement.is(e.target) || thisElement.has(e.target).length != 0) {
+            APP.filterModeChangeAction(e.target.closest('.rowOptionsButton'));
+        }
+
+        thisElement = $("#filterMode-yours");
+        if(thisElement.is(e.target) || thisElement.has(e.target).length != 0) {
+            APP.filterModeChangeAction(e.target.closest('.rowOptionsButton'));
+        }
+
+        thisElement = $("#filterMode-inactive");
+        if(thisElement.is(e.target) || thisElement.has(e.target).length != 0) {
+            APP.filterModeChangeAction(e.target.closest('.rowOptionsButton'));
+        }
+
+        thisElement = $("#filterMode-modules");
+        thisElement2 = $("#filterModuleList");
+        if(thisElement.is(e.target) || thisElement.has(e.target).length != 0 || thisElement2.is(e.target) || thisElement2.has(e.target).length != 0) {
+            APP.filterModeChangeAction(e.target.closest('.rowOptionsButton'));
+        }
+
+
+
+        // emojiPicker.classList.remove('show');
+        // attachmentOptions.classList.remove('show');
+    },
+    loader: function(elementId) {
+        if(!$(".loaderStyle").length) {
+            let loaderStyle = `<style class="loaderStyle">/* message loading style */ .enLoadingInner { margin: 0 auto; background-color: #fff; border-radius: 50%; box-shadow: 0 1px 1px 0 rgba(0,0,0,.06),0 2px 5px 0 rgba(0,0,0,.2); display: flex; align-items: center; justify-content: center; width: 35px; height: 35px; } .enLoadingOuter { display: flex; flex: none; justify-content: center; padding: 15px 0px; box-sizing: border-box; } .enLoadingSvgCircle { stroke: #ccc; stroke-dasharray: 1,150; stroke-dashoffset: 0; stroke-linecap: round; animation: enLoadingSvgCircle 1.5s ease-in-out infinite; } .enLoadingSVG { animation: enLoadingSVG 2s linear infinite; } @keyframes enLoadingSVG{ to{transform:rotate(1turn)} } @keyframes enLoadingSvgCircle{ 0%{stroke-dasharray:1,150;stroke-dashoffset:0} 50%{stroke-dasharray:90,150;stroke-dashoffset:-35} to{stroke-dasharray:90,150;stroke-dashoffset:-124} } /* message loading style */</style>`;
+            $("body").append(loaderStyle);
+        }
+        return `<div id="${elementId}" class="enContent" style="height: 100%; background-color: white;color: black; overflow: hidden;  line-height: initial; resize: none; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: inherit; font-weight: inherit; word-break: break-word; word-wrap: break-word; box-sizing: border-box;   width: 100%; padding: 0; cursor: default;   font-family: sans-serif;      z-index: 10000000; position: absolute; left: 0;  top: 0;      max-width: 100%; min-width: 0; text-align: left; white-space: normal;     "><div style="display: flex; align-items: center; justify-content: center; flex-direction: column; width: 100%; height: 100%;   max-width: 100%; min-width: 0; overflow: hidden; word-break: break-word; word-wrap: break-word; white-space: normal; text-align: left;    " class="content"><div class="enLoadingInner" title="loading…"><svg class="enLoadingSVG" width="17" height="17" viewBox="0 0 46 46" role="status"><circle class="enLoadingSvgCircle" cx="23" cy="23" r="20" fill="none" stroke-width="6" style="stroke: rgb(57 82 234);"></circle></svg></div></div></div>`;
+    },
+    getRecordFunction: async function(module, recordId) {
+        return await ZOHO.CRM.API.getRecord({Entity:module,RecordID:recordId}).then(async function(resp){
+            return resp.data[0];
+        });
+    },
+    getFieldsFunction: async function(module) {
+        return await ZOHO.CRM.META.getFields({"Entity":module}).then(function(data){
+            return data.fields;
+        });
+    },
     currentUserSet: async function() {
-        await ZOHO.CRM.CONFIG.getCurrentUser().then(function(data){
-            APP.currentUser = data.users[0];
-            $(APP.currentUserIconElement).attr("src", APP.currentUser.image_link);
+        return await await ZOHO.CRM.CONFIG.getCurrentUser().then(function(data){
+            return data.users[0];
         });
     },
     allUsersGet: async function() {
-        await ZOHO.CRM.API.getAllUsers({Type:"AllUsers"}).then(async function(data){
-            let assignUserElements = "";
+        return await ZOHO.CRM.API.getAllUsers({Type:"AllUsers"}).then(async function(data){
+            let allUsers = {};
             await data.users.forEach(function(user) {
                 if(user.status == "active") {
-                    APP.allUsers[user.id] = user;
-                    assignUserElements += `<div class="dropdownList" userid="${user.id}">
-                                                <div class="dropdownListIcon">
-                                                    <div class="dropdownListIconSize">
-                                                        <img src="${user.image_link}">
-                                                    </div>
-                                                </div>
-                                                <div class="dropdownListText">${user.full_name}</div>
-                                            </div>`;
+                    allUsers[user.id] = user;
                 }
             });
-            
-            $(APP.sidebarElement).append(`<div class="dropdownOuter" id="userAssignDropdown">
-                                <div class="dropdownInner">
-                                    <div class="dropdownList dropdownListTitle">
-                                        <div class="dropdownListText">Assign User</div>
-                                    </div>
-                                    <hr class="dropdownSeprate">
-                                    ${assignUserElements}
-                                </div>
-                            </div>`);
+            return allUsers;
         });
     },
-    getZapikey: function() {
-        //         let getmap = {"nameSpace":"<portal_name.extension_namespace>"};
-        //         let resp = await ZOHO.CRM.CONNECTOR.invokeAPI("crm.zapikey",getmap);
-        //         let zapikey = JSON.parse(resp).response;
-        // APP.database.ref('zapikey/'+currentUser.full_name).set({
-        //     zapikey: zapikey
-        //   });
+    allUsersGetSet: async function() {
+        let assignUserElements = "";
+        await Object.values(APP.allUsers).forEach(function(user) {
+            assignUserElements += `<div class="dropdownList" userid="${user.id}">
+                                        <div class="dropdownListIcon">
+                                            <div class="dropdownListIconSize">
+                                                <img src="${user.image_link}">
+                                            </div>
+                                        </div>
+                                        <div class="dropdownListText">${user.full_name}</div>
+                                    </div>`;
+        });
+        
+        $(APP.sidebarElement).append(`<div class="dropdownOuter" id="userAssignDropdown">
+                            <div class="dropdownInner">
+                                <div class="dropdownList dropdownListTitle">
+                                    <div class="dropdownListText">Assign User</div>
+                                </div>
+                                <hr class="dropdownSeprate">
+                                ${assignUserElements}
+                            </div>
+                        </div>`);
+    },
+    getZapikey: async function() {
+        return await ZOHO.CRM.CONNECTOR.invokeAPI("crm.zapikey", {"nameSpace":"<portal_name.extension_namespace>"}).then(function(resp) {
+            return JSON.parse(resp).response;
+        });
     },
     dealStageListSet: async function() {
-        let dealStagesList = [];
-        await ZOHO.CRM.META.getFields({"Entity":"Deals"}).then(function(data){
-            data.fields.forEach(function(field) {
-                if(field.api_name == "Stage") {
-                    dealStagesList = field.pick_list_values;
-                } 
-            });
-        });
+        let dealFieldsList = await APP.getFieldsFunction("Deals");
         let Stage = "";
-        dealStagesList.forEach(function(stage) {
-            Stage += `<option value="${stage.display_value}">${stage.display_value}</option>`;
+        await dealFieldsList.forEach(function(field) {
+            if(field.api_name == "Stage") {
+                field.pick_list_values.forEach(function(stage) {
+                    Stage += `<option value="${stage.display_value}">${stage.display_value}</option>`;
+                });
+            }
         });
-        APP.dealStagesList = `<select id="map_Stage">${Stage}</select>`;
+        return `<select id="map_Stage">${Stage}</select>`;
     },
     popupResize: async function() {
-        await ZOHO.CRM.UI.Resize({height:"600",width:"1000"}).then(function(data){
-            console.log(data);
-        });
-    },
-    recordChatSetup: async function() {
-        APP.selectedModule = APP.module;
-        await APP.popupResize();
-        APP.contactList = document.getElementById('chat-list');
-        await ZOHO.CRM.META.getFields({"Entity":APP.module}).then(function(data){
-            let phoneFields = [];
-            let phoneNumbers = [];
-            data.fields.forEach(function(field) {
-                if(field.data_type == "phone") {
-                    phoneFields.push(field.api_name);
-                }
-            });
-            ZOHO.CRM.API.getRecord({Entity:APP.module,RecordID:APP.recordId})
-            .then(async function(resp){
-                APP.selectedRecord = resp.data[0];
-                phoneFields.forEach(function(phoneField) {
-                    if(resp.data[0][phoneField]) {phoneNumbers.push(resp.data[0][phoneField]);}
-                });
-                phoneNumbers.forEach(async function(phone, i) {
-                    APP.contacts[phone] = {
-                        id: phone,
-                        unread: 0,
-                        details: {},
-                        notifications: {},
-                        messages: []
-                    };
-                    await ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts,Type:"phone",Query:phone,delay:false}).then(async function(data){
-                        if(data && data.data) {
-                            let contact = {};
-                            data.data.forEach(async thisContact => {
-                                contact = thisContact;
-                                APP.contacts[contact[APP.extensionFieldWhatsAppNumber]] = {
-                                    id: contact[APP.extensionFieldWhatsAppNumber],
-                                    unread: 0,
-                                    details: contact,
-                                    notifications: {},
-                                    messages: []
-                                };
-                                await APP.startChatListAddFunction(APP.contacts[thisContact[APP.extensionFieldWhatsAppNumber]]);
-                            });
-                            let contactElement = APP.createContactElement(APP.contacts[phone]);
-                            APP.contactList.appendChild(contactElement);
-                        }
-                        else {
-                            let recordData = {};
-                            recordData[APP.extensionFieldName] = APP.selectedRecord.Full_Name;
-                            recordData[APP.extensionFieldWhatsAppNumber] = phone.replaceAll(" ", "").replaceAll("+", "");
-                            ZOHO.CRM.API.insertRecord({Entity:APP.extensionContacts,APIData:recordData,Trigger:["workflow"]}).then(function(data){
-                                console.log(data);
-                            });
-                            let contactElement = APP.createContactElement(APP.contacts[phone]);
-                            APP.contactList.appendChild(contactElement);
-                        }
-                    });
-                });
-                $(APP.loaderElement).remove();
-                await APP.realtimeListener(); 
-            });
+        return await ZOHO.CRM.UI.Resize({height:"600",width:"1000"}).then(function(data){
+            return data;
         });
     },
     inboxChatSetup: async function() {
 
+        APP.body = document.body;
+        APP.initialChatDiv = document.querySelector(".initialChatDiv");
 
-        APP.filterModeAll = document.getElementById('filterMode-all');
-        APP.filterModeYours = document.getElementById('filterMode-yours');
-        APP.filterModeInactive = document.getElementById('filterMode-inactive');
-        APP.filterModeModules = document.getElementById('filterMode-modules');
-        // APP.contactList = document.getElementById('filterMode-users');
+        APP.loaderElement = document.createElement('div');
+        APP.loaderElement.innerHTML = APP.loader("loader");
 
-        APP.filterModeAll.addEventListener('click', async function() {
-            $(".filter-container .rowOptionsButton.selected").removeClass("selected");
-            this.setAttribute("class", "rowOptionsButton selected");
+        APP.contactListloaderElement = document.createElement('div')
+        APP.contactListloaderElement.innerHTML = APP.loader("contactloader");
+
+        APP.body.appendChild(APP.loaderElement);
+
+        APP.contactList = document.getElementById('chat-list');
+        APP.chatLoader = APP.loader("contactloader");
+        
+        APP.filterModes = {};
+        APP.filterModeTypes = ["all", "yours", "leads", "contacts", "inActive", "users", "single", "bulk"];
+
+        APP.filterModeTypes.forEach(function(mode) {
+            APP.filterModes[mode] = {
+                currentPage: 1,
+                pageCompleted: false,
+                contacts: []
+            };
+        });
+
+        APP.contactList.addEventListener('scroll', function() {
+            if(APP.isContactLoading) return;
+            let scrollTop = APP.contactList.scrollTop;
+            let scrollHeight = APP.contactList.scrollHeight;
+            let clientHeight = APP.contactList.clientHeight;
+            if(scrollTop + clientHeight >= scrollHeight - 100) {
+                APP.loadContacts();
+            }
+        });
+
+        APP.messagesContainer = document.getElementById('messages-container');
+        APP.messagesContainer.addEventListener('scroll', function() {
+            if(APP.isMessageLoading) return;
+            let scrollTop = APP.messagesContainer.scrollTop;
+            let scrollHeight = APP.messagesContainer.scrollHeight;
+            let clientHeight = APP.messagesContainer.clientHeight;
+            if(scrollTop <= 100) {
+                APP.loadMessages(APP.currentContactId);
+            }
+        });
+
+        if(APP.module && APP.recordId) {
+            await APP.popupResize();
+            $(".contact-details").remove();
+            $(".search-container").remove();
+            $(".filter-container").remove();
+            $(".accountPage").remove();
+            APP.selectedModule = APP.module;
+            APP.selectedRecord = await APP.getRecordFunction(APP.module, APP.recordId);
+            APP.selectedRecordFields = await APP.getFieldsFunction(APP.module);
+            APP.filterMode = "single";
+        }
+        else {
             APP.filterMode = "all";
-            APP.contactList.innerHTML = "";
-            APP.filterModes[APP.filterMode].contacts.forEach(contactId => {
-                let contactElement = APP.createContactElement(APP.contacts[contactId]);
-                APP.contactList.appendChild(contactElement);
-            });
-            APP.loadContacts();
-        });
+        }
 
-        APP.filterModeYours.addEventListener('click', async function() {
-            $(".filter-container .rowOptionsButton.selected").removeClass("selected");
-            this.setAttribute("class", "rowOptionsButton selected");
-            APP.filterMode = "yours";
-            APP.contactList.innerHTML = "";
-            APP.filterModes[APP.filterMode].contacts.forEach(contactId => {
-                let contactElement = APP.createContactElement(APP.contacts[contactId]);
-                APP.contactList.appendChild(contactElement);
-            });
-            APP.loadContacts();
-        });
+        APP.currentUser = await APP.currentUserSet();
+        // document.getElementById("profile-pic").setAttribute("src", APP.currentUser.image_link);
+        APP.selectedUser = APP.currentUser;
 
-        APP.filterModeInactive.addEventListener('click', async function() {
-            $(".filter-container .rowOptionsButton.selected").removeClass("selected");
-            this.setAttribute("class", "rowOptionsButton selected");
-            APP.filterMode = "inActive";
-            APP.contactList.innerHTML = "";
-            APP.filterModes[APP.filterMode].contacts.forEach(contactId => {
-                let contactElement = APP.createContactElement(APP.contacts[contactId]);
-                APP.contactList.appendChild(contactElement);
-            });
-            // APP.loadContacts();
-        });
+        APP.allUsers = await APP.allUsersGet();
+        await APP.allUsersGetSet();
 
-        APP.filterModeModules.addEventListener('click', async function() {
-            // $(".filter-container .rowOptionsButton.selected").removeClass("selected");
-            // this.setAttribute("class", "rowOptionsButton selected");
-            // APP.filterMode = "all";
-            // APP.contactList.innerHTML = "";
-            // APP.filterModes[APP.filterMode].contacts.forEach(contactId => {
-            //     let contactElement = APP.createContactElement(APP.contacts[contactId]);
-            //     APP.contactList.appendChild(contactElement);
-            // });
-            // APP.loadContacts();
-        });
-        
-        APP.filterMode = "all";
-        
-        // Initial load
+        APP.dealStagesList = await APP.dealStageListSet();
+
+        APP.reactionElementOpen();
+
+        APP.isContactLoading = false;
+        APP.contactsPerPage = 200;
         await APP.loadContacts();
-        $(APP.loaderElement).remove();
+
+        await APP.firebaseSetup();
         await APP.realtimeListener();
+
+        $(APP.loaderElement).remove();
         
-        
+    },
+    filterModeChangeAction: function(thisSelected) {
+        $(".filter-container .rowOptionsButton.selected").removeClass("selected");
+        thisSelected.setAttribute("class", "rowOptionsButton selected");
+        if(thisSelected.getAttribute("id") == "filterMode-yours") {
+            APP.filterMode = "yours";
+        }
+        else if(thisSelected.getAttribute("id") == "filterMode-inactive") {
+            APP.filterMode = "inActive";
+        }
+        else if(thisSelected.getAttribute("id") == "filterMode-modules") {
+            document.getElementById('filterModuleList').focus();
+            document.getElementById('filterModuleList').click();
+            if($("#filterModuleList").val() == "Lead") {
+                APP.filterMode = "leads";
+            }
+            if($("#filterModuleList").val() == "Contact") {
+                APP.filterMode = "contacts";
+            }
+            else {
+                APP.filterMode = "all";
+            }
+        }
+        else {
+            APP.filterMode = "all";
+        }
+        APP.contactList.innerHTML = "";
+        APP.filterModes[APP.filterMode].contacts.forEach(async contactId => {
+            await APP.addContactList(contactId);
+        });
+        if(APP.filterModes[APP.filterMode].contacts.length < APP.contactsPerPage+1) {
+            APP.loadContacts();
+        }
     },
     loadContacts: async function() {
         if(APP.filterModes[APP.filterMode].pageCompleted) {
             return;
         }
-        APP.isLoading = true;
-        $("#chat-list").append(APP.chatLoader);
-        APP.loadingIndicator = document.getElementById('contactloader');
+        APP.isContactLoading = true;
+        APP.contactList.appendChild(APP.contactListloaderElement);
+        APP.contactListloader = document.getElementById('contactloader');
         setTimeout(async function() {
-            let loadedContacts = await APP.getContacts(APP.filterModes[APP.filterMode].currentPage);
-            loadedContacts.forEach(contact => {
-                let contactElement = APP.createContactElement(contact);
-                APP.contactList.appendChild(contactElement);
-            });
+            await APP.getContacts(APP.filterModes[APP.filterMode].currentPage);
             APP.filterModes[APP.filterMode].currentPage++;
-            APP.loadingIndicator.remove();
-            APP.isLoading = false;
-            APP.loadingIndicator.style.display = 'none';
+            APP.isContactLoading = false;
+            APP.contactListloader.remove();
         }, 1000);
     },
     getContacts: async function() {
@@ -266,6 +439,36 @@ var APP = {
                 return await APP.getContactsResponse(data);
             });
         }
+        else if(APP.filterMode == "single") {
+            let selectedNumbers = {};
+            let searchQuery = "";
+            if(APP.selectedRecord && APP.selectedRecordFields){
+                APP.selectedRecordFields.forEach(async function(field) {
+                    if(field.data_type == "phone" && APP.selectedRecord[field.api_name]) {
+                        let selectedNumberDetails = {};
+                        selectedNumberDetails[APP.extensionFieldWhatsAppNumber] = APP.selectedRecord[field.api_name];
+                        selectedNumbers[APP.selectedRecord[field.api_name]] = selectedNumberDetails;
+                        searchQuery += `or(${APP.extensionFieldWhatsAppNumber}:equals:${APP.selectedRecord[field.api_name]})`;
+                    }
+                });
+            }
+            if(searchQuery) {
+                searchQuery = searchQuery.slice(2);
+                return await ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts,Type:"criteria",Query:`(${searchQuery})`}).then(async function(data) {
+                    if(data.data) {
+                        data.data.forEach(function(selectedRecord) {
+                            if(selectedRecord[APP.extensionFieldWhatsAppNumber]) {
+                                selectedNumbers[selectedRecord[APP.extensionFieldWhatsAppNumber]] = selectedRecord;
+                            }
+                        });
+                    }
+                    return await APP.getContactsResponse({info: data.info, data: Object.values(selectedNumbers)});
+                });
+            }
+            else {
+                return await APP.getContactsResponse({info: { more_records: false }, data: Object.values(selectedNumbers)});
+            }
+        }
         else {
             return await ZOHO.CRM.API.getAllRecords({Entity:APP.extensionContacts, sort_by: APP.extensionFieldActiveTime, sort_order:"desc", per_page:APP.contactsPerPage, page:APP.filterModes[APP.filterMode].currentPage}).then(async function(data){
                 return await APP.getContactsResponse(data);
@@ -276,92 +479,345 @@ var APP = {
         if(data && data.info && !data.info.more_records) {
             APP.filterModes[APP.filterMode].pageCompleted = true;
         }
-        let loadedContacts = [];
         if(data && data.data) {
-            data.data.forEach(async contact => {
-                if(!APP.contacts[contact[APP.extensionFieldWhatsAppNumber]]) {
-                    APP.contacts[contact[APP.extensionFieldWhatsAppNumber]] = {
-                        id: contact[APP.extensionFieldWhatsAppNumber],
+            let loadedContactsCount = data.data.length;
+            let loadedContacts = [];
+            data.data.forEach(async (contact) => {
+                let contactId = contact[APP.extensionFieldWhatsAppNumber];
+                if(!APP.contacts[contactId]) {
+                    APP.contacts[contactId] = {
+                        id: contactId,
                         unread: 0,
                         details: contact,
                         notifications: {},
-                        messages: []
+                        messages: {},
+                        pageCompleted: false,
+                        currentPage: 1
                     };
                 }
-                if(!APP.filterModes[APP.filterMode].contacts.includes(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]])) {
-                    let currentTime = new Date();
-                    let oneWeekAgo = currentTime.setDate(currentTime.getDate() - 7);
-                    if(APP.filterMode != "inActive") { // || new Date(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].details.Modified_Time) < oneWeekAgo
-                        APP.filterModes[APP.filterMode].contacts.push(contact[APP.extensionFieldWhatsAppNumber]);
-                        loadedContacts.push(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]]);
-                    }
+                else {
+                    APP.contacts[contactId].details = contact;
                 }
-                await APP.startChatListAddFunction(contact);
-            });
-        }
-        return loadedContacts;
-    },
-    createContactElement: function(chat) {
-        chatList = document.getElementById('chat-list');
-        var chatItem = document.createElement('div');
-        chatItem.id = "chatid-"+chat.id;
-        chatItem.className = `chat-item ${chat.id === APP.currentChatId ? 'active' : ''}`;
-        chatItem.dataset.id = chat.id;
-        
-        chatItem.innerHTML = `
-            <div class="chat-avatars">
-                <img src="${chat.details && chat.details.avatar ? chat.details.avatar : "person.png"}" alt="${chat.details && chat.details.Name ? chat.details.Name : chat.id}" class="chat-avatar">
-                <img src="${chat.details && chat.details.Owner && chat.details.Owner.id && APP.allUsers[chat.details.Owner.id].image_link ? APP.allUsers[chat.details.Owner.id].image_link : "user-thumbnail.png"}" alt="${chat.details && chat.details.Name ? chat.details.Name : chat.id}" class="chat-avatar chatUser-avatar">
-            </div>
-            <div class="chat-info">
-                <div class="chat-header">
-                    <div class="chat-header-deatils">
-                        <div class="chat-name">${chat.details && chat.details.Name ? chat.details.Name : chat.id}</div>
-                        ${APP.module && APP.recordId ? '' : `<div class="chat-module">${chat.details[APP.extensionFieldModule] ? chat.details[APP.extensionFieldModule] : 'Contact'}</div>`}
-                    </div>
-                    <div class="chat-time">${chat.details && chat.details.Modified_Time ? APP.getCurrentTime(chat.details.Modified_Time) : 'New'}</div>
-                </div>
-                <div class="chat-preview">
-                    <div class="chat-message">${chat.details && chat.details[APP.extensionFieldLastMessage] ? chat.details[APP.extensionFieldDirection] && chat.details[APP.extensionFieldDirection] == "incoming" ? chat.details[APP.extensionFieldLastMessage] : "You: "+chat.details[APP.extensionFieldLastMessage] : 'Start Coversation'}</div>
-                    ${chat.unread > 0 ? `<div class="unread-count">${chat.unread}</div>` : ''}
-                </div>
-            </div>
-        `;
-        return chatItem;
-    },
-    startChatListAddFunction: async function(contact) {
-        if(APP.filterModes || !APP.filterModes[APP.filterMode].contacts.length)
-        ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory,Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${contact[APP.extensionFieldWhatsAppNumber]})`}).then(function(searchRecord) {
-            if(searchRecord.data) {
-                if(!APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].messages.length) {
-                    APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].messages = APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].messages.concat(searchRecord.data);
-                    APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].messages.sort(function(a, b) {
-                        var keyA = new Date(a.Created_Time), keyB = new Date(b.Created_Time);
-                        // Compare the 2 dates
-                        if (keyA < keyB) return -1;
-                        if (keyA > keyB) return 1;
-                        return 0;
-                    });
-                }
-                if($("#chatid-"+contact[APP.extensionFieldWhatsAppNumber]).length) {
-                    $("#chatid-"+contact.id+" .chat-message").html(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].details[APP.extensionFieldLastMessage]);
-                    $("#chatid-"+contact.id+" .chat-time").html(APP.getCurrentTime(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]].details[APP.extensionFieldActiveTime]));
+                if(APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldLastMessage] && APP.contacts[contactId].details[APP.extensionFieldLastMessage].id) {
+                    APP.contacts[contactId].details[APP.extensionFieldLastMessage] = await APP.getRecordFunction(APP.extensionHistory, APP.contacts[contactId].details[APP.extensionFieldLastMessage].id);
                 }
                 else {
-                    let contactElement = APP.createContactElement(APP.contacts[contact[APP.extensionFieldWhatsAppNumber]]);
-                    APP.contactList.appendChild(contactElement);
+                    APP.contacts[contactId].details[APP.extensionFieldLastMessage] = {};
                 }
+                if(!APP.filterModes[APP.filterMode].contacts.includes(contactId)) {
+                    let currentTime = new Date();
+                    let oneWeekAgo = currentTime.setDate(currentTime.getDate() - 7);
+                    let contactLastActivityTime = APP.contacts[contactId].details.Modified_Time ? APP.contacts[contactId].details.Modified_Time : "";
+                    if(APP.filterMode != "inActive" || new Date(contactLastActivityTime) < oneWeekAgo) {
+                        APP.filterModes[APP.filterMode].contacts.push(contactId);
+                        loadedContacts.push(APP.contacts[contactId]);
+                    }
+                }
+                loadedContactsCount -= 1;
+                if(!loadedContactsCount) {
+                    // sorted = Object.fromEntries(Object.entries(k).sort(([, a], [, b]) => a.text - b.text));
+                    loadedContacts.sort((a, b) => new Date(b.details.Modified_Time) - new Date(a.details.Modified_Time));
+                    loadedContacts.forEach(async function(contact) {
+                        await APP.addContactList(contact.id);
+                    });
+                }
+            });
+        }
+    },
+    addContactList: async function(contactId, type) {
+
+        let contact = APP.contacts[contactId];
+        let lastMessage = contact.details && contact.details[APP.extensionFieldLastMessage] && contact.details[APP.extensionFieldLastMessage] ? contact.details[APP.extensionFieldLastMessage] : {};
+        let img = contact.details && contact.details.avatar ? contact.details.avatar : "person.png";
+        let ownerImg = contact.details && contact.details.Owner && contact.details.Owner.id && APP.allUsers[contact.details.Owner.id].image_link ? APP.allUsers[contact.details.Owner.id].image_link : "user-thumbnail.png";
+        let name = contact.details && contact.details.Name ? contact.details.Name : contactId;
+        let time = lastMessage && lastMessage.Modified_Time ? APP.formatWhatsAppTime(lastMessage.Modified_Time) : 'New';
+        let user = lastMessage && lastMessage[APP.extensionFieldDirection] && lastMessage[APP.extensionFieldDirection] == "incoming" ? '' : contact.details && contact.details.Owner && contact.details.Owner.name && APP.currentUser.id != contact.details.Owner.id ? contact.details.Owner.name : 'You';
+        let status = lastMessage && lastMessage[APP.extensionFieldDirection] && lastMessage[APP.extensionFieldDirection] == "incoming" ? '' : lastMessage && lastMessage[APP.extensionFieldStatus] ? lastMessage[APP.extensionFieldStatus] == "sent" ? APP.sentStatus : lastMessage[APP.extensionFieldStatus] == "delivered" ? APP.deliveredStatus : lastMessage[APP.extensionFieldStatus] == "read" ? APP.readStatus : APP.addedStatus : APP.addedStatus;          
+        let message = lastMessage && lastMessage[APP.extensionFieldMessage] ? lastMessage[APP.extensionFieldMessage] : 'Start Coversation';
+        let encodeMessage = lastMessage && lastMessage[APP.extensionFieldEncodeMessage] ? lastMessage[APP.extensionFieldEncodeMessage] : message;
+        message = decodeURIComponent(decodeURIComponent(encodeMessage));
+
+        let statusElement = status && message != 'Start Coversation' ? `<div class="contactListContntBodyStatus"><span class="contactListContntBodyStatusIcon">${status}</span></div>` : '';
+        let userElement = user && message != 'Start Coversation' ? `<div class="contactListContntBodySender"><div class="contactListContntBodySenderIn"><span class="contactListContntBodySenderName">${user}</span><span>:&nbsp;</span></div></div>` : '';
+        let messageElement = `${statusElement} ${userElement} <span class="contactListContntBodyContent">${message}</span>`;
+
+        let contantListElement = `<div class="contactList">
+                <div class="contactListIn contactItem ${contactId === APP.currentContactId ? 'active' : ''}" data-id="${contactId}" id="contactid-${contactId}">
+                    <div class="contactSelectionBox">
+                        <input type="checkbox" class="contact-checkbox" data-id="${contactId}" onclick="APP.handleOnContactSelectionOnChange('${contactId}', this.checked)">
+                    </div>
+                    <div class="contactListImgOut">
+                        <div class="contactListImgIn">
+                            <div class="contactListImgMain">
+                                <div class="contactListImgMain">
+                                <svg viewBox="0 0 48 48" height="212" width="212" preserveAspectRatio="xMidYMid meet" class="contactListImgMainSVG" fill="none"><title>default-contact-refreshed</title><path d="M24 23q-1.857 0-3.178-1.322Q19.5 20.357 19.5 18.5t1.322-3.178T24 14t3.178 1.322Q28.5 16.643 28.5 18.5t-1.322 3.178T24 23m-6.75 10q-.928 0-1.59-.66-.66-.662-.66-1.59v-.9q0-.956.492-1.758A3.3 3.3 0 0 1 16.8 26.87a16.7 16.7 0 0 1 3.544-1.308q1.8-.435 3.656-.436 1.856 0 3.656.436T31.2 26.87q.816.422 1.308 1.223T33 29.85v.9q0 .928-.66 1.59-.662.66-1.59.66z" fill="#606263" class="x1d6ck0k"></path></svg>
+                                <div class="contactListOwnerImg">
+                                    <span class="contactListOwnerImgSpan">
+                                        <img src="${ownerImg}" alt="${''}" class="chat-avatar chatUser-avatar">
+                                    </span>
+                                </div>
+                                
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contactListContntOut">
+                        <div class="contactListContntHead">
+                            <div class="contactListContntHeadName">
+                                <span title="${name}" class="contactListContntHeadNameText">${name}</span>
+                            </div>
+                            <div class="contactListContntHeadTime">${time}</div>
+                        </div>
+                        <div class="contactListContntBodyOut">
+                            <div class="contactListContntBodyIn">
+                                <span class="contactListContntBody" title="${message}">
+                                    ${messageElement}
+                                </span>
+                            </div>
+                            <div class="contactListContntMore">
+                                ${contact.unread > 0 ? `<div class="unread-count">${contact.unread}</div>` : ''}
+                                <span class=""></span><span class=""></span><span class=""></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+        if($("#contactid-"+contactId).length && contact.details[APP.extensionFieldActiveTime]) {
+            $("#contactid-"+contactId).parent().parent().html(contantListElement);
+        }
+        else if(!$("#contactid-"+contactId).length) {
+            let contactElement = document.createElement('div');
+            contactElement.className = `chat-item`;
+            contactElement.dataset.id = contactId;
+            contactElement.innerHTML = contantListElement;
+            APP.contactList.appendChild(contactElement);
+        }
+        // APP.moveContactToTop(contactId);
+    },
+    histroryMap: function(contactId, messageId) {
+
+        let message = APP.contacts[contactId].messages[messageId];
+        
+        let historyRecordData = {};
+        historyRecordData[APP.extensionFieldId] = message[APP.extensionFieldId] ? message[APP.extensionFieldId] : "";
+        historyRecordData[APP.extensionFieldName] = message[APP.extensionFieldName] ? message[APP.extensionFieldName] : "";
+        historyRecordData[APP.extensionFieldOwner] = message[APP.extensionFieldOwner] ? message[APP.extensionFieldOwner] : "";
+        historyRecordData[APP.extensionFieldWhatsAppNumber] = message[APP.extensionFieldWhatsAppNumber] ? message[APP.extensionFieldWhatsAppNumber] : "";
+        historyRecordData[APP.extensionFieldFrom] = message[APP.extensionFieldFrom] ? message[APP.extensionFieldFrom] : "";
+        historyRecordData[APP.extensionFieldTo] = message[APP.extensionFieldTo] ? message[APP.extensionFieldTo] : "";
+        historyRecordData[APP.extensionFieldMessage] = message[APP.extensionFieldMessage] ? message[APP.extensionFieldMessage] : "";
+        historyRecordData[APP.extensionFieldEncodeMessage] = message[APP.extensionFieldEncodeMessage] ? message[APP.extensionFieldEncodeMessage] : "";
+        historyRecordData[APP.extensionFieldTimestamp] = APP.toIsoString(new Date(message[APP.extensionFieldTimestamp] ? Number(message[APP.extensionFieldTimestamp]) : ""));
+        historyRecordData[APP.extensionFieldDirection] = message[APP.extensionFieldDirection] ? message[APP.extensionFieldDirection] : "";
+        historyRecordData[APP.extensionFieldStatus] = message[APP.extensionFieldStatus] ? message[APP.extensionFieldStatus] : "";
+        historyRecordData[APP.extensionFieldMsgId] = message[APP.extensionFieldMsgId] ? message[APP.extensionFieldMsgId] : "";
+        historyRecordData[APP.extensionFieldReactionFrom] = message[APP.extensionFieldReactionFrom] ? message[APP.extensionFieldReactionFrom] : "";
+        historyRecordData[APP.extensionFieldReactionTo] = message[APP.extensionFieldReactionTo] ? message[APP.extensionFieldReactionTo] : "";
+        historyRecordData[APP.extensionFieldModule] = message[APP.extensionFieldModule] ? message[APP.extensionFieldModule] : "";
+        historyRecordData[APP.extensionFieldLead] = message[APP.extensionFieldLead] ? message[APP.extensionFieldLead] : "";        
+        historyRecordData[APP.extensionFieldContact] = message[APP.extensionFieldContact] ? message[APP.extensionFieldContact] : "";
+
+        historyRecordData = Object.entries(historyRecordData).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
+        return historyRecordData;
+        
+    },
+    contactMap: function(contactId) {   // contactObject = Object.assign(contactObject, changeContactObjectObject);
+
+        let contact = APP.contacts[contactId];
+
+        let contactRecordData = {};
+        contactRecordData[APP.extensionFieldId] = contact.details && contact.details[APP.extensionFieldId] ? contact.details[APP.extensionFieldId] : "";
+        contactRecordData[APP.extensionFieldName] = contact.details && contact.details[APP.extensionFieldName] ? contact.details[APP.extensionFieldName] : "";
+        contactRecordData[APP.extensionFieldOwner] = contact.details && contact.details[APP.extensionFieldOwner] ? contact.details[APP.extensionFieldOwner] : "";
+        contactRecordData[APP.extensionFieldWhatsAppNumber] = contact.details && contact.details[APP.extensionFieldWhatsAppNumber] ? contact.details[APP.extensionFieldWhatsAppNumber] : "";
+        contactRecordData[APP.extensionFieldLastMessage] = contact.details && contact.details[APP.extensionFieldLastMessage] && contact.details[APP.extensionFieldLastMessage].id ? contact.details[APP.extensionFieldLastMessage].id : "";
+        contactRecordData[APP.extensionFieldActiveTime] = contact.details && contact.details[APP.extensionFieldActiveTime] ? APP.toIsoString(new Date(contact.details[APP.extensionFieldActiveTime])) : "";
+        contactRecordData[APP.extensionFieldStatus] = contact.details && contact.details[APP.extensionFieldStatus] ? contact.details[APP.extensionFieldStatus] : "";
+        contactRecordData[APP.extensionFieldModule] = contact.details && contact.details[APP.extensionFieldModule] ? contact.details[APP.extensionFieldModule] : "";
+        contactRecordData[APP.extensionFieldLead] = contact.details && contact.details[APP.extensionFieldLead] ? contact.details[APP.extensionFieldLead] : "";        
+        contactRecordData[APP.extensionFieldContact] = contact.details && contact.details[APP.extensionFieldContact] ? contact.details[APP.extensionFieldContact] : "";
+
+        contactRecordData = Object.entries(contactRecordData).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
+        return contactRecordData;
+        
+    },
+    contactListClickFunction: async function(e) {
+
+        if($(e.target).hasClass('chatUser-avatar')) {           
+            return;
+        }
+
+        let contactElement = e.target.closest('.contactItem');
+        if(APP.isBulk) {
+            if(contactElement && contactElement.querySelector(".contact-checkbox")) {
+                let checkbox = contactElement.querySelector(".contact-checkbox");
+                checkbox.checked = !checkbox.checked;
+                APP.handleOnContactSelectionOnChange(contactElement.dataset.id, checkbox.checked);
             }
+            return;
+
+        }
+        if(contactElement && APP.currentContactId != contactElement.dataset.id) {
+
+            if(APP.initialChatDiv) APP.initialChatDiv.remove();
+            $(".contactItem.active").removeClass("active");
+            contactElement.setAttribute("class", "contactListIn contactItem active");
+
+            APP.currentContactId = contactElement.dataset.id;
+            let contact = APP.contacts[APP.currentContactId];
+
+            if(!APP.contacts[APP.currentContactId].initied) {
+                if(contact.details[APP.extensionFieldContact]) {
+                    APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
+                }
+                else if(contact.details[APP.extensionFieldLead]) {
+                    APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
+                }
+                else {
+                    await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query:APP.currentContactId, delay:false}).then( async function(data){
+                        if(!data || !data.data) {
+                            await ZOHO.CRM.API.searchRecord({Entity: "Leads", Type:"phone",Query:APP.currentContactId, delay:false}).then(async function(resp){
+                                if(!resp || !resp.data) {
+                                    let response = await ZOHO.CRM.API.insertRecord({Entity: "Lead",APIData:{Last_Name: APP.currentContactId, phone: APP.currentContactId},Trigger:["workflow"]}).then(function(data){});
+                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
+                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = response.data[0].id;
+                                }
+                                else {
+                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
+                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = resp.data[0].id;
+                                }
+                            });
+                        }
+                        else {
+                            APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
+                            APP.contacts[APP.currentContactId].details[APP.extensionFieldContact] = data.data[0].id;
+                        }
+                    });
+                }
+                APP.contacts[APP.currentContactId].initied = true;
+                await APP.contactAction(APP.currentContactId);
+            }
+            await APP.showRecordDetailsView(APP.contacts[APP.currentContactId].details[APP.extensionFieldModule]);
+
+            APP.isMessageLoading = false;
+            APP.messagesPerPage = 20;
+            APP.lastMessageDirection = "";
+
+            if(contactElement.querySelector(".unread-count")) {
+                contactElement.querySelector(".unread-count").remove();
+            }
+
+            APP.contacts[APP.currentContactId].unread = 0;
+
+            let messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = "";
+
+            if(Object.keys(APP.contacts[APP.currentContactId].messages).length) {
+                let sortingContacts = Object.values(APP.contacts[APP.currentContactId].messages).sort((a, b) => new Date(b.Modified_Time) - new Date(a.Modified_Time));
+                sortingContacts.forEach(async message => {
+                    await APP.addMessage(message[APP.extensionFieldMsgId], APP.currentContactId, "loaded");
+                });
+            }
+            if(Object.keys(APP.contacts[APP.currentContactId].messages).length < APP.messagesPerPage+1) {
+                await APP.loadMessages(APP.currentContactId);
+            }
+            APP.currentChatUnreadNotification();
+            $("#message-input").focus();
+        }
+    },
+    loadMessages: async function(contactId) {
+        if(APP.contacts[contactId].pageCompleted) {
+            return;
+        }
+        APP.isMessageLoading = true;
+        // APP.contactList.appendChild(APP.contactListloaderElement);
+        // APP.contactListloader = document.getElementById('contactloader');
+        setTimeout(async function() {
+            await APP.getMessages(contactId);
+            APP.contacts[contactId].currentPage++;
+            APP.isMessageLoading = false;
+            // APP.contactListloader.remove();
+        }, 1000);
+    },
+    getMessages: async function(contactId) {
+        return await ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory,Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${contactId})`, per_page:APP.messagesPerPage, page:APP.contacts[contactId].currentPage}).then(async function(data) {
+            return await APP.getMessagesResponse(data, contactId);
         });
+    },
+    getMessagesResponse: function(data, contactId) {
+        if(data && data.info && !data.info.more_records) {
+            APP.contacts[contactId].pageCompleted = true;
+        }
+        if(data && data.data) {
+            let loadedMessagesCount = data.data.length;
+            let loadedMessages = [];
+            data.data.forEach(async (messageRecord) => {
+                if(messageRecord[APP.extensionFieldMsgId] && !APP.contacts[contactId].messages[messageRecord[APP.extensionFieldMsgId]]) {
+                    APP.contacts[contactId].messages[messageRecord[APP.extensionFieldMsgId]] = messageRecord;
+                    loadedMessages.push(messageRecord);
+                }
+                loadedMessagesCount -= 1;
+                if(!loadedMessagesCount) {
+                    loadedMessages.sort((a, b) => new Date(b.Modified_Time) - new Date(a.Modified_Time));
+                    loadedMessages.forEach(async function(message) {
+                        await APP.addMessage(message[APP.extensionFieldMsgId], contactId, "loaded");
+                    });
+                }
+            });
+        }
+    },
+    contactAction: async function(contactId) {
+        let contactRecordMap = await APP.contactMap(contactId);
+        if(contactRecordMap && contactRecordMap.id) {
+            await ZOHO.CRM.API.updateRecord({Entity: APP.extensionContacts, APIData: contactRecordMap, Trigger:["workflow"]}).then(function(data){
+                console.log(data);
+            });
+        }
+        else {
+            await ZOHO.CRM.API.searchRecord({Entity: APP.extensionContacts, Type:"phone",Query: contactId, delay:false}).then( async function(data){
+                if(data && data.data) {
+                    contactRecordMap.id = data.data[0].id;
+                    await ZOHO.CRM.API.updateRecord({Entity: APP.extensionContacts, APIData: contactRecordMap, Trigger:["workflow"]}).then(function(data){
+                        console.log(data);
+                    });
+                }
+                else {
+                    await ZOHO.CRM.API.insertRecord({Entity: APP.extensionContacts, APIData: contactRecordMap, Trigger:["workflow"]}).then(function(data){
+                        console.log(data);
+                    });
+                }
+            });
+        }
+    },
+    histroyAction: async function(contactId, messageId) {
+        let histroyRecordMap = await APP.histroryMap(contactId, messageId);
+        if(histroyRecordMap && histroyRecordMap.id) {
+            await ZOHO.CRM.API.updateRecord({Entity: APP.extensionHistory, APIData: histroyRecordMap, Trigger:["workflow"]}).then(function(data){
+                console.log(data);
+            });
+        }
+        else {
+            await ZOHO.CRM.API.insertRecord({Entity: APP.extensionHistory, APIData: histroyRecordMap, Trigger:["workflow"]}).then(function(data){
+                console.log(data);
+            });
+        }
+    },
+    createContactElement: function(chat) {
+        
+        return chatItem;
     },
     sortingArrOfOject: function() {
 
     },
     currentChatUnreadNotification: function() {
-        if(Object.keys(APP.contacts[APP.currentChatId].notifications).length) {
-            Object.keys(APP.contacts[APP.currentChatId].notifications).forEach(function(key) {              
-                APP.contacts[APP.currentChatId].messages.push(APP.contacts[APP.currentChatId].notifications[key]);
-                delete APP.contacts[APP.currentChatId].notifications[key];
+        if(Object.keys(APP.contacts[APP.currentContactId].notifications).length) {
+            Object.keys(APP.contacts[APP.currentContactId].notifications).forEach(function(key) {          
+                let message = APP.contacts[APP.currentContactId].notifications[key];
+                let message_id = APP.contacts[APP.currentContactId].notifications[key][APP.extensionFieldMsgId];    
+                APP.contacts[APP.currentContactId].messages[message_id] = message;
+                delete APP.contacts[APP.currentContactId].notifications[key];
                 setTimeout(() => {
                     APP.database.ref('incomingMessages/'+key).remove().then(() => {
                         console.log("Data deleted successfully");
@@ -372,36 +828,88 @@ var APP = {
             });
         }
     },
-    reactionElementOpen: async function() {
-        let reactionElement = `<div class="reactionPoupButton" id="reactionPoupButton"><div class="rectionBUttonOuter"><div class="rectionButton"><div class="reactionButtonIn"><div><img alt="👍" class="reactionButtonImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: 0px -64px;display: inline-block;vertical-align: top;zoom: 1;border: 0;background-size: 160px 160px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/38.webp);transform: scale(.9375);visibility: visible;width: 32px;height: 32px;image-rendering: -webkit-optimize-contrast;"></div></div></div>
+    reactionSentMessage: function(thisSelected) {
+        let reaction = $(thisSelected).text();
+        let msgId = $(thisSelected).attr("msgid");
+        $(".reactionOpened").removeClass("reactionOpened");
+        let message_id = decodeURIComponent(msgId).replaceAll("_", ".").replaceAll("-", "=");
+        APP.contacts[APP.currentContactId].messages[message_id][APP.extensionFieldReactionTo] = reaction
+        APP.addMessage(message_id, APP.currentContactId, "outgoing"); 
+        $("#"+msgId+" .reactionShowInmsgBoxOuter").css({"display": "flex"});
+        let request = {
+            url : `https://graph.facebook.com/v22.0/581984271672102/messages`,
+            headers: { 
+                "Authorization": "Bearer "+APP.at,
+                "Content-Type": "application/json"
+            },
+            body: {
+                messaging_product: "whatsapp",
+                recipient_type: "individual",
+                to: APP.currentContactId,
+                type: "reaction",
+                reaction: {
+                    message_id: message_id,
+                    emoji: reaction // e.g., "👍", "❤️", "😂"
+                }
+            }
+        };
 
-                                    <div class="rectionButton"><div class="reactionButtonIn"><div><img alt="❤️" class="reactionButtonImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: 0px -64px;display: inline-block;vertical-align: top;zoom: 1;border: 0;background-size: 160px 160px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/38.webp);transform: scale(.9375);visibility: visible;width: 32px;height: 32px;image-rendering: -webkit-optimize-contrast;background-position: -128px -128px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/7.webp);"></div></div></div>
-                                    
-                                    <div class="rectionButton"><div class="reactionButtonIn"><div><img alt="😂" class="reactionButtonImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: 0px -64px;display: inline-block;vertical-align: top;zoom: 1;border: 0;background-size: 160px 160px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/38.webp);transform: scale(.9375);visibility: visible;width: 32px;height: 32px;image-rendering: -webkit-optimize-contrast;background-position: -64px -96px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/82.webp);"></div></div></div>
-                                    
-                                    <div class="rectionButton"><div class="reactionButtonIn"><div><img alt="🙏" class="reactionButtonImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: 0px -64px;display: inline-block;vertical-align: top;zoom: 1;border: 0;background-size: 160px 160px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/38.webp);transform: scale(.9375);visibility: visible;width: 32px;height: 32px;image-rendering: -webkit-optimize-contrast;background-position: -96px -96px;background-image: url(https://web.whatsapp.com/emoji/v1/16/0/1/sprite/w/40/88.webp);"></div></div></div>
-                                    <div class="reactionAddButton"><div class="reactionButtonIn"><div style="
-                                        text-transform: uppercase;
-                                        background-color: #f2f2f7;
-                                        border-radius: 50%;
-                                        transition-timing-function: cubic-bezier(.4,0,.2,1);
-                                        padding-top: 0;
-                                        width: 32px;
-                                        padding-bottom: 0;
-                                        height: 32px;
-                                        justify-content: center;
-                                        padding-left: 0;
-                                        transition-property: box-shadow;
-                                        font-weight: 500;
-                                        display: flex;
-                                        cursor: pointer;
-                                        box-shadow: none;
-                                        align-items: center;
-                                        padding-right: 0;
-                                        font-size: .875rem;
-                                        transition-duration: .08s;
-                                        color: #ffffff;
-                                    "><span aria-hidden="true" data-icon="plus" class="x1t495xr"><svg viewBox="0 0 24 24" width="26" preserveAspectRatio="xMidYMid meet" class=""><title>plus</title><path fill="currentColor" d="M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6V13z"></path></svg></span></div></div></div></div></div>`;
+        ZOHO.CRM.HTTP.post(request).then(async function(resp) {
+            let searchRecord = await ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory, Type:"criteria",Query:`(${APP.extensionFieldMsgId}:equals:${decodeURIComponent(msgId).replaceAll("_", ".").replaceAll("-", "=")})`});
+            if(searchRecord.data) {
+                let contactRecordData = {
+                    id: searchRecord.data[0].id
+                };
+                contactRecordData[APP.extensionFieldReactionTo] = encodeURIComponent(encodeURIComponent(reaction));
+                await ZOHO.CRM.API.updateRecord({Entity: APP.extensionHistory,APIData:contactRecordData,Trigger:["workflow"]}).then(function(data){});
+            }
+        });
+    },
+    reactionElementOpen: async function() {
+        let reactionElement = `<div class="reactionPoupButton" id="reactionPoupButton">
+    <div class="rectionBUttonOuter">
+        <div class="rectionButton">
+            <div class="reactionButtonIn">
+                <div>
+                    <span class="reactionButtonImg" onclick="APP.reactionSentMessage(this);">👍</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="rectionButton">
+            <div class="reactionButtonIn">
+                <div>
+                    <span class="reactionButtonImg" onclick="APP.reactionSentMessage(this);">❤️</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="rectionButton">
+            <div class="reactionButtonIn">
+                <div>
+                    <span class="reactionButtonImg" onclick="APP.reactionSentMessage(this);">😂</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="rectionButton">
+            <div class="reactionButtonIn">
+                <div>
+                    <span class="reactionButtonImg" onclick="APP.reactionSentMessage(this);">🙏</span>
+                </div>
+            </div>
+        </div>
+        <div class="reactionAddButton">
+            <div class="reactionButtonIn">
+                <div>
+                    <span aria-hidden="true" data-icon="plus" class="x1t495xr">
+                        <svg viewBox="0 0 24 24" width="26" preserveAspectRatio="xMidYMid meet" class=""><title>plus</title><path fill="currentColor" d="M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6V13z"></path></svg>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>`;
 
         
         $("body").append(reactionElement);
@@ -445,262 +953,6 @@ var APP = {
           // Position above click
           notificationBox.style.bottom = `${viewportHeight - clickY}px`;
         }
-      },  
-    init: async function() {
-
-        APP.extensionFieldName = "Name";
-        APP.extensionFieldOwner = "Owner";
-        APP.extensionFieldMessage = APP.extensionAPI + "WhatsApp_Message";    // WhatsApp_Message
-        APP.extensionFieldWhatsAppNumber = APP.extensionAPI + "WhatsApp_Number";
-        APP.extensionFieldModule = APP.extensionAPI + "Module";
-        APP.extensionFieldLastMessage = APP.extensionAPI + "Last_Message";
-        APP.extensionFieldDeal = APP.extensionAPI + "Deal";
-        APP.extensionFieldContact = APP.extensionAPI + "Contact";
-        APP.extensionFieldLead = APP.extensionAPI + "Lead";
-        APP.extensionFieldAccount = APP.extensionAPI + "Account";
-        APP.extensionFieldFrom = APP.extensionAPI + "From";
-        APP.extensionFieldTo = APP.extensionAPI + "To";
-        APP.extensionFieldStatus = APP.extensionAPI + "Status";
-        APP.extensionFieldMsgId = APP.extensionAPI + "MsgId";
-        APP.extensionFieldLastMsgId = APP.extensionAPI + "Last_Message_ID";
-        APP.extensionFieldDirection = APP.extensionAPI + "Direction";
-        APP.extensionFieldActiveTime = APP.extensionAPI + "Active_Time";
-
-        APP.extensionHistory = APP.extensionAPI + "WhatsApp_Business_History";
-        APP.extensionContacts = APP.extensionAPI + "WhatsApp_Contacts";
-
-        
-
-        APP.contactList = document.getElementById('chat-list');
-        APP.chatLoader = `<div id="contactloader" class="enContent " style="height: 100%;background-color: white;color: black;overflow: hidden;line-height: initial;resize: none;display: flex;align-items: center;justify-content: center;flex-direction: column;font-size: inherit;font-weight: inherit;word-break: break-word;word-wrap: break-word;box-sizing: border-box;width: 100%;padding: 0;cursor: default;font-family: sans-serif;z-index: 10000000;left: 0;top: 0;max-width: 100%;min-width: 0;text-align: left;white-space: normal;position: relative;height: 60px;"><div style="display: flex; align-items: center; justify-content: center; flex-direction: column; width: 100%; height: 100%;   max-width: 100%; min-width: 0; overflow: hidden; word-break: break-word; word-wrap: break-word; white-space: normal; text-align: left;    " class="content"><div class="enLoadingInner" title="loading…"><svg class="enLoadingSVG" width="17" height="17" viewBox="0 0 46 46" role="status"><circle class="enLoadingSvgCircle" cx="23" cy="23" r="20" fill="none" stroke-width="6" style="stroke: rgb(57 82 234);"></circle></svg></div></div></div>`;
-        APP.isLoading = false;
-        
-        APP.contactsPerPage = 200;
-        APP.filterModes = {};
-        APP.filterModeTypes = ["all", "yours", "leads", "contacts", "inActive", "users"];
-
-        APP.filterModeTypes.forEach(function(mode) {
-            APP.filterModes[mode] = {
-                currentPage: 1,
-                pageCompleted: false,
-                contacts: []
-            };
-        });
-
-        // Scroll event listener
-        APP.contactList.addEventListener('scroll', function() {
-            if(APP.isLoading) return;
-            let scrollTop = APP.contactList.scrollTop;
-            let scrollHeight = APP.contactList.scrollHeight;
-            let clientHeight = APP.contactList.clientHeight;
-            if(scrollTop + clientHeight >= scrollHeight - 100) {
-                APP.loadContacts();
-            }
-        });
-
-
-        await APP.firebaseSetup();
-        await APP.currentUserSet();
-        await APP.allUsersGet();
-        await APP.dealStageListSet();
-
-        APP.reactionElementOpen();
-
-        APP.selectedUser = APP.currentUser;
-
-        if(APP.module && APP.recordId) {
-            await APP.recordChatSetup();
-        }
-        else {
-            await APP.inboxChatSetup();
-        }   
-
-        // Chat list item click
-        var chatList = document.getElementById('chat-list');
-        chatList.addEventListener('click', async (e) => { APP.chatListClickFunction(e); });
-
-        // Send message
-        var sendButton = document.getElementById('send-button');
-        sendButton.addEventListener('click', APP.sendMessage);
-        var messageInput = document.getElementById('message-input');
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                APP.sendMessage();
-            }
-        });
-
-        // Typing indicator
-        var messageInput = document.getElementById('message-input');
-        messageInput.addEventListener('input', () => {
-            if (messageInput.textContent.trim() && !isTyping) {
-                sendButton.classList.add('active');
-            } else if (!messageInput.textContent.trim() && isTyping) {
-                sendButton.classList.remove('active');
-            }
-            isTyping = !!messageInput.textContent.trim();
-        });
-
-        // Search chats
-        var searchInput = document.getElementById('search-input');
-        if(searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                let filter = e.target.value;
-                var chatList = document.getElementById('chat-list');
-                chatList.innerHTML = '';
-                let filteredChats = filter ? Object.values(APP.contacts).filter(chat => chat.id.toLowerCase().includes(filter.toLowerCase())) : Object.values(APP.contacts);
-                console.log(filteredChats);
-                Object.values(filteredChats).forEach(chat => {
-                    let contactElement = APP.createContactElement(chat);
-                    APP.contactList.appendChild(contactElement);
-                });
-            });
-        }
-
-        if(document.querySelector("#leadSelectOption"))
-        document.querySelector("#leadSelectOption").addEventListener('click', (e) => {
-            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
-            $("#leadSelectOption").addClass("rowOptionsButtonSelected");
-            APP.showRecordDetailsView("Leads");
-        });
-
-        if(document.querySelector("#contactSelectOption"))
-        document.querySelector("#contactSelectOption").addEventListener('click', (e) => {
-            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
-            $("#contactSelectOption").addClass("rowOptionsButtonSelected");
-            APP.showRecordDetailsView("Contacts");
-        });
-
-        $('#filterModuleList').on('change', function() {
-            $(".filter-container .rowOptionsButton.selected").removeClass("selected");
-            this.parentNode.parentNode.setAttribute("class", "rowOptionsButton selected");
-            let value = this.value;
-            $(".filterMode-module-selected").text(value ? value+'s' : 'All Modules');
-            var chatList = document.getElementById('chat-list');
-            chatList.innerHTML = '';
-            let filteredChats = value ? Object.values(APP.contacts).filter(chat => chat.details[APP.extensionFieldModule] && chat.details[APP.extensionFieldModule].toLowerCase().includes(value.toLowerCase())) : value == "" ? Object.values(APP.contacts) : '';
-            Object.values(filteredChats).forEach(chat => {
-                let contactElement = APP.createContactElement(chat);
-                APP.contactList.appendChild(contactElement);
-            });
-        });
-
-        document.addEventListener('click', (e) => {
-            if($(e.target).hasClass('chatUser-avatar')) {
-                $(".dropdownOuter").css({transform: "scale(1)", top: $(e.target).parent().position().top+$(e.target).parent().height()+2, left: $(e.target).parent().position().left+$(e.target).parent().width()-37});
-            }
-            else {
-                $(".dropdownOuter").css({transform: "scale(0)"});
-            }
-            let thisElement = $(".message-text-to-react");
-            if(thisElement.is(e.target) || thisElement.has(e.target).length != 0) {
-                
-                $(".reactionPoupButton").css({transform: "scale(1)"});
-                console.log(e.clientX, $(e.target).width(), e.layerX, e.clientX + $(e.target).width()-e.layerX, $(e.target));
-                APP.positionNotificationBox(e.clientX + $(e.target).width()-e.offsetX, e.clientY + $(e.target).height()-e.layerY);
-            }
-            else {
-                $(".reactionPoupButton").css({transform: "scale(0)"});
-            }
-            if($(e.target).attr('id') == "dealMapConfirmCondainer") {   
-                $("#dealMapConfirmCondainer").remove();        
-                return;
-            }
-            // emojiPicker.classList.remove('show');
-            // attachmentOptions.classList.remove('show');
-            
-        });
-
-        APP.unusedCodes();
-
-    },
-    chatListClickFunction: async function(e) {
-        if($(e.target).hasClass('chatUser-avatar')) {           
-            return;
-        }
-        if($(".initialChatDiv").length) {
-            $(".initialChatDiv").remove();
-        }
-        APP.lastMessageDirection = "";
-
-        var chatItem = e.target.closest('.chat-item');
-        if(chatItem && APP.currentChatId != chatItem.dataset.id) {
-            APP.currentChatId = chatItem.dataset.id;
-            if(APP.contacts[APP.currentChatId].details[APP.extensionFieldContact]) {
-                APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Contact";
-                await APP.showRecordDetailsView("Contacts");
-            }
-            else if(APP.contacts[APP.currentChatId].details[APP.extensionFieldLead]) {
-                // APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Lead";
-                // await APP.showRecordDetailsView("Leads");
-                await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query:APP.currentChatId.replaceAll(" ", ""), delay:false}).then( async function(data){
-                    if(!data || !data.data) {
-                        APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Lead";
-                        await APP.showRecordDetailsView("Leads");
-                    }
-                    else {
-                        APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Contact";
-                        APP.contacts[APP.currentChatId].details[APP.extensionFieldContact] = data.data[0].id;
-                        await APP.showRecordDetailsView("Contacts");
-                    }
-                });
-            }
-            else {
-                await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query:APP.currentChatId.replaceAll(" ", ""), delay:false}).then( async function(data){
-                    if(!data || !data.data) {
-                        await ZOHO.CRM.API.searchRecord({Entity: "Leads", Type:"phone",Query:APP.currentChatId.replaceAll(" ", ""), delay:false}).then(async function(resp){
-                            if(!resp || !resp.data) {
-                                let response = await ZOHO.CRM.API.insertRecord({Entity: "Lead",APIData:{Last_Name: APP.currentChatId, phone: APP.currentChatId.replaceAll(" ", "")},Trigger:["workflow"]}).then(function(data){});
-                                APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Lead";
-                                APP.contacts[APP.currentChatId].details[APP.extensionFieldLead] = response.data[0].id;
-                                await APP.showRecordDetailsView("Leads");
-                            }
-                            else {
-                                APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Lead";
-                                APP.contacts[APP.currentChatId].details[APP.extensionFieldLead] = resp.data[0].id;
-                                await APP.showRecordDetailsView("Leads");
-                            }
-                        });
-                    }
-                    else {
-                        APP.contacts[APP.currentChatId].details[APP.extensionFieldModule] = "Contact";
-                        APP.contacts[APP.currentChatId].details[APP.extensionFieldContact] = data.data[0].id;
-                        await APP.showRecordDetailsView("Contacts");
-                    }
-                });
-            }
-
-            $(".active").removeClass("active");
-            chatItem.setAttribute("class", "chat-item active");
-
-            if(chatItem.querySelector(".unread-count")) {
-                chatItem.querySelector(".unread-count").remove();
-            }
-
-            APP.contacts[APP.currentChatId].unread = 0;
-
-            if(Object.keys(APP.contacts[APP.currentChatId].messages).length) {
-                APP.currentChatUnreadNotification();
-                APP.renderMessages(APP.currentChatId);
-                return;
-            }
-            else {
-                let searchRecord = await ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory,Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${APP.currentChatId})`});
-                if(searchRecord.data) {
-                    APP.contacts[APP.currentChatId].messages = APP.contacts[APP.currentChatId].messages.concat(searchRecord.data);
-                    APP.currentChatUnreadNotification();
-                    APP.contacts[APP.currentChatId].messages.sort(function(a, b) {
-                        var keyA = new Date(a.Created_Time), keyB = new Date(b.Created_Time);
-                        // Compare the 2 dates
-                        if (keyA < keyB) return -1;
-                        if (keyA > keyB) return 1;
-                        return 0;
-                    });
-                }
-                APP.renderMessages(APP.currentChatId);
-            }
-        }
-        $("#message-input").focus();
     },
     showRecordDetailsView: async function(module) {
         if(!module || module == "nulls"){
@@ -724,11 +976,11 @@ var APP = {
         let contactFieldList = ["First_Name", "Last_Name", "Account_Name", "Email", "Phone", "Mobile", "Secondary_Email", "Description", "Lead_Source", "Assistant", "Asst_Phone", "Home_Phone", "Other_Phone", "Created_Time", "id", "Full_Name"];
         let leadFieldList = ["First_Name", "Last_Name", "Company", "Email", "Phone", "Mobile", "Description", "Website", "Lead_Status", "Lead_Source", "Created_Time", "id", "Full_Name"];
         let fieldArr = module == "Leads" ? leadFieldList : contactFieldList;
-        await ZOHO.CRM.API.searchRecord({Entity: module,Type:"phone",Query:APP.currentChatId.replaceAll(" ", ""),delay:false})
+        await ZOHO.CRM.API.searchRecord({Entity: module+"s",Type:"phone",Query:APP.currentContactId.replaceAll(" ", ""),delay:false})
         .then(function(data){
             if(!data || !data.data) return;
             record = data.data[0];
-            APP.contacts[APP.currentChatId].details.Name = record.Full_Name;
+            APP.contacts[APP.currentContactId].details.Name = record.Full_Name;
             if(module == "Leads") {
                 APP.leadRecord = record;
             }
@@ -1009,16 +1261,12 @@ var APP = {
             </div>
             </div>`;
     },
-    moduleFilter: function(value) {
-        
-        
-    },
     moveContactToTop: function(contactId) {
         var contactList = document.getElementById('chat-list');
         let contacts = Array.from(document.querySelectorAll('.chat-item'));
         if (contacts.length < 2) return;
         const contactToMove = contacts.find(c => c.getAttribute('data-id') === contactId.toString());
-        console.log(contactToMove);
+        // console.log(contactToMove);
         if (!contactToMove || contacts[0].getAttribute('data-id') === contactId.toString()) return;
         
         // Remove the contact from its current position
@@ -1046,12 +1294,9 @@ var APP = {
             }, 500);
         }
     },
-    renderMessages: function(chatId) {
-        var messagesContainer = document.getElementById('messages-container');
+    renderMessages: function(contactid) {
         var chatHeader = document.getElementById('chat-header');
-        messagesContainer.innerHTML = '';
-        
-        var chat = Object.values(APP.contacts).find(c => c.id == chatId);
+        var chat = Object.values(APP.contacts).find(c => c.id == contactid);
         
         if (!chat) return;
         
@@ -1059,7 +1304,7 @@ var APP = {
         var chatHeaderInfo = chatHeader.querySelector('.chat-header-info');
         chatHeaderInfo.innerHTML = `
         <div class="chat-header-info-head">
-            <img src="${chat.avatar ? chat.avatar: 'person.png'}" alt="${chatId}" class="profile-pic">
+            <img src="${chat.avatar ? chat.avatar: 'person.png'}" alt="${contactid}" class="profile-pic">
             <div class="chat-header-name"><span class="chat-header-nameText">${chat.details.Name}</span><span class="chat-header-nameId">+${chat.id}</span></div>
         </div>
         <div class="chat-header-info-body">
@@ -1088,135 +1333,114 @@ var APP = {
                 APP.leadToContactCreateConfirmation(APP.contactRecord);
             });
         }
-        
-        // Render messages
-        chat.messages.forEach(message => {
-            APP.addMessage(message);
-        });
-
-        
-        
-        // Mark messages as read
-        // if (chat.unread > 0) {
-        //     chat.unread = 0;
-        //     APP.renderChatList();
-        // }
     },
     addedStatus: `<svg viewBox="0 0 16 15" width="16" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 16 15"><title>msg-time</title><path fill="currentColor" d="M9.75,7.713H8.244V5.359c0-0.276-0.224-0.5-0.5-0.5H7.65c-0.276,0-0.5,0.224-0.5,0.5v2.947 c0,0.276,0.224,0.5,0.5,0.5h0.094c0.001,0,0.002-0.001,0.003-0.001S7.749,8.807,7.75,8.807h2c0.276,0,0.5-0.224,0.5-0.5V8.213 C10.25,7.937,10.026,7.713,9.75,7.713z M9.75,2.45h-3.5c-1.82,0-3.3,1.48-3.3,3.3v3.5c0,1.82,1.48,3.3,3.3,3.3h3.5 c1.82,0,3.3-1.48,3.3-3.3v-3.5C13.05,3.93,11.57,2.45,9.75,2.45z M11.75,9.25c0,1.105-0.895,2-2,2h-3.5c-1.104,0-2-0.895-2-2v-3.5 c0-1.104,0.896-2,2-2h3.5c1.105,0,2,0.896,2,2V9.25z"></path></svg>`,
     sentStatus: `<svg viewBox="0 0 12 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>msg-check</title><path d="M11.1549 0.652832C11.0745 0.585124 10.9729 0.55127 10.8502 0.55127C10.7021 0.55127 10.5751 0.610514 10.4693 0.729004L4.28038 8.36523L1.87461 6.09277C1.8323 6.04622 1.78151 6.01025 1.72227 5.98486C1.66303 5.95947 1.60166 5.94678 1.53819 5.94678C1.407 5.94678 1.29275 5.99544 1.19541 6.09277L0.884379 6.40381C0.79128 6.49268 0.744731 6.60482 0.744731 6.74023C0.744731 6.87565 0.79128 6.98991 0.884379 7.08301L3.88047 10.0791C4.02859 10.2145 4.19574 10.2822 4.38194 10.2822C4.48773 10.2822 4.58929 10.259 4.68663 10.2124C4.78396 10.1659 4.86436 10.1003 4.92784 10.0156L11.5738 1.59863C11.6458 1.5013 11.6817 1.40186 11.6817 1.30029C11.6817 1.14372 11.6183 1.01888 11.4913 0.925781L11.1549 0.652832Z" fill="currentcolor"></path></svg>`,
     deliveredStatus: `<svg viewBox="0 0 16 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>msg-dblcheck</title><path d="M11.0714 0.652832C10.991 0.585124 10.8894 0.55127 10.7667 0.55127C10.6186 0.55127 10.4916 0.610514 10.3858 0.729004L4.19688 8.36523L1.79112 6.09277C1.7488 6.04622 1.69802 6.01025 1.63877 5.98486C1.57953 5.95947 1.51817 5.94678 1.45469 5.94678C1.32351 5.94678 1.20925 5.99544 1.11192 6.09277L0.800883 6.40381C0.707784 6.49268 0.661235 6.60482 0.661235 6.74023C0.661235 6.87565 0.707784 6.98991 0.800883 7.08301L3.79698 10.0791C3.94509 10.2145 4.11224 10.2822 4.29844 10.2822C4.40424 10.2822 4.5058 10.259 4.60313 10.2124C4.70046 10.1659 4.78086 10.1003 4.84434 10.0156L11.4903 1.59863C11.5623 1.5013 11.5982 1.40186 11.5982 1.30029C11.5982 1.14372 11.5348 1.01888 11.4078 0.925781L11.0714 0.652832ZM8.6212 8.32715C8.43077 8.20866 8.2488 8.09017 8.0753 7.97168C7.99489 7.89128 7.8891 7.85107 7.75791 7.85107C7.6098 7.85107 7.4892 7.90397 7.3961 8.00977L7.10411 8.33984C7.01947 8.43717 6.97715 8.54508 6.97715 8.66357C6.97715 8.79476 7.0237 8.90902 7.1168 9.00635L8.1959 10.0791C8.33132 10.2145 8.49636 10.2822 8.69102 10.2822C8.79681 10.2822 8.89838 10.259 8.99571 10.2124C9.09304 10.1659 9.17556 10.1003 9.24327 10.0156L15.8639 1.62402C15.9358 1.53939 15.9718 1.43994 15.9718 1.32568C15.9718 1.1818 15.9125 1.05697 15.794 0.951172L15.4386 0.678223C15.3582 0.610514 15.2587 0.57666 15.1402 0.57666C14.9964 0.57666 14.8715 0.635905 14.7657 0.754395L8.6212 8.32715Z" fill="currentColor"></path></svg>`,
     readStatus: `<svg viewBox="0 0 16 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>msg-dblcheck</title><path fill="#53bdeb" d="M11.0714 0.652832C10.991 0.585124 10.8894 0.55127 10.7667 0.55127C10.6186 0.55127 10.4916 0.610514 10.3858 0.729004L4.19688 8.36523L1.79112 6.09277C1.7488 6.04622 1.69802 6.01025 1.63877 5.98486C1.57953 5.95947 1.51817 5.94678 1.45469 5.94678C1.32351 5.94678 1.20925 5.99544 1.11192 6.09277L0.800883 6.40381C0.707784 6.49268 0.661235 6.60482 0.661235 6.74023C0.661235 6.87565 0.707784 6.98991 0.800883 7.08301L3.79698 10.0791C3.94509 10.2145 4.11224 10.2822 4.29844 10.2822C4.40424 10.2822 4.5058 10.259 4.60313 10.2124C4.70046 10.1659 4.78086 10.1003 4.84434 10.0156L11.4903 1.59863C11.5623 1.5013 11.5982 1.40186 11.5982 1.30029C11.5982 1.14372 11.5348 1.01888 11.4078 0.925781L11.0714 0.652832ZM8.6212 8.32715C8.43077 8.20866 8.2488 8.09017 8.0753 7.97168C7.99489 7.89128 7.8891 7.85107 7.75791 7.85107C7.6098 7.85107 7.4892 7.90397 7.3961 8.00977L7.10411 8.33984C7.01947 8.43717 6.97715 8.54508 6.97715 8.66357C6.97715 8.79476 7.0237 8.90902 7.1168 9.00635L8.1959 10.0791C8.33132 10.2145 8.49636 10.2822 8.69102 10.2822C8.79681 10.2822 8.89838 10.259 8.99571 10.2124C9.09304 10.1659 9.17556 10.1003 9.24327 10.0156L15.8639 1.62402C15.9358 1.53939 15.9718 1.43994 15.9718 1.32568C15.9718 1.1818 15.9125 1.05697 15.794 0.951172L15.4386 0.678223C15.3582 0.610514 15.2587 0.57666 15.1402 0.57666C14.9964 0.57666 14.8715 0.635905 14.7657 0.754395L8.6212 8.32715Z" fill="currentColor"></path></svg>`,
-    addMessage: function(message) {
+    addMessage: function(messageId, contactId, type) {
+
+        if(!messageId) return;
+        if(APP.currentContactId != contactId) return;
+        if(!APP.contacts[contactId].messages[messageId]) return;
+
+        let message = APP.contacts[contactId].messages[messageId];
 
         messagesContainer = document.getElementById('messages-container');
         messageElement = document.createElement('div');
         messageElement.className = "message-content";
-        messageElement.id = message[APP.extensionFieldMsgId] ? message[APP.extensionFieldMsgId].replaceAll(".", "_").replaceAll("=", "_") : "";
-                
-                if (message.replyTo) {
-                    const repliedMessage = currentContact.messages.find(m => m.id === message.replyTo);
-                    if (repliedMessage) {
-                        messageElement.innerHTML += `
-                            <div class="reply-indicator">
-                                <p>Replying to <span class="replying-to">${message.outgoing ? 'you' : currentContact.name}</span></p>
-                                <p>${repliedMessage.text || 'Media'}</p>
-                            </div>
-                        `;
-                    }
-                }
-                else if (message.attachment) {
-                    if (message.attachment.type === 'photo') {
-                        messageElement.innerHTML += `
-                            <div class="media-message">
-                                <img src="${message.attachment.url}" alt="Photo">
-                                <div class="download-btn">
-                                    <i class="fas fa-download"></i>
-                                </div>
-                            </div>
-                        `;
-                    } else if (message.attachment.type === 'document') {
-                        messageElement.innerHTML += `
-                            <div class="message-content">
-                                <div class="message-text">
-                                    <i class="fas fa-file-pdf"></i> ${message.attachment.name} (${message.attachment.size})
-                                </div>
-                                <div class="download-btn">
-                                    <i class="fas fa-download"></i>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-                else {
+        let msgId = message[APP.extensionFieldMsgId] ? encodeURIComponent(message[APP.extensionFieldMsgId].replaceAll(".", "_").replaceAll("=", "-")) : "";
+        messageElement.id = msgId;
+        if(message[APP.extensionFieldEncodeMessage]) {
+            let messageInColor = "White";
+            let messageOutColor = "#d9fdd3";
+            let incoming = message[APP.extensionFieldDirection] == 'incoming' ? true : false;
+            let messageDirection = incoming ? 'message-in' : 'message-out';
+            let messageboxHook = incoming ? `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-in</title><path opacity="0.13" fill="#0000000" d="M1.533,3.568L8,12.193V1H2.812 C1.042,1,0.474,2.156,1.533,3.568z"></path><path fill="currentColor" d="M1.533,2.568L8,11.193V0L2.812,0C1.042,0,0.474,1.156,1.533,2.568z"></path></svg></span>` : `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-out</title><path opacity="0.13" d="M5.188,1H0v11.193l6.467-8.625 C7.526,2.156,6.958,1,5.188,1z"></path><path fill="currentColor" d="M5.188,0H0v11.193l6.467-8.625C7.526,1.156,6.958,0,5.188,0z"></path></svg></span>`;
+            let messageToReact = `<div class="message-text-to-react-out"><div class="message-text-to-react-in"><div><div class="message-text-to-react"><span class="message-text-to-react-icon" msgId="${msgId}"><svg viewBox="0 0 15 15" width="15" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>react</title><path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.5C0 11.6305 3.36946 15 7.5 15C11.6527 15 15 11.6305 15 7.5C15 3.36946 11.6305 0 7.5 0C3.36946 0 0 3.36946 0 7.5ZM10.995 8.69333C11.1128 8.67863 11.2219 8.66503 11.3211 8.65309C11.61 8.63028 11.8076 8.91918 11.6784 9.13965C10.8573 10.6374 9.29116 11.793 7.50455 11.793C5.71794 11.793 4.15181 10.6602 3.33072 9.16246C3.18628 8.91918 3.37634 8.63028 3.66524 8.65309C3.79123 8.66749 3.93521 8.68511 4.09426 8.70457C4.94292 8.80842 6.22074 8.96479 7.48174 8.96479C8.81855 8.96479 10.1378 8.80025 10.995 8.69333ZM5.41405 7.37207C6.05761 7.37207 6.60923 6.72851 6.60923 6.02978C6.60923 5.30348 6.05761 4.6875 5.41405 4.6875C4.77048 4.6875 4.21886 5.33106 4.21886 6.02978C4.20967 6.75609 4.77048 7.37207 5.41405 7.37207ZM10.7807 6.05619C10.7807 6.74114 10.24 7.37201 9.60912 7.37201C8.97825 7.37201 8.4375 6.76818 8.4375 6.05619C8.4375 5.37124 8.97825 4.74037 9.60912 4.74037C10.24 4.74037 10.7807 5.34421 10.7807 6.05619Z" fill="currentColor"></path></svg></span></div></div></div></div>`;
+            let messageTime = APP.getCurrentTime(message.Created_Time);
+            let messageText = decodeURIComponent(decodeURIComponent(message[APP.extensionFieldEncodeMessage]));
+            let messageChatImg = `<div class="message-chat-img-div"><img alt="" draggable="false" class="message-chat-img" tabindex="-1" src="${incoming ? 'person.png' : APP.currentUser.image_link ? APP.currentUser.image_link : 'person.png'}"></div>`;
+            let messageOwnerName = !incoming && message.Owner && typeof(message.Owner) == "object" && message.Owner.name ? `<div class="message-owner"><span class="message-owner-name">${message.Owner.name}</span></div>` : !incoming && message.Owner && typeof(message.Owner) == "string" && APP.allUsers[message.Owner] && APP.allUsers[message.Owner].full_name ? `<div class="message-owner"><span class="message-owner-name">${APP.allUsers[message.Owner].full_name}</span></div>` : '';
+            let reactionFrom = message[APP.extensionFieldReactionFrom] ? decodeURIComponent(decodeURIComponent(message[APP.extensionFieldReactionFrom])) : '';
+            let reactionTo = message[APP.extensionFieldReactionTo] ?  decodeURIComponent(decodeURIComponent(message[APP.extensionFieldReactionTo])) : '';
 
-                    let messageInColor = "White";
-                    let messageOutColor = "#d9fdd3";
-                    let incoming = message[APP.extensionFieldDirection] == 'incoming' ? true : false;
-                    let messageDirection = incoming ? 'message-in' : 'message-out';
-                    let messageboxHook = incoming ? `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-in</title><path opacity="0.13" fill="#0000000" d="M1.533,3.568L8,12.193V1H2.812 C1.042,1,0.474,2.156,1.533,3.568z"></path><path fill="currentColor" d="M1.533,2.568L8,11.193V0L2.812,0C1.042,0,0.474,1.156,1.533,2.568z"></path></svg></span>` : `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-out</title><path opacity="0.13" d="M5.188,1H0v11.193l6.467-8.625 C7.526,2.156,6.958,1,5.188,1z"></path><path fill="currentColor" d="M5.188,0H0v11.193l6.467-8.625C7.526,1.156,6.958,0,5.188,0z"></path></svg></span>`;
-                    let messageToReact = incoming ? `<div class="message-text-to-react-out"><div class="message-text-to-react-in"><div><div class="message-text-to-react"><span class="message-text-to-react-icon"><svg viewBox="0 0 15 15" width="15" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>react</title><path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.5C0 11.6305 3.36946 15 7.5 15C11.6527 15 15 11.6305 15 7.5C15 3.36946 11.6305 0 7.5 0C3.36946 0 0 3.36946 0 7.5ZM10.995 8.69333C11.1128 8.67863 11.2219 8.66503 11.3211 8.65309C11.61 8.63028 11.8076 8.91918 11.6784 9.13965C10.8573 10.6374 9.29116 11.793 7.50455 11.793C5.71794 11.793 4.15181 10.6602 3.33072 9.16246C3.18628 8.91918 3.37634 8.63028 3.66524 8.65309C3.79123 8.66749 3.93521 8.68511 4.09426 8.70457C4.94292 8.80842 6.22074 8.96479 7.48174 8.96479C8.81855 8.96479 10.1378 8.80025 10.995 8.69333ZM5.41405 7.37207C6.05761 7.37207 6.60923 6.72851 6.60923 6.02978C6.60923 5.30348 6.05761 4.6875 5.41405 4.6875C4.77048 4.6875 4.21886 5.33106 4.21886 6.02978C4.20967 6.75609 4.77048 7.37207 5.41405 7.37207ZM10.7807 6.05619C10.7807 6.74114 10.24 7.37201 9.60912 7.37201C8.97825 7.37201 8.4375 6.76818 8.4375 6.05619C8.4375 5.37124 8.97825 4.74037 9.60912 4.74037C10.24 4.74037 10.7807 5.34421 10.7807 6.05619Z" fill="currentColor"></path></svg></span></div></div></div></div>` : `<div class="message-text-to-react-out"><div class="message-text-to-react-in"><div><div class="message-text-to-react"><span class="message-text-to-react-icon"><svg viewBox="0 0 15 15" width="15" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>react</title><path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.5C0 11.6305 3.36946 15 7.5 15C11.6527 15 15 11.6305 15 7.5C15 3.36946 11.6305 0 7.5 0C3.36946 0 0 3.36946 0 7.5ZM10.995 8.69333C11.1128 8.67863 11.2219 8.66503 11.3211 8.65309C11.61 8.63028 11.8076 8.91918 11.6784 9.13965C10.8573 10.6374 9.29116 11.793 7.50455 11.793C5.71794 11.793 4.15181 10.6602 3.33072 9.16246C3.18628 8.91918 3.37634 8.63028 3.66524 8.65309C3.79123 8.66749 3.93521 8.68511 4.09426 8.70457C4.94292 8.80842 6.22074 8.96479 7.48174 8.96479C8.81855 8.96479 10.1378 8.80025 10.995 8.69333ZM5.41405 7.37207C6.05761 7.37207 6.60923 6.72851 6.60923 6.02978C6.60923 5.30348 6.05761 4.6875 5.41405 4.6875C4.77048 4.6875 4.21886 5.33106 4.21886 6.02978C4.20967 6.75609 4.77048 7.37207 5.41405 7.37207ZM10.7807 6.05619C10.7807 6.74114 10.24 7.37201 9.60912 7.37201C8.97825 7.37201 8.4375 6.76818 8.4375 6.05619C8.4375 5.37124 8.97825 4.74037 9.60912 4.74037C10.24 4.74037 10.7807 5.34421 10.7807 6.05619Z" fill="currentColor"></path></svg></span></div></div></div></div>`;
-                    let messageTime = APP.getCurrentTime(message.Created_Time);
-                    let messageText = message[APP.extensionFieldMessage];
-                    let messageChatImg = `<div class="message-chat-img-div"><img alt="" draggable="false" class="message-chat-img" tabindex="-1" src="${incoming ? 'person.png' : APP.currentUser.image_link ? APP.currentUser.image_link : 'person.png'}"></div>`;
-                    let messageOwnerName = !incoming && message.Owner && typeof(message.Owner) == "object" && message.Owner.name ? `<div class="message-owner"><span class="message-owner-name">${message.Owner.name}</span></div>` : !incoming && message.Owner && typeof(message.Owner) == "string" && APP.allUsers[message.Owner] && APP.allUsers[message.Owner].full_name ? `<div class="message-owner"><span class="message-owner-name">${APP.allUsers[message.Owner].full_name}</span></div>` : '';
+            let rections = reactionFrom && reactionTo ? reactionFrom+reactionTo+" 2" : reactionFrom ? reactionFrom : reactionTo ? reactionTo : '';
 
-                    let startConvIcon = "";
-                    let startConvImag = "";
-                    let startConvOwner = "";
-                    if(APP.lastMessageDirection != message[APP.extensionFieldDirection]) {
-                        APP.lastMessageDirection = message[APP.extensionFieldDirection];
-                        messageElement.className = "message-content startConversation";
-                        startConvIcon = messageboxHook;
-                        startConvImag = messageChatImg;
-                        startConvOwner = messageOwnerName;
-                    }
+            let startConvIcon = "";
+            let startConvImag = "";
+            let startConvOwner = "";
+            if(APP.lastMessageDirection != message[APP.extensionFieldDirection]) {
+                APP.lastMessageDirection = message[APP.extensionFieldDirection];
+                messageElement.className = "message-content startConversation";
+                startConvIcon = messageboxHook;
+                startConvImag = messageChatImg;
+                startConvOwner = messageOwnerName;
+            }
 
-                    let messageStatus = incoming ? '' : `<div class="message-status-out"><span class="message-status">${message[APP.extensionFieldStatus] == "sent" ? APP.sentStatus : message[APP.extensionFieldStatus] == "delivered" ? APP.deliveredStatus : message[APP.extensionFieldStatus] == "read" ? APP.readStatus : APP.addedStatus}</span></div>`;
-                    messageElement.innerHTML = `<div class="message-content-inner" data-id="">
-                                                <div class="${ messageDirection }">
-                                                    <div class="message-content-main">
-                                                        ${startConvIcon}${startConvImag}${messageToReact}
-                                                        <div class="message-content-main-div">
-                                                            <div>
-                                                                <div class="message-content-main-div-in">
-                                                                    ${startConvOwner}
-                                                                    <div class="data-pre-plain-text-out">
-                                                                        <div class="data-pre-plain-text"><span dir="ltr" class="message-text"><span class="message">${messageText}</span></span><span class=""><span class="message-text-hide-formate"><span class="message-out-status-width"></span><span class="message-text-hide">${messageTime}</span></span></span></div>
-                                                                    </div>
-                                                                    <div class="message-time-out">
-                                                                        <div class="message-time-in"><span class="message-time" dir="auto">${messageTime}</span>${messageStatus}</div>
-                                                                    </div>
+            let messageStatus = incoming ? '' : `<div class="message-status-out"><span class="message-status">${message[APP.extensionFieldStatus] == "sent" ? APP.sentStatus : message[APP.extensionFieldStatus] == "delivered" ? APP.deliveredStatus : message[APP.extensionFieldStatus] == "read" ? APP.readStatus : APP.addedStatus}</span></div>`;
+            messageElement.innerHTML = `<div class="message-content-inner" data-id="">
+                                        <div class="${ messageDirection }">
+                                            <div class="message-content-main">
+                                                ${startConvIcon}${startConvImag}${messageToReact}
+                                                <div class="message-content-main-div">
+                                                    <div>
+                                                        <div class="message-content-main-div-in">
+                                                            ${startConvOwner}
+                                                            <div class="data-pre-plain-text-out">
+                                                                <div class="data-pre-plain-text"><span dir="ltr" class="message-text"><span class="message">${messageText}</span></span><span class=""><span class="message-text-hide-formate"><span class="message-out-status-width"></span><span class="message-text-hide">${messageTime}</span></span></span></div>
+                                                            </div>
+                                                            <div class="message-time-out">
+                                                                <div class="message-time-in"><span class="message-time" dir="auto">${messageTime}</span>${messageStatus}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <span class=""><div class="message-text-to-out"><div class="message-text-to-in"><span class="message-text-to"><svg viewBox="0 0 18 18" height="18" width="18" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 18 18"><title>down-context</title><path fill="currentColor" d="M3.3,4.6L9,10.3l5.7-5.7l1.6,1.6L9,13.4L1.7,6.2L3.3,4.6z"></path></svg></span></div></div></span>
+                                                </div>  
+                                                <div class="reactionShowInmsgBoxOuter" style="display: ${rections ? 'flex' : 'none'};">
+                                                    <button class="reactionShowInmsgButton">
+                                                        <div class="reactionShowInmsgButtonIn">
+                                                            <div class="reactionShowInmsgOut">
+                                                                <div class="reactionShowInmsgIn">
+                                                                    <span class="messageRectionEelement">
+                                                                        ${rections}
+                                                                    </span>
                                                                 </div>
                                                             </div>
-                                                            <span class=""><div class="message-text-to-out"><div class="message-text-to-in"><span class="message-text-to"><svg viewBox="0 0 18 18" height="18" width="18" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 18 18"><title>down-context</title><path fill="currentColor" d="M3.3,4.6L9,10.3l5.7-5.7l1.6,1.6L9,13.4L1.7,6.2L3.3,4.6z"></path></svg></span></div></div></span>
-                                                        </div>                
-                                                    </div>
-                                                </div>
-                                            </div>`;
-                }
+                                                        </div>
+                                                    </button>
+                                                </div>            
+                                            </div>
+                                        </div>
+                                    </div>`;
+        }
 
-                        
-                // Add right-click menu for messages
-                // messageElement.addEventListener('contextmenu', (e) => {
-                //     e.preventDefault();
-                //     showMessageContextMenu(e, message);
-                // });
-                
-                
-                  messageElement.addEventListener('mouseover', function() {
-                    this.querySelector(".message-text-to-react-out").style.display = 'flex';                    
-                    this.querySelector(".message-text-to-out").style.display = 'flex';
-                });
-                
-                // Add mouseout event listener to return to original state
-                messageElement.addEventListener('mouseout', function() {                    
-                    this.querySelector(".message-text-to-react-out").style.display = 'none';
-                    this.querySelector(".message-text-to-out").style.display = 'none';
-                });
-                messagesContainer.appendChild(messageElement);
+        messageElement.addEventListener('mouseover', function() {
+            this.querySelector(".message-text-to-react-out").style.display = 'flex';                    
+            this.querySelector(".message-text-to-out").style.display = 'flex';
+        });
+        messageElement.addEventListener('mouseout', function() {                    
+            this.querySelector(".message-text-to-react-out").style.display = 'none';
+            this.querySelector(".message-text-to-out").style.display = 'none';
+        });
+        
+        if($("#"+msgId).length) {
+            $("#"+msgId).html(messageElement.innerHTML);
+        }
+        else if(type == "loaded") {
+            messagesContainer.prepend(messageElement);
+        }
+        else {
+            messagesContainer.appendChild(messageElement);
+        }
 
-                // Scroll to bottom
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Add right-click menu for messages
+        // messageElement.addEventListener('contextmenu', (e) => {
+        //     e.preventDefault();
+        //     showMessageContextMenu(e, message);
+        // });
     },
     showNotification: function(message) {
         notification.textContent = message;
@@ -1235,7 +1459,42 @@ var APP = {
         hours = hours ? hours : 12; // the hour '0' should be '12'
         return `${hours}:${minutes} ${ampm}`;
     },
+    formatWhatsAppTime: function(timestamp) {
+        let now = new Date();
+        let date = new Date(timestamp);
+
+        let diffInSeconds = Math.floor((now - date) / 1000);
+        let diffInMinutes = Math.floor(diffInSeconds / 60);
+        let diffInHours = Math.floor(diffInMinutes / 60);
+
+        if (date.toDateString() === now.toDateString()) {
+            let hours = String(date.getHours()).padStart(2, '');
+            let minutes = String(date.getMinutes()).padStart(2, '0');
+            let ampm = hours >= 12 ? 'pm' : 'am';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // Convert 0 to 12
+            return `${hours}:${minutes} ${ampm}`;
+        }
+        
+        let yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (date.toDateString() === yesterday.toDateString()) {
+            return 'yesterday';
+        }
+        
+        let diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 7) {
+            return date.toLocaleDateString([], { weekday: 'long' });
+        }
+        
+        let day = String(date.getDate()).padStart(2, '');
+        let month = String(date.getMonth() + 1).padStart(2, '');
+        let year = date.getFullYear();
+        
+        return `${day}-${month}-${year}`;
+    },
     toIsoString: function(date) {
+        if(!date) return;
         let tzo = -date.getTimezoneOffset(),
             dif = tzo >= 0 ? '+' : '-',
             pad = function(num) {
@@ -1250,63 +1509,84 @@ var APP = {
             ':' + pad(date.getSeconds()) +
             dif + pad(Math.floor(Math.abs(tzo) / 60)) +
             ':' + pad(Math.abs(tzo) % 60);
-    },
+    },   
     sendMessage: async function() {
-
-        messageInput = document.getElementById('message-input');
-        var messageText = messageInput.textContent.trim();
-        
-        if (!messageText) return;
-        if (!APP.contacts[APP.currentChatId]) return;
-
-        let historyRecordData = {};
-        historyRecordData[APP.extensionFieldName] = "WhatsApp Message to "+APP.contacts[APP.currentChatId].details.Name;
-        historyRecordData[APP.extensionFieldOwner] = APP.currentUser.id;
-        historyRecordData[APP.extensionFieldWhatsAppNumber] = APP.currentChatId;
-        historyRecordData[APP.extensionFieldFrom] = "";
-        historyRecordData[APP.extensionFieldTo] = APP.currentUser.id;
-        historyRecordData[APP.extensionFieldMessage] = messageText;
-        historyRecordData[APP.extensionFieldTimestamp] = APP.toIsoString(new Date());
-        historyRecordData[APP.extensionFieldDirection] = "outgoing";
-        historyRecordData[APP.extensionFieldStatus] = "added";
-
-        if(APP.selectedModule && APP.selectedRecord) {
-            historyRecordData[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-            historyRecordData[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+        if(APP.isBulk){
+            APP.renderLoaderPopupForBulkSending();
+            return;
         }
+        let messageInput = document.getElementById('message-input');
+        let messageText = messageInput.textContent.trim();
+        
+        if(!messageText) return;
+        if(!APP.contacts[APP.currentContactId]) return;
 
-        APP.addMessage(historyRecordData);
+        let contactId = APP.currentContactId;
+        let message_id = new Date().getTime()+"";
+        let from = "";
+        let contactName = "WhatsApp Message to "+ contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldName] ? APP.contacts[contactId].details[APP.extensionFieldName] : contactId;
+        let owner = contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldOwner] && APP.contacts[contactId].details[APP.extensionFieldOwner].id ? APP.contacts[contactId].details[APP.extensionFieldOwner].id : '';
+        let to = contactId;
+        let time = Number(message_id);
+        let text = messageText;
+        let encodeText = encodeURIComponent(encodeURIComponent(messageText));
+        let reactionFrom = "";
+        let reactionTo = "";
 
-        sendButton = document.getElementById('send-button');
+        let message = {};
+        message[APP.extensionFieldId] = "";
+        message[APP.extensionFieldName] = contactName;
+        message[APP.extensionFieldOwner] = owner;
+        message[APP.extensionFieldWhatsAppNumber] = contactId;
+        message[APP.extensionFieldFrom] = from;
+        message[APP.extensionFieldTo] = to;
+        message[APP.extensionFieldMessage] = String(text);
+        message[APP.extensionFieldEncodeMessage] = String(encodeText);
+        message[APP.extensionFieldTimestamp] = time;
+        message[APP.extensionFieldDirection] = "outgoing";
+        message[APP.extensionFieldStatus] = "send";
+        message[APP.extensionFieldMsgId] = message_id;
+        message[APP.extensionFieldReactionFrom] = reactionFrom;
+        message[APP.extensionFieldReactionTo] = reactionTo;
+        if(APP.selectedModule && APP.selectedRecord) {
+            message[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
+            message[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+        }
+        message["Modified_Time"] = APP.toIsoString(new Date());
+
+        APP.contacts[contactId].messages[message_id] = message;
+        APP.addMessage(message_id, contactId, "sendMessage");
+
+        let sendButton = document.getElementById('send-button');
         messageInput.textContent = '';
         sendButton.classList.remove('active');
 
-        let contactRecordData = {};
-        contactRecordData[APP.extensionFieldName] = APP.contacts[APP.currentChatId].details.Name;
-        // contactRecordData[APP.extensionFieldOwner] = APP.currentUser.id;
-        contactRecordData[APP.extensionFieldWhatsAppNumber] = APP.currentChatId;
-        contactRecordData[APP.extensionFieldLastMessage] = messageText;
-        contactRecordData[APP.extensionFieldActiveTime] = APP.toIsoString(new Date());
-        contactRecordData[APP.extensionFieldDirection] = "outgoing";
-        contactRecordData[APP.extensionFieldStatus] = "added";
-
+        let contact = {};
+        contact[APP.extensionFieldId] = "";
+        contact[APP.extensionFieldName] = contactName;
+        contact[APP.extensionFieldOwner] = owner;
+        contact[APP.extensionFieldWhatsAppNumber] = contactId;
+        contact[APP.extensionFieldLastMessage] = contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id] ? APP.contacts[contactId].messages[message_id] : message;
+        contact[APP.extensionFieldActiveTime] = time;
+        contact[APP.extensionFieldStatus] = "";
         if(APP.selectedModule && APP.selectedRecord) {
-            contactRecordData[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-            contactRecordData[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+            contact[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
+            contact[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
         }
 
-        $("#chatid-"+APP.currentChatId+" .chat-message").html(contactRecordData[APP.extensionFieldLastMessage]);
-        $("#chatid-"+APP.currentChatId+" .chat-time").html(APP.getCurrentTime(contactRecordData[APP.extensionFieldActiveTime]));
+        contact = Object.entries(contact).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
+        APP.contacts[contactId].details = Object.assign(APP.contacts[contactId].details, contact);
+        await APP.addContactList(contactId);
 
         let request = {
             url : `https://graph.facebook.com/v22.0/581984271672102/messages`,
             headers: { 
-                "Authorization": "Bearer "+"EAAmTNTZCXDTkBO3gpqAHGHNuZBicKy7ehR1zQh01ZAdcrFtGbjvfArlqnamegWQLi3qLJCgLOFQdN10w94MuZBDIJZA2aERKZCsuJBBJAHZA1ntLqox2iSxjjVAbneJZCmSIusrow26adrRRfqdVuXlcBmuBY6ATYwVsyuv7zQVxMuVIGuc0ZCgNxHnnZC7HiGM89Heo1ogGGQt0S8LvmsZAW8UFhPXLBAc3FnQiO3s",
+                "Authorization": "Bearer "+APP.at,
                 "Content-Type": "application/json"
             },
             body: {
                 "messaging_product": "whatsapp",
-                "to": APP.currentChatId,
+                "to": contactId,
                 "type": "text",                    
                 "recipient_type": "individual",
                 // "template": {
@@ -1324,31 +1604,25 @@ var APP = {
                 resp = JSON.parse(resp);
             }
             if(resp && resp.messages && resp.messages[0] && resp.messages[0].id) {
-                historyRecordData[APP.extensionFieldMsgId] = resp.messages[0].id;
-                contactRecordData[APP.extensionFieldLastMsgId] = resp.messages[0].id;
-                $(".message-content").last().attr("id", resp.messages[0].id.replaceAll(".", "_").replaceAll("=", "_"))
+                message[APP.extensionFieldMsgId] = resp.messages[0].id;
+                APP.contacts[contactId].messages[message_id][APP.extensionFieldMsgId] = resp.messages[0].id
+                APP.contacts[contactId].messages[resp.messages[0].id] = APP.contacts[contactId].messages[message_id];
+                delete APP.contacts[contactId].messages[message_id];
+                contact[APP.extensionFieldLastMessage] = contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[resp.messages[0].id] ? APP.contacts[contactId].messages[resp.messages[0].id] : message;
+                $("#"+encodeURIComponent(message_id.replaceAll(".", "_").replaceAll("=", "-"))).attr("id", encodeURIComponent(resp.messages[0].id.replaceAll(".", "_").replaceAll("=", "-")));                
+                $("#"+encodeURIComponent(resp.messages[0].id.replaceAll(".", "_").replaceAll("=", "-"))).find(".message-text-to-react-icon").attr("msgid", encodeURIComponent(resp.messages[0].id.replaceAll(".", "_").replaceAll("=", "-")));
+                message_id = resp.messages[0].id;
             }
             else {
-                historyRecordData[APP.extensionFieldStatus] = "faild";
-                contactRecordData[APP.extensionFieldStatus] = "faild";
+                message[APP.extensionFieldStatus] = "faild";
             }
-            APP.contacts[APP.currentChatId].messages.push(historyRecordData);
-            // APP.contacts[APP.currentChatId].details = contactRecordData;
-            APP.contacts[APP.currentChatId].details = Object.assign(APP.contacts[APP.currentChatId].details, contactRecordData);
-            if(APP.module && APP.recordId) {
-                historyRecordData[APP.extensionAPI+APP.module.substring(0, APP.module.length-1)] = APP.recordId;
-                contactRecordData[APP.extensionAPI+APP.module.substring(0, APP.module.length-1)] = APP.recordId;
-            }
-            await ZOHO.CRM.API.insertRecord({Entity: APP.extensionHistory,APIData:historyRecordData,Trigger:["workflow"]}).then(function(data){});
-            let searchRecord = await ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts, Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${APP.currentChatId})`});
-            if(searchRecord.data) {
-                contactRecordData.id = searchRecord.data[0].id;
-                contactRecordData.Name = searchRecord.data[0].Name;
-                await ZOHO.CRM.API.updateRecord({Entity: APP.extensionContacts,APIData:contactRecordData,Trigger:["workflow"]}).then(function(data){});
-            }
-            else {
-                await ZOHO.CRM.API.insertRecord({Entity: APP.extensionContacts,APIData:contactRecordData,Trigger:["workflow"]}).then(function(data){});
-            }
+            // APP.contacts[APP.currentContactId].messages.push(historyRecordData);
+            contact = Object.entries(contact).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
+            APP.contacts[contactId].details = Object.assign(APP.contacts[contactId].details, contact);
+
+            await APP.histroyAction(contactId, message_id);
+            await APP.contactAction(contactId);
+
         });
         
     },
@@ -1361,13 +1635,13 @@ var APP = {
     firebaseSetup: function() {
         // Your Firebase config
         var firebaseConfig = {
-            apiKey: "AIzaSyBo03-xCIbQSvb9HdYjhC8FRLwMUuYzI4U",
-            authDomain: "enprojecttest.firebaseapp.com",
-            databaseURL: "https://enprojecttest-default-rtdb.firebaseio.com",
-            projectId: "enprojecttest",
-            storageBucket: "enprojecttest.firebasestorage.app",
-            messagingSenderId: "771895717983",
-            appId: "1:771895717983:web:25295df2887ad04c79abea"
+            apiKey: "AIzaSyD2EuYfB9ZM7j4Uerei3vtGGFJ65kkSJ9Y",
+            authDomain: "pols-whatsapp.firebaseapp.com",
+            databaseURL: "https://pols-whatsapp-default-rtdb.firebaseio.com",
+            projectId: "pols-whatsapp",
+            storageBucket: "pols-whatsapp.firebasestorage.app",
+            messagingSenderId: "300523207681",
+            appId: "1:300523207681:web:d2174d4676e4a0dd465400"
             };
     
             // Initialize Firebase
@@ -1377,7 +1651,7 @@ var APP = {
             APP.database = firebase.database();
     },
     realtimeListener: function() {
-        APP.database.ref('incomingMessages').on('child_added', (snapshot) => {
+        APP.database.ref('incomingMessages').on('child_added', async (snapshot) => {
             let data = snapshot.val();
             let key  = snapshot.key;
             if(APP.realtimeDuplicateChaeckArr[key]) return;
@@ -1385,85 +1659,103 @@ var APP = {
             if(!data || !data.messages || !data.messages[0]) {
                 return;
             }
-            let historyRecordData = {};
-            historyRecordData[APP.extensionFieldName] = "incoming from "+ data.messages[0].from && APP.contacts[data.messages[0].from] && APP.contacts[data.messages[0].from].details && APP.contacts[data.messages[0].from].details[APP.extensionFieldName] ? APP.contacts[data.messages[0].from].details[APP.extensionFieldName] : data.messages[0].from;
-            historyRecordData[APP.extensionFieldOwner] = data.messages[0].from && APP.contacts[data.messages[0].from] && APP.contacts[data.messages[0].from].details && APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner] && APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner].id ? APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner].id : APP.currentUser.id;
-            historyRecordData[APP.extensionFieldWhatsAppNumber] = data.messages[0].from;
-            historyRecordData[APP.extensionFieldFrom] = data.messages[0].from;
-            historyRecordData[APP.extensionFieldTo] = "";
-            historyRecordData[APP.extensionFieldMessage] = data.messages[0].text.body;
-            historyRecordData[APP.extensionFieldTimestamp] = APP.toIsoString(new Date(data.messages[0].timestamp));
-            historyRecordData[APP.extensionFieldDirection] = "incoming";
-            historyRecordData[APP.extensionFieldStatus] = "received";
 
+            let message_id = data.messages[0].reaction && data.messages[0].reaction.message_id ? data.messages[0].reaction.message_id : data.messages[0].id;
+            let from = data.messages[0].from;
+            let contactId = from;
+            let contactName = "incoming from "+ contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldName] ? APP.contacts[contactId].details[APP.extensionFieldName] : contactId;
+            let owner = contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldOwner] && APP.contacts[contactId].details[APP.extensionFieldOwner].id ? APP.contacts[contactId].details[APP.extensionFieldOwner].id : '';
+            let to = data.metadata.display_phone_number;
+            let time = Number(data.messages[0].timestamp);
+            let text = data.messages[0].text && data.messages[0].text.body ? data.messages[0].text.body : '';            
+            let encodeText = encodeURIComponent(encodeURIComponent(text));
+            let reactionFrom = data.messages[0].reaction && data.messages[0].reaction.emoji ? data.messages[0].reaction.emoji : "";
+            let reactionTo = "";
+
+            let message = {};
+            message[APP.extensionFieldId] = "";
+            message[APP.extensionFieldName] = contactName;
+            message[APP.extensionFieldOwner] = owner;
+            message[APP.extensionFieldWhatsAppNumber] = contactId;
+            message[APP.extensionFieldTimestamp] = time;
+            if(!data.messages[0].reaction) {
+                message[APP.extensionFieldFrom] = from;
+                message[APP.extensionFieldTo] = to;
+                message[APP.extensionFieldMessage] = text;
+                message[APP.extensionFieldEncodeMessage] = encodeText;
+                message[APP.extensionFieldDirection] = "incoming";
+                message[APP.extensionFieldStatus] = "received";
+            }
+            else {
+                message[APP.extensionFieldReactionFrom] = reactionFrom;
+                message[APP.extensionFieldReactionTo] = reactionTo;
+            }
+            message[APP.extensionFieldMsgId] = message_id;
             if(APP.selectedModule && APP.selectedRecord) {
-                historyRecordData[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-                historyRecordData[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+                message[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
+                message[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+            }
+            message["Modified_Time"] = APP.toIsoString(new Date());
+
+            if(contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id]) {
+                if(!reactionFrom) {
+                    APP.contacts[contactId].messages[message_id][APP.extensionFieldReactionFrom] = "";
+                }
+                message = Object.entries(message).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
+                APP.contacts[contactId].messages[message_id] = Object.assign(APP.contacts[contactId].messages[message_id], message);
+            }
+            else if(contactId && APP.contacts[contactId] && APP.contacts[contactId].messages) {
+                APP.contacts[contactId].messages[message_id] = message;
             }
 
-            historyRecordData["Created_Time"] = APP.toIsoString(new Date());
-            if(APP.contacts[data.messages[0].from]) {
-                APP.contacts[data.messages[0].from]["notifications"][key] = historyRecordData;
+            let contact = {};
+            contact[APP.extensionFieldId] = "";
+            contact[APP.extensionFieldName] = contactName;
+            contact[APP.extensionFieldOwner] = owner;
+            contact[APP.extensionFieldWhatsAppNumber] = contactId;
+            contact[APP.extensionFieldLastMessage] = contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id] ? APP.contacts[contactId].messages[message_id] : message;
+            contact[APP.extensionFieldActiveTime] = reactionFrom ? '' : time;
+            contact[APP.extensionFieldStatus] = "";
+            if(APP.selectedModule && APP.selectedRecord) {
+                contact[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
+                contact[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+            }
+            
+            if(APP.contacts[contactId]) {
+                contact = Object.entries(contact).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
+                APP.contacts[contactId].details = Object.assign(APP.contacts[contactId].details, contact);
+                APP.contacts[contactId]["notifications"][key] = message;
             }
             else {
                 let newContactNotification = {};
-                newContactNotification[key] = historyRecordData;
-                APP.contacts[data.messages[0].from] = {
-                    id: data.messages[0].from,
+                newContactNotification[key] = message;
+                APP.contacts[contactId] = {
+                    id: contactId,
                     unread: 0,
-                    details: {},
+                    details: contact,
                     notifications: newContactNotification,
-                    messages: []
+                    messages: {},                        
+                    pageCompleted: false,
+                    currentPage: 1
                 };
+                APP.contacts[contactId].messages[message_id] = message;
             }
-            if(APP.currentChatId == data.messages[0].from) {                
-                APP.contacts[data.messages[0].from].messages.push(historyRecordData);
-                delete APP.contacts[data.messages[0].from].notifications[key];
-                APP.addMessage(historyRecordData);
+            
+            if(APP.currentContactId == contactId) {
+                APP.addMessage(message_id, contactId, "incoming");            
+                delete APP.contacts[contactId].notifications[key];
                 setTimeout(() => {
                     APP.database.ref('incomingMessages/'+key).remove().then(() => {
-                        console.log("Data deleted successfully");
+                        // console.log("Data deleted successfully");
                     }).catch((error) => {
                         console.error("Error deleting data: ", error);
                     });
                 }, 2000);
             }
-            let contactRecordData = {};
-            contactRecordData[APP.extensionFieldName] = data.messages[0].from && APP.contacts[data.messages[0].from] && APP.contacts[data.messages[0].from].details && APP.contacts[data.messages[0].from].details[APP.extensionFieldName] ? APP.contacts[data.messages[0].from].details[APP.extensionFieldName] : data.messages[0].from;
-            contactRecordData[APP.extensionFieldOwner] = data.messages[0].from && APP.contacts[data.messages[0].from] && APP.contacts[data.messages[0].from].details && APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner] && APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner].id ? APP.contacts[data.messages[0].from].details[APP.extensionFieldOwner].id : "";
-            contactRecordData[APP.extensionFieldWhatsAppNumber] = data.messages[0].from;
-            contactRecordData[APP.extensionFieldLastMessage] = data.messages[0].text.body;
-            contactRecordData[APP.extensionFieldActiveTime] = APP.toIsoString(new Date(data.messages[0].timestamp));
-            contactRecordData[APP.extensionFieldDirection] = "incoming";
-            contactRecordData[APP.extensionFieldStatus] = "received";
-
-            if(APP.selectedModule && APP.selectedRecord) {
-                contactRecordData[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-                contactRecordData[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+            else if(data.messages[0].type == "text" && APP.currentContactId != contactId) {
+                APP.contacts[contactId].unread += 1;
             }
-
-            if(APP.currentChatId != data.messages[0].from) {
-                APP.contacts[data.messages[0].from].unread += 1;
-            }
-
-            // APP.contacts[data.messages[0].from].details = contactRecordData;
-            APP.contacts[data.messages[0].from].details = Object.assign(APP.contacts[data.messages[0].from].details, contactRecordData);
-            
-            if($("#chatid-"+data.messages[0].from).length) {
-                if(!$("#chatid-"+data.messages[0].from+" .unread-count").length && APP.currentChatId != data.messages[0].from) {
-                    $("#chatid-"+data.messages[0].from+" .chat-preview").append(`<div class="unread-count">${APP.contacts[data.messages[0].from].unread}</div>`);
-                }
-                else if(APP.currentChatId != data.messages[0].from) {
-                    $("#chatid-"+data.messages[0].from+" .unread-count").html(APP.contacts[data.messages[0].from].unread);
-                }
-                $("#chatid-"+data.messages[0].from+" .chat-message").html(APP.contacts[data.messages[0].from].details[APP.extensionFieldLastMessage]);
-                $("#chatid-"+data.messages[0].from+" .chat-time").html(APP.getCurrentTime(APP.contacts[data.messages[0].from].details.Modified_Time));
-                APP.moveContactToTop(data.messages[0].from);
-            }
-            else {
-                let contactElement = APP.createContactElement(APP.contacts[data.messages[0].from]);
-                APP.contactList.appendChild(contactElement);
-            }
+            await APP.addContactList(contactId);
             
         }, (error) => {
             console.error("Listener error:", error);
@@ -1480,43 +1772,37 @@ var APP = {
                 return;
             }
 
-            if(data.statuses[0].recipient_id && APP.contacts[data.statuses[0].recipient_id]) {
-                let chatMessage = {};
-                APP.contacts[data.statuses[0].recipient_id].messages.find((o, i) => {
-                    if(o[APP.extensionFieldMsgId] === data.statuses[0].id) {
-                        APP.contacts[data.statuses[0].recipient_id].messages[i][APP.extensionFieldStatus] = data.statuses[0].status;
-                        chatMessage = APP.contacts[data.statuses[0].recipient_id].messages[i];
-                        return true;
-                    }
-                });
+            let message_id = data.statuses[0].id;
+            let from = "";
+            let to = data.statuses[0].recipient_id;
+            let contactId = to;
+            let contactName = contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldName] ? APP.contacts[contactId].details[APP.extensionFieldName] : contactId;
+            let owner = contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldOwner] && APP.contacts[contactId].details[APP.extensionFieldOwner].id ? APP.contacts[contactId].details[APP.extensionFieldOwner].id : '';
+            let time = data.statuses[0].timestamp;
+            let status = data.statuses[0].status;            
 
-                if(chatMessage && chatMessage[APP.extensionFieldMessage]) {
-                    let chat = Object.values(APP.contacts).find(c => c.id == data.statuses[0].recipient_id);
-                    let contactRecordData = {};
-                    contactRecordData[APP.extensionFieldName] = chat && chat.details && chat.details[APP.extensionFieldName] ? chat.details[APP.extensionFieldName] : data.statuses[0].recipient_id;
-                    contactRecordData[APP.extensionFieldOwner] = chat && chat.details && chat.details[APP.extensionFieldOwner] && chat.details[APP.extensionFieldOwner].id ? chat.details[APP.extensionFieldOwner].id : "";
-                    contactRecordData[APP.extensionFieldWhatsAppNumber] = data.statuses[0].recipient_id;
-                    contactRecordData[APP.extensionFieldLastMessage] = chatMessage[APP.extensionFieldMessage];
-                    contactRecordData[APP.extensionFieldActiveTime] = APP.toIsoString(new Date(data.statuses[0].timestamp));
-                    contactRecordData[APP.extensionFieldDirection] = "outgoing";
-                    contactRecordData[APP.extensionFieldStatus] = data.statuses[0].status;
-
-                    // APP.contacts[data.statuses[0].recipient_id].details = contactRecordData;
-                    APP.contacts[data.statuses[0].recipient_id].details = Object.assign(APP.contacts[data.statuses[0].recipient_id].details, contactRecordData);
-                    
-                    if($("#chatid-"+data.statuses[0].recipient_id).length) {
-                        $("#chatid-"+data.statuses[0].recipient_id+" .chat-message").html(`${data.statuses[0].status == "sent" ? APP.sentStatus : data.statuses[0].status == "delivered" ? APP.deliveredStatus : data.statuses[0].status == "read" ? APP.readStatus : APP.addedStatus}`+APP.contacts[data.statuses[0].recipient_id].details[APP.extensionFieldLastMessage]);
-                        $("#chatid-"+data.statuses[0].recipient_id+" .chat-time").html(APP.getCurrentTime(APP.contacts[data.statuses[0].recipient_id].details.Modified_Time));
-                        // APP.moveContactToTop(data.messages[0].from);
+            if(contactId && APP.contacts[contactId]) {
+                APP.contacts[contactId].messages[message_id][APP.extensionFieldStatus] = status;
+                let message = APP.contacts[contactId].messages[message_id];
+                if(message && message[APP.extensionFieldMessage]) {
+                    let contact = APP.contacts[contactId];
+                    contact[APP.extensionFieldId] = "";
+                    contact[APP.extensionFieldName] = contactName;
+                    contact[APP.extensionFieldOwner] = owner;
+                    contact[APP.extensionFieldWhatsAppNumber] = contactId;
+                    contact[APP.extensionFieldLastMessage] = contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id] ? APP.contacts[contactId].messages[message_id] : message;
+                    contact[APP.extensionFieldActiveTime] = time;
+                    contact[APP.extensionFieldStatus] = "";
+                    if(APP.selectedModule && APP.selectedRecord) {
+                        contact[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
+                        contact[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
                     }
-                    else {
-                        // APP.addChat(APP.contacts[data.messages[0].from]);
-                    }
+                    contact = Object.entries(contact).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
+                    APP.contacts[contactId].details = Object.assign(APP.contacts[contactId].details, contact);
+                    APP.addContactList(contactId);
                 }
             }
-            if($("#"+data.statuses[0].id.replaceAll(".", "_").replaceAll("=", "_")).length) {
-                $("#"+data.statuses[0].id.replaceAll(".", "_").replaceAll("=", "_")+" .message-status").html(`${data.statuses[0].status == "sent" ? APP.sentStatus : data.statuses[0].status == "delivered" ? APP.deliveredStatus : data.statuses[0].status == "read" ? APP.readStatus : APP.addedStatus}`);
-            }
+            APP.addMessage(message_id, contactId, "outgoing"); 
             setTimeout(() => {
                 APP.database.ref('outgoingMessages/'+key).remove().then(() => {
                     console.log("Data deleted successfully");
@@ -1530,6 +1816,71 @@ var APP = {
             document.getElementById('data-container').textContent = "Error: " + error.message;
         });
 
+    },
+    emojiOpenFunction: function() {
+        $(".emojiListBox").toggle();
+    },
+    emojiAddFunction: function(thisSelected) {
+        $(".message-input").append($(thisSelected).text());
+    },
+    settingsPopup: function() {
+        APP.passwordOpenIcon = `<svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-on</title><path fill-rule="evenodd" clip-rule="evenodd" d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM9 12C9 10.34 10.34 9 12 9C13.66 9 15 10.34 15 12C15 13.66 13.66 15 12 15C10.34 15 9 13.66 9 12Z" fill="currentColor"></path></svg>`;
+        APP.passwordCloseIcon = `<svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-off</title><path d="M12 7C14.76 7 17 9.24 17 12C17 12.65 16.87 13.26 16.64 13.83L19.56 16.75C21.07 15.49 22.26 13.86 22.99 12C21.26 7.61 16.99 4.5 11.99 4.5C10.59 4.5 9.25 4.75 8.01 5.2L10.17 7.36C10.74 7.13 11.35 7 12 7ZM2 4.27L4.28 6.55L4.74 7.01C3.08 8.3 1.78 10.02 1 12C2.73 16.39 7 19.5 12 19.5C13.55 19.5 15.03 19.2 16.38 18.66L16.8 19.08L19.73 22L21 20.73L3.27 3L2 4.27ZM7.53 9.8L9.08 11.35C9.03 11.56 9 11.78 9 12C9 13.66 10.34 15 12 15C12.22 15 12.44 14.97 12.65 14.92L14.2 16.47C13.53 16.8 12.79 17 12 17C9.24 17 7 14.76 7 12C7 11.21 7.2 10.47 7.53 9.8ZM11.84 9.02L14.99 12.17L15.01 12.01C15.01 10.35 13.67 9.01 12.01 9.01L11.84 9.02Z" fill="currentColor"></path></svg>`;
+        APP.settingsPopupElement = `<div class="popupInit accessKeyPopup" style="opacity: 0; overflow: auto; width: 100%; height: 100%; top: 0px; visibility: visible; position: fixed; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.32); z-index: 0; left: 0px; transition: 0.1s;"><div class="popupInitIn" role="dialog" style="width: 100%;min-height: 100%;height: 600px;justify-content: center;flex-direction: column;box-sizing: border-box;display: flex;align-items: center;" onclick="$(event.target).attr('class') == $('.accessKeyPopup .popupInitIn').attr('class') ? APP.settingsPopupClose() : '';"><div class="popupInitBody" data-animate-modal-popup="true" style="opacity: 1; transform: scaleX(0) scaleY(0); padding: 22px 24px 20px; overflow: hidden; width: 400px; box-shadow: rgba(0, 0, 0, 0.26) 0px 2px 18px 0px, rgba(0, 0, 0, 0.1) 0px 8px 10px 0px; flex-direction: column; flex: 0 0 auto; box-sizing: border-box; display: flex; border-radius: 18px; background-color: rgb(255, 255, 255); transition: 0.3s;"><div class="popupInitBodyOut" data-animate-modal-body="true" style=" flex-shrink: 1; white-space: normal; position: relative; word-wrap: break-word; flex-basis: 100%; flex-grow: 1; "><div class="popupInitBodyIn" style=" font-size: .8875rem; line-height: 1.43; "><div class="popupInitBodyMain" style=" display: flex; flex-direction: column; flex-wrap: nowrap; align-self: auto; justify-self: auto; min-width: 0; min-height: 0; "> <div class="popupInitBodyMainIn" style=" "> <div class="popupInitBodyTitle" style="min-width: 0;min-height: 0;flex-shrink: 1;flex-wrap: nowrap;flex-basis: auto;align-self: center;order: 0;flex-grow: 0;justify-self: auto;width: 100%;text-align: left;padding-left: 15px;padding-bottom: 20px;"><div class="popupInitBodyTitleText" style=" padding-top: 20px; color: #0a0a0a; font-size: 1.1875rem; line-height: 1.4737; font-weight: 600; ">Enter your access token</div></div> <div style="padding-bottom: 12px;min-width: 0;min-height: 0;padding-top: 20px;padding-left: 8px;flex-shrink: 1;flex-wrap: nowrap;align-self: stretch;flex-basis: auto;padding-right: 8px;order: 0;flex-grow: 0;justify-self: auto;" padding="40,8,12,8" class="popupInitBodyInputOut"><div class="popupInitBodyInputIn" style=" min-width: 150px; border-bottom-width: 1px; border-bottom-style: solid; padding-bottom: 1px; border-bottom-color: #959393; background-color: #fff; display: flex; position: relative; "><input class="popupInitBodyInput" placeholder="Access Token" type="password" fdprocessedid="43n9wk" style=" border-bottom-style: unset; border-top-width: unset; border-top-style: unset; border-bottom-width: unset; overflow-x: hidden; padding-top: 6px; border-top-color: unset; border-bottom-color: unset; overflow-y: hidden; padding-bottom: 6px; color: var(--primary); padding-right: 6px; border-left-width: unset; background-color: #fff; border-right-color: unset; border-left-style: unset; border-left-color: unset; font-size: 1rem; border-right-width: unset; flex-grow: 1; padding-left: 6px; border-right-style: unset; outline: none; -webkit-user-select: text; margin: 0; font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif; "><button class="popupInitBodyInputButton" tabindex="0" type="button" aria-label="Show" style=" margin: 0; font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif; background: none; border: 0; outline: none; padding: 0; font-size: 100%; cursor: pointer; color: inherit; " onclick="$('.accessKeyPopup .popupInitBodyInput').attr('type') == 'text' ? $('.accessKeyPopup .popupInitBodyInput').attr('type', 'password').parent().find('.popupInitBodyInputButtonSpan').html(APP.passwordCloseIcon) : $('.accessKeyPopup .popupInitBodyInput').attr('type', 'text').parent().find('.popupInitBodyInputButtonSpan').html(APP.passwordOpenIcon);"><span aria-hidden="true" data-icon="visibility-off" class="popupInitBodyInputButtonSpan" style=" color: #1daa61; "><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-off</title><path d="M12 7C14.76 7 17 9.24 17 12C17 12.65 16.87 13.26 16.64 13.83L19.56 16.75C21.07 15.49 22.26 13.86 22.99 12C21.26 7.61 16.99 4.5 11.99 4.5C10.59 4.5 9.25 4.75 8.01 5.2L10.17 7.36C10.74 7.13 11.35 7 12 7ZM2 4.27L4.28 6.55L4.74 7.01C3.08 8.3 1.78 10.02 1 12C2.73 16.39 7 19.5 12 19.5C13.55 19.5 15.03 19.2 16.38 18.66L16.8 19.08L19.73 22L21 20.73L3.27 3L2 4.27ZM7.53 9.8L9.08 11.35C9.03 11.56 9 11.78 9 12C9 13.66 10.34 15 12 15C12.22 15 12.44 14.97 12.65 14.92L14.2 16.47C13.53 16.8 12.79 17 12 17C9.24 17 7 14.76 7 12C7 11.21 7.2 10.47 7.53 9.8ZM11.84 9.02L14.99 12.17L15.01 12.01C15.01 10.35 13.67 9.01 12.01 9.01L11.84 9.02Z" fill="currentColor"></path></svg></span></button></div><div class="" style=" padding-top: 4px; display: flex; flex-direction: row; "><div>&nbsp;</div></div></div> </div> <div class="popupInitBodyMainOut popupInitBodyTitle" style="min-width: 0;min-height: 0;flex-shrink: 1;flex-wrap: nowrap;flex-basis: auto;align-self: center;order: 0;flex-grow: 0;justify-self: auto;width: 100%;text-align: left;padding-left: 15px;padding-bottom: 20px;display: none;"><div class="popupInitBodyTitleText" style=" padding-top: 20px; color: #0a0a0a; font-size: 1.1875rem; line-height: 1.4737; font-weight: 600; ">Saving...</div></div><div class="popupBottomDiv" paddingtop="20" style="min-width: 0px;min-height: 0px;padding-top: 20px;flex-flow: row;place-self: stretch auto;flex-basis: auto;display: flex;column-gap: 16px;order: 0;align-items: flex-start;flex-grow: 0;justify-content: flex-end;"><button class="popupBottomCloseButton" fdprocessedid="arjw17" style="margin: 0;font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif;background: none;border: 0;outline: none;border-bottom-width: 1px;padding-top: 10px;border-top-color: transparent;border-bottom-style: solid;padding-bottom: 10px;border-top-width: 1px;border-bottom-color: transparent;border-top-style: solid;line-height: 1.1429;border-left-width: 1px;padding-right: 24px;white-space: nowrap;border-right-style: solid;border-right-color: transparent;border-right-width: 1px;font-weight: 500;border-top-right-radius: 24px;transition-property: all;padding-left: 24px;transition-timing-function: ease-out;transition-duration: .18s;border-bottom-left-radius: 24px;background-color: #f7f5f3;border-left-style: solid;border-top-left-radius: 24px;display: inline-block;position: relative;border-bottom-right-radius: 24px;color: #00000099;outline-offset: 2px;border-left-color: transparent;font-size: .875rem;cursor: pointer;" onclick="$('.accessKeyPopup .popupInitIn').click();"><div class="popupBottomCloseButtonDiv"><div class="popupBottomCloseButtonText" gap="8" style="flex-grow: 1;">Cancel</div></div></button><button class="popupBottomSaveButton" fdprocessedid="u1g4au" style="margin: 0;font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif;background: none;border: 0;outline: none;border-bottom-width: 1px;padding-top: 10px;border-top-color: transparent;border-bottom-style: solid;padding-bottom: 10px;border-top-width: 1px;border-bottom-color: transparent;border-top-style: solid;line-height: 1.1429;border-left-width: 1px;padding-right: 24px;white-space: nowrap;border-right-style: solid;border-right-color: transparent;border-right-width: 1px;font-weight: 500;border-top-right-radius: 24px;transition-property: all;padding-left: 24px;transition-timing-function: ease-out;transition-duration: .18s;border-bottom-left-radius: 24px;background-color: #1daa61;border-left-style: solid;border-top-left-radius: 24px;display: inline-block;position: relative;border-bottom-right-radius: 24px;color: #fff;outline-offset: 2px;border-left-color: transparent;font-size: .875rem;cursor: pointer;" onclick="APP.saveAccessToken($('.accessKeyPopup .popupInitBodyInput').val());"><div class="popupBottomSaveButtonDiv"><div class="popupBottomSaveButtonText" gap="8" style="flex-grow: 1;">Save</div></div></button></div></div></div></div></div></div></div>`;
+        $("body").append(APP.settingsPopupElement);
+    },
+    settingsPopupOpen: function() {
+        $('.accessKeyPopup.popupInit').css('opacity', '1').css('z-index', '800').find('.popupInitBody').css('transform', 'scaleX(1) scaleY(1)');
+        $('.accessKeyPopup .popupInitBodyInput').focus();
+    },
+    settingsPopupClose: function() {
+        $('.accessKeyPopup.popupInit').css('opacity', '0').css('z-index', '0').find('.popupInitBody').css('transform', 'scaleX(0) scaleY(0)');
+    },
+    saveAccessToken: async function(accesskey) {
+        let value = {};
+        value[APP.extensionAPIAt] = accesskey;
+        $(".accessKeyPopup .popupInitBodyMainIn").css("display", "none");
+        $(".accessKeyPopup .popupInitBodyMainOut").css("display", "block");        
+        $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Saving...");
+        return await ZOHO.CRM.CONNECTOR.invokeAPI("crm.set", {"apiname": APP.extensionAPIAt, "value": value}).then(function(res) {
+            if(res && JSON.parse(res) && JSON.parse(res).status_code && JSON.parse(res).status_code == "200"){
+                $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Saved");
+                setTimeout(function() {
+                    if($(".accessKeyPopup .popupInitBodyMainIn").is(":visible")) {
+                        APP.settingsPopupClose();
+                        $(".accessKeyPopup .popupInitBodyMainIn").css("display", "block");
+                        $(".accessKeyPopup .popupInitBodyMainOut").css("display", "none");
+                        $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Saving...");
+                    }
+                }, 1000);
+                return true;
+            }
+            else {
+                $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Failed");
+                setTimeout(function() {
+                    if($(".accessKeyPopup .popupInitBodyMainIn").is(":visible")) {
+                        APP.settingsPopupClose();
+                        $(".accessKeyPopup .popupInitBodyMainIn").css("display", "block");
+                        $(".accessKeyPopup .popupInitBodyMainOut").css("display", "none");
+                        $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Saving...");
+                    }
+                }, 1000);
+                return false;
+            }
+        });
+    },
+    addNumberPopup: function() {
+        APP.passwordOpenIcon = `<svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-on</title><path fill-rule="evenodd" clip-rule="evenodd" d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM9 12C9 10.34 10.34 9 12 9C13.66 9 15 10.34 15 12C15 13.66 13.66 15 12 15C10.34 15 9 13.66 9 12Z" fill="currentColor"></path></svg>`;
+        APP.passwordCloseIcon = `<svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-off</title><path d="M12 7C14.76 7 17 9.24 17 12C17 12.65 16.87 13.26 16.64 13.83L19.56 16.75C21.07 15.49 22.26 13.86 22.99 12C21.26 7.61 16.99 4.5 11.99 4.5C10.59 4.5 9.25 4.75 8.01 5.2L10.17 7.36C10.74 7.13 11.35 7 12 7ZM2 4.27L4.28 6.55L4.74 7.01C3.08 8.3 1.78 10.02 1 12C2.73 16.39 7 19.5 12 19.5C13.55 19.5 15.03 19.2 16.38 18.66L16.8 19.08L19.73 22L21 20.73L3.27 3L2 4.27ZM7.53 9.8L9.08 11.35C9.03 11.56 9 11.78 9 12C9 13.66 10.34 15 12 15C12.22 15 12.44 14.97 12.65 14.92L14.2 16.47C13.53 16.8 12.79 17 12 17C9.24 17 7 14.76 7 12C7 11.21 7.2 10.47 7.53 9.8ZM11.84 9.02L14.99 12.17L15.01 12.01C15.01 10.35 13.67 9.01 12.01 9.01L11.84 9.02Z" fill="currentColor"></path></svg>`;
+        APP.settingsPopupElement = `<div class="popupInit addNumberPopup" style="opacity: 0; overflow: auto; width: 100%; height: 100%; top: 0px; visibility: visible; position: fixed; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.32); z-index: 0; left: 0px; transition: 0.1s;"><div class="popupInitIn" role="dialog" style="width: 100%;min-height: 100%;height: 600px;justify-content: center;flex-direction: column;box-sizing: border-box;display: flex;align-items: center;" onclick="$(event.target).attr('class') == $('.addNumberPopup .popupInitIn').attr('class') ? APP.addNumberPopupClose() : '';"><div class="popupInitBody" data-animate-modal-popup="true" style="opacity: 1; transform: scaleX(0) scaleY(0); padding: 22px 24px 20px; overflow: hidden; width: 400px; box-shadow: rgba(0, 0, 0, 0.26) 0px 2px 18px 0px, rgba(0, 0, 0, 0.1) 0px 8px 10px 0px; flex-direction: column; flex: 0 0 auto; box-sizing: border-box; display: flex; border-radius: 18px; background-color: rgb(255, 255, 255); transition: 0.3s;"><div class="popupInitBodyOut" data-animate-modal-body="true" style=" flex-shrink: 1; white-space: normal; position: relative; word-wrap: break-word; flex-basis: 100%; flex-grow: 1; "><div class="popupInitBodyIn" style=" font-size: .8875rem; line-height: 1.43; "><div class="popupInitBodyMain" style=" display: flex; flex-direction: column; flex-wrap: nowrap; align-self: auto; justify-self: auto; min-width: 0; min-height: 0; "> <div class="popupInitBodyMainIn" style=" "> <div class="popupInitBodyTitle" style="min-width: 0;min-height: 0;flex-shrink: 1;flex-wrap: nowrap;flex-basis: auto;align-self: center;order: 0;flex-grow: 0;justify-self: auto;width: 100%;text-align: left;padding-left: 15px;padding-bottom: 20px;"><div class="popupInitBodyTitleText" style=" padding-top: 20px; color: #0a0a0a; font-size: 1.1875rem; line-height: 1.4737; font-weight: 600; ">Enter your access token</div></div> <div style="padding-bottom: 12px;min-width: 0;min-height: 0;padding-top: 20px;padding-left: 8px;flex-shrink: 1;flex-wrap: nowrap;align-self: stretch;flex-basis: auto;padding-right: 8px;order: 0;flex-grow: 0;justify-self: auto;" padding="40,8,12,8" class="popupInitBodyInputOut"><div class="popupInitBodyInputIn" style=" min-width: 150px; border-bottom-width: 1px; border-bottom-style: solid; padding-bottom: 1px; border-bottom-color: #959393; background-color: #fff; display: flex; position: relative; "><input class="popupInitBodyInput" placeholder="Access Token" type="password" fdprocessedid="43n9wk" style=" border-bottom-style: unset; border-top-width: unset; border-top-style: unset; border-bottom-width: unset; overflow-x: hidden; padding-top: 6px; border-top-color: unset; border-bottom-color: unset; overflow-y: hidden; padding-bottom: 6px; color: var(--primary); padding-right: 6px; border-left-width: unset; background-color: #fff; border-right-color: unset; border-left-style: unset; border-left-color: unset; font-size: 1rem; border-right-width: unset; flex-grow: 1; padding-left: 6px; border-right-style: unset; outline: none; -webkit-user-select: text; margin: 0; font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif; "><button class="popupInitBodyInputButton" tabindex="0" type="button" aria-label="Show" style=" margin: 0; font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif; background: none; border: 0; outline: none; padding: 0; font-size: 100%; cursor: pointer; color: inherit; " onclick="$('.addNumberPopup .popupInitBodyInput').attr('type') == 'text' ? $('.addNumberPopup .popupInitBodyInput').attr('type', 'password').parent().find('.popupInitBodyInputButtonSpan').html(APP.passwordCloseIcon) : $('.addNumberPopup .popupInitBodyInput').attr('type', 'text').parent().find('.popupInitBodyInputButtonSpan').html(APP.passwordOpenIcon);"><span aria-hidden="true" data-icon="visibility-off" class="popupInitBodyInputButtonSpan" style=" color: #1daa61; "><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-off</title><path d="M12 7C14.76 7 17 9.24 17 12C17 12.65 16.87 13.26 16.64 13.83L19.56 16.75C21.07 15.49 22.26 13.86 22.99 12C21.26 7.61 16.99 4.5 11.99 4.5C10.59 4.5 9.25 4.75 8.01 5.2L10.17 7.36C10.74 7.13 11.35 7 12 7ZM2 4.27L4.28 6.55L4.74 7.01C3.08 8.3 1.78 10.02 1 12C2.73 16.39 7 19.5 12 19.5C13.55 19.5 15.03 19.2 16.38 18.66L16.8 19.08L19.73 22L21 20.73L3.27 3L2 4.27ZM7.53 9.8L9.08 11.35C9.03 11.56 9 11.78 9 12C9 13.66 10.34 15 12 15C12.22 15 12.44 14.97 12.65 14.92L14.2 16.47C13.53 16.8 12.79 17 12 17C9.24 17 7 14.76 7 12C7 11.21 7.2 10.47 7.53 9.8ZM11.84 9.02L14.99 12.17L15.01 12.01C15.01 10.35 13.67 9.01 12.01 9.01L11.84 9.02Z" fill="currentColor"></path></svg></span></button></div><div class="" style=" padding-top: 4px; display: flex; flex-direction: row; "><div>&nbsp;</div></div></div> </div> <div class="popupInitBodyMainOut popupInitBodyTitle" style="min-width: 0;min-height: 0;flex-shrink: 1;flex-wrap: nowrap;flex-basis: auto;align-self: center;order: 0;flex-grow: 0;justify-self: auto;width: 100%;text-align: left;padding-left: 15px;padding-bottom: 20px;display: none;"><div class="popupInitBodyTitleText" style=" padding-top: 20px; color: #0a0a0a; font-size: 1.1875rem; line-height: 1.4737; font-weight: 600; ">Saving...</div></div><div class="popupBottomDiv" paddingtop="20" style="min-width: 0px;min-height: 0px;padding-top: 20px;flex-flow: row;place-self: stretch auto;flex-basis: auto;display: flex;column-gap: 16px;order: 0;align-items: flex-start;flex-grow: 0;justify-content: flex-end;"><button class="popupBottomCloseButton" fdprocessedid="arjw17" style="margin: 0;font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif;background: none;border: 0;outline: none;border-bottom-width: 1px;padding-top: 10px;border-top-color: transparent;border-bottom-style: solid;padding-bottom: 10px;border-top-width: 1px;border-bottom-color: transparent;border-top-style: solid;line-height: 1.1429;border-left-width: 1px;padding-right: 24px;white-space: nowrap;border-right-style: solid;border-right-color: transparent;border-right-width: 1px;font-weight: 500;border-top-right-radius: 24px;transition-property: all;padding-left: 24px;transition-timing-function: ease-out;transition-duration: .18s;border-bottom-left-radius: 24px;background-color: #f7f5f3;border-left-style: solid;border-top-left-radius: 24px;display: inline-block;position: relative;border-bottom-right-radius: 24px;color: #00000099;outline-offset: 2px;border-left-color: transparent;font-size: .875rem;cursor: pointer;" onclick="$('.addNumberPopup .popupInitIn').click();"><div class="popupBottomCloseButtonDiv"><div class="popupBottomCloseButtonText" gap="8" style="flex-grow: 1;">Cancel</div></div></button><button class="popupBottomSaveButton" fdprocessedid="u1g4au" style="margin: 0;font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif;background: none;border: 0;outline: none;border-bottom-width: 1px;padding-top: 10px;border-top-color: transparent;border-bottom-style: solid;padding-bottom: 10px;border-top-width: 1px;border-bottom-color: transparent;border-top-style: solid;line-height: 1.1429;border-left-width: 1px;padding-right: 24px;white-space: nowrap;border-right-style: solid;border-right-color: transparent;border-right-width: 1px;font-weight: 500;border-top-right-radius: 24px;transition-property: all;padding-left: 24px;transition-timing-function: ease-out;transition-duration: .18s;border-bottom-left-radius: 24px;background-color: #1daa61;border-left-style: solid;border-top-left-radius: 24px;display: inline-block;position: relative;border-bottom-right-radius: 24px;color: #fff;outline-offset: 2px;border-left-color: transparent;font-size: .875rem;cursor: pointer;" onclick="APP.saveAccessToken($('.addNumberPopup .popupInitBodyInput').val());"><div class="popupBottomSaveButtonDiv"><div class="popupBottomSaveButtonText" gap="8" style="flex-grow: 1;">Save</div></div></button></div></div></div></div></div></div></div>`;
+        $("body").append(APP.settingsPopupElement);
+    },
+    addNumberPopupOpen: function() {
+        $('.addNumberPopup.popupInit').css('opacity', '1').css('z-index', '900').find('.popupInitBody').css('transform', 'scaleX(1) scaleY(1)');
+        $('.addNumberPopup .popupInitBodyInput').focus();
+    },
+    addNumberPopupClose: function() {
+        $('.addNumberPopup.popupInit').css('opacity', '0').css('z-index', '0').find('.popupInitBody').css('transform', 'scaleX(0) scaleY(0)');
     },
     unusedCodes: function() {
 
@@ -1633,7 +1984,7 @@ var APP = {
         });
         
         previewSend.addEventListener('click', () => {
-            var chat = Object.values(APP.contacts).find(c => c.id == APP.currentChatId);
+            var chat = Object.values(APP.contacts).find(c => c.id == APP.currentContactId);
             var newMessage = {
                 text: '[Photo]',
                 time: APP.getCurrentTime(),
@@ -1643,7 +1994,7 @@ var APP = {
             chat.messages.push(newMessage);
             chat.lastMessage = 'You: [Photo]';
             chat.time = 'Just now';
-            APP.renderMessages(APP.currentChatId);
+            APP.renderMessages(APP.currentContactId);
             APP.renderChatList();
             mediaPreview.style.display = 'none';
             
@@ -1666,34 +2017,17 @@ var APP = {
                 chat.messages.push(replyMessage);
                 chat.lastMessage = randomReply;
                 chat.time = 'Just now';
-                APP.renderMessages(APP.currentChatId);
+                APP.renderMessages(APP.currentContactId);
                 APP.renderChatList();
                 
                 // Show notification if chat is not active
-                if (chat.id !== APP.currentChatId) {
+                if (chat.id !== APP.currentContactId) {
                     APP.showNotification(`${chat.name}: ${randomReply}`);
                 }
             }, 1000 + Math.random() * 2000);
         });
 
-        emojiBtn = document.getElementById('emoji-btn');
-        emojiPicker = document.getElementById('emoji-picker');
-
-// Emoji picker
-            emojiBtn.addEventListener('click', toggleEmojiPicker);
-            emojiPicker.querySelectorAll('.emoji').forEach(emoji => {
-                emoji.addEventListener('click', () => {
-                    messageInput.value += emoji.textContent;
-                    messageInput.focus();
-                });
-            });
-
-            // Toggle emoji picker
-        function toggleEmojiPicker(e) {
-            e.stopPropagation();
-            emojiPicker.classList.toggle('show');
-            attachmentOptions.classList.remove('show');
-        }
+        
 
     attachmentBtn = document.getElementById('attachment-btn');
     attachmentOptions = document.getElementById('attachment-options');
@@ -1737,6 +2071,112 @@ var APP = {
         });
 
 
-    }
+    },
+
+    updateSendModeType: function(type){
+        $(".whatsapp-container").removeClass(APP.sendModeType);
+        $(".whatsapp-container").addClass(type);
+        APP.sendModeType = type;
+        APP.isBulk = type == "bulk"? true: false;
+        APP.resetBulkInitConfigs();
+        console.log("current send mode: "+ APP.sendModeType);
+    },
+
+    resetBulkInitConfigs: function(){
+        $(".selectAll-checkbox-inp").prop("checked", false);
+        $(".contact-checkbox").prop("checked", false);
+        APP.selectedContacts = [];
+        if(APP.initialChatDiv) APP.initialChatDiv.remove();
+        if(APP.isBulk){
+            //show initial selected chats name and number list. hide chat-header, messages-container. and here show list of selected contacts
+            $(".chat-header").hide();
+            $(".messages-container").hide();
+            $("#chat-area").prepend(`
+                <div class="bulk-selected-chats-list-div">
+                    <div class="bulk-selected-chats-list-div-inner">
+                        <div class="bulk-selected-chats-list-div-text">You have selected ${APP.selectedContacts.length} contacts.</div>
+                        <div class="selected-chats-list"></div>
+                    </div>
+                </div>
+            `);
+        }
+        else{
+            $(".chat-header").show();
+            $(".messages-container").show();
+            $(".bulk-selected-chats-list-div").remove();
+        }
+    },
+
+    handleBulkSelectAllCheckboxOnChange: function(){
+        const isChecked = $(".selectAll-checkbox-inp").is(":checked");
+        $(".contact-checkbox").prop("checked", isChecked);
+        if (isChecked) {
+            $(".contact-checkbox").map(function () {
+                let contactId = $(this).data("id").toString();``
+                if(!APP.selectedContacts.includes(contactId)) APP.selectedContacts.push(contactId);
+                APP.renderSelectedBulkContacts(contactId);
+                return contactId
+            }).get();
+        } 
+        else {
+            APP.selectedContacts = [];
+            APP.renderSelectedBulkContacts(null, false);
+        }
+        console.log("Bulk selection updated:", APP.selectedContacts);
+    },
+    
+    handleOnContactSelectionOnChange: function(contactId, isChecked){
+        contactId = contactId.toString();
+        if(isChecked && !APP.selectedContacts.includes(contactId)){
+            APP.selectedContacts.push(contactId);
+            APP.renderSelectedBulkContacts(contactId);
+        }
+        else{
+            APP.selectedContacts = APP.selectedContacts.filter(function(contact) {
+                return contact !== contactId;
+            });
+            APP.renderSelectedBulkContacts(contactId, false);
+        }
+        const allChecked = $(".contact-checkbox").length === APP.selectedContacts.length;
+        $(".selectAll-checkbox-inp").prop("checked", allChecked); 
+    },
+
+    renderSelectedBulkContacts: function(contactId, isChecked = true){
+        const contact = APP.contacts[contactId];
+        const selectedChatsList = document.querySelector(".selected-chats-list");
+        $(".bulk-selected-chats-list-div-text").text(`You have selected ${APP.selectedContacts.length} contacts.`);
+        if(!APP.isBulk) return;
+        if(!isChecked){
+            contactId? document.querySelector(`.selected-chat-div.contact_${contactId}`).remove(): selectedChatsList.innerHTML = "";
+            return;
+        }
+        if(contact && !document.querySelector(`.selected-chat-div.contact_${contactId}`)){
+            const chatDiv = document.createElement("div");
+            chatDiv.className = `selected-chat-div contact_${contactId}`;
+            chatDiv.innerHTML = `<div class="selected-chat-div-inner">
+                <div class="selected-chat-div-text">${contactId}</div>
+            </div>`;
+            selectedChatsList.appendChild(chatDiv);
+        }
+        
+    },
+    
+    renderLoaderPopupForBulkSending: function() {
+        let loaderPopup = document.createElement('div');
+        loaderPopup.className = 'loader-popup';
+        loaderPopup.innerHTML = `
+            <div class="loader-popup-inner">
+                <div class="loader-popup-content">
+                    <div class="loader-popup-header">
+                        <span class="loader-popup-title">Messages sending to all selected contacts...</span>
+                    </div>
+                    <div class="loader-popup-body">
+                        <p>Please wait while we process your messages.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById("chat-area").appendChild(loaderPopup);
+    },    
 
 };

@@ -1,6 +1,6 @@
 var FORAPP = null;
 FORAPP = "zohocrm";
-document.writeln('<script src="zohocrm.js?v=2"></script>');
+document.writeln('<script src="zohocrm.js?v=7"></script>');
 document.addEventListener("DOMContentLoaded", function (event) {
     SMS.init();
     ZOHO.embeddedApp.init();
@@ -10,8 +10,9 @@ var APP;
 var ENAPP = null;
 var SMS = {
 
-    extensionName: 'Vonage SMS',
+    extensionName: 'WhatsApp Business',
     extensionAPI: 'whatsappbusiness0__',
+    extensionSignal: "whatsappbusiness",
     extensionFunction: 'send',
     credentials: {},
     page: null,
@@ -37,13 +38,14 @@ var SMS = {
         }
 
         ENAPP = ZOHOCRM;
+        ZOHOCRM.init();
         SMS.extensionInvokeAPI = SMS.extensionAPI + SMS.extensionFunction;
         SMS.extensionCredential = SMS.extensionAPI + 'credentials';
 
         encodeLib.init();
 
-        let loaderDiv = encodeLib.loader({ id: "loader", position: "absolute", backgroundColor: "white", zIndex: "10000", top: "0", left: "0" });
-        encodeLib.insert(encodeLib.BODY, loaderDiv, { addOn: "prepend" });
+        // let loaderDiv = encodeLib.loader({ id: "loader", position: "absolute", backgroundColor: "white", zIndex: "10000000", top: "0", left: "0" });
+        // encodeLib.insert(encodeLib.BODY, loaderDiv, { addOn: "prepend" });
 
         let outerBody = encodeLib.content({ id: "outerBody", class: "outerBody", content: "", contentFitX: "100%", position: "relative", overflow: "auto", innerOverflow: "unset", innerDisplay: "block", height: "100%", padding: "0px", innerPosition: "relative", scrollbarWidth: "thin" });
         encodeLib.insert(encodeLib.BODY, outerBody, { addOn: "append" });
@@ -52,39 +54,45 @@ var SMS = {
         SMS.HTML = $("#outerBody");
         SMS.BODY = $("#outerBody").children(".content").first();
 
+        await setTimeout(async function () {
+            SMS.loader.remove();
+        }, 2000);
+
         APP = SMS;
 
-        if (SMS.page == "settings") {
-            SMS.SETTINGS.init();
-        }
-        else if(new URLSearchParams(window.location.search).get("t") == "settings") {
-            await ZOHO.embeddedApp.on("PageLoad", async function () {
-                SMS.SETTINGS.init();
-            });
-        }
-        else {
-            SMS.SEND.init();
-        }
+        // if (SMS.page == "settings") {
+        //     SMS.SETTINGS.init();
+        // }
+        // else if(new URLSearchParams(window.location.search).get("t") == "settings") {
+        //     await ZOHO.embeddedApp.on("PageLoad", async function () {
+        //         SMS.SETTINGS.init();
+        //     });
+        // }
+        // else {
+        //     SMS.SEND.init();
+        // }
+
+        SMS.SEND.init();
 
     },    
     SEND: {
         init: async function() {
 
-            // SMS.extensionFieldName = "Name";
-            // SMS.extensionFieldMessage = SMS.extensionAPI + "Message";
-            // SMS.extensionFieldContactNumber = SMS.extensionAPI + "Customer_Number";
-            // SMS.extensionFieldModule = SMS.extensionAPI + "Module";
+            SMS.extensionFieldName = "Name";
+            SMS.extensionFieldMessage = SMS.extensionAPI + "Message";
+            SMS.extensionFieldContactNumber = SMS.extensionAPI + "Customer_Number";
+            SMS.extensionFieldModule = SMS.extensionAPI + "Module";
             // SMS.extensionFieldDeal = SMS.extensionAPI + "Deal";
             // SMS.extensionFieldContact = SMS.extensionAPI + "Contact";
-            // SMS.extensionFieldLead = SMS.extensionAPI + "Lead";
+            SMS.extensionFieldLead = SMS.extensionAPI + "Lead";
             // SMS.extensionFieldAccount = SMS.extensionAPI + "Account";
             // SMS.extensionFieldSchedule = SMS.extensionAPI + "Scheduled_Time";
-            // SMS.extensionFieldStatus = SMS.extensionAPI + "Status";
-            // SMS.extensionFieldMsgId = SMS.extensionAPI + "MsgId";
-            // SMS.extensionFieldDirection = SMS.extensionAPI + "Direction";
+            SMS.extensionFieldStatus = SMS.extensionAPI + "Status";
+            SMS.extensionFieldMsgId = SMS.extensionAPI + "MsgId";
+            SMS.extensionFieldDirection = SMS.extensionAPI + "Direction";
 
             // SMS.extensionTemplate = SMS.extensionAPI + "Vonage_SMS_Templates";
-            // SMS.extensionHistory = SMS.extensionAPI + "Vonage_SMS_History";
+            SMS.extensionHistory = SMS.extensionAPI + "WhatsApp_Business_History";
 
             SMS.msgTextMaxLength = 160;
             SMS.SEND_ACTION = "SMS.SEND.ACTION";
@@ -94,6 +102,8 @@ var SMS = {
 
             SMS.HTML.css({ height: "calc(100% - 85px)" });
             encodeLib.insert(SMS.BODY, encodeLib.scrollStyle({ element: "#" + SMS.HTML.attr("id"), marginTop: "15px", marginBottom: "62px", color: "#e2e2e2", borderRadius: "1.5px", scrollY: "6px" }), { addOn: "append" });
+
+            
 
             await setTimeout(async function () {
                 // await SMS.SEND.settingsPage();
@@ -132,6 +142,28 @@ var SMS = {
             // await encodeLib.settingsPage(settingsObj);
         },
         credentialSet: async function() {
+
+            // let k = await ZOHOCRM.searchRecord(ZOHOCRM.extensionHistory, `(${SMS.extensionFieldContactNumber}:equals:${"916383345508"})`, type="criteria");
+
+            // k.sort(function(a, b) {
+            //     var keyA = new Date(a.Created_Time),
+            //       keyB = new Date(b.Created_Time);
+            //     // Compare the 2 dates
+            //     if (keyA < keyB) return -1;
+            //     if (keyA > keyB) return 1;
+            //     return 0;
+            //   });
+
+            // k.forEach(function(res) {
+
+            //     if(res.whatsappbusiness0__Direction && res.whatsappbusiness0__Direction == "Incoming") {
+            //         SMS.SEND.addMessage('incoming', res.whatsappbusiness0__Message, res.Created_Time, null);
+            //     }
+            //     else {
+            //         SMS.SEND.addMessage('outgoing', res.whatsappbusiness0__Message, res.Created_Time, null);
+            //     }
+                
+            // });
             // SMS.credentials = await ENAPP.getOrgVariable(SMS.extensionCredential);
             
             // if(SMS.credentials.apikey && SMS.credentials.apisecret) {
@@ -169,32 +201,32 @@ var SMS = {
                 }
             }
         },
-        ACTION: async function() {
+        ACTION: async function(text) {
 
-            if(!SMS.credentials.apikey || !SMS.credentials.apisecret) {
-                let popupObject = { htmlText: `<div style="min-width: 200px;">${'API Key or API Secret is empty.'}</div>`, backgroundColor: "#ffffffa3", buttonsDivPadding: "20px 0 0", earseAll: true };
-                await encodeLib.popup(popupObject);
-                return;
-            }
+            // if(!SMS.credentials.apikey || !SMS.credentials.apisecret) {
+            //     let popupObject = { htmlText: `<div style="min-width: 200px;">${'API Key or API Secret is empty.'}</div>`, backgroundColor: "#ffffffa3", buttonsDivPadding: "20px 0 0", earseAll: true };
+            //     await encodeLib.popup(popupObject);
+            //     return;
+            // }
 
-            let sendingPopupBodyElement = `<div class="sendingBody">
-                                                <div style="text-align: center; padding: 30px 40px 0 40px; display: flex; justify-content: center; align-items: center; font-size: 16px;" class="sendingHead">
-                                                    <span>${encodeLib.loader({class: "smsSendingLoader", backgroundColor: "white", minWidth: "300px", height: "50px"})}</span>
-                                                </div>
-                                                <div style="padding: 0 65px 16px 65px;" class="progressBody">
-                                                    <div style="min-width: 200px;max-width: 100%;height: 2px;background-color: #f5f5f5;margin-top: 20px;">
-                                                        <div class="progress" style="height: 2px; background-color: #1a73e8; width: 0%;"></div>
-                                                        <div style="font-size: 11px;"><span class="loadingPercentage">0</span>%</div>
-                                                    </div>
-                                                </div>
-                                                <div style="margin-top: 10px; padding: 0 40px; text-align: center; display: flex; align-items: start; justify-content: center;flex-direction: column;">
-                                                    <div class="sendingCountDiv" style="${!ENAPP.isBulk ? 'display: none;' : ''}font-size: 16px; text-align: left; width: 100%; font-weight: 600; padding-bottom: 10px;text-align: center;"><span class="sendingCount">0</span>/${ENAPP.currentRecords.length}</div>
-                                                    <div class="sendingContent" style="display: block;width: 100%;"><span style="padding-bottom: 25px;display: block"><span style="padding-left: 11px;">Sending...</span></span></div>
-                                                </div>
-                                            </div>`;
-            let popupObject = { htmlText: sendingPopupBodyElement, backgroundColor: "#ffffffa3", buttonsDivPadding: "20px 0 0", earseAll: true};
-            encodeLib.popup(popupObject);
-            encodeLib.popupButtons.hide();
+            // let sendingPopupBodyElement = `<div class="sendingBody">
+            //                                     <div style="text-align: center; padding: 30px 40px 0 40px; display: flex; justify-content: center; align-items: center; font-size: 16px;" class="sendingHead">
+            //                                         <span>${encodeLib.loader({class: "smsSendingLoader", backgroundColor: "white", minWidth: "300px", height: "50px"})}</span>
+            //                                     </div>
+            //                                     <div style="padding: 0 65px 16px 65px;" class="progressBody">
+            //                                         <div style="min-width: 200px;max-width: 100%;height: 2px;background-color: #f5f5f5;margin-top: 20px;">
+            //                                             <div class="progress" style="height: 2px; background-color: #1a73e8; width: 0%;"></div>
+            //                                             <div style="font-size: 11px;"><span class="loadingPercentage">0</span>%</div>
+            //                                         </div>
+            //                                     </div>
+            //                                     <div style="margin-top: 10px; padding: 0 40px; text-align: center; display: flex; align-items: start; justify-content: center;flex-direction: column;">
+            //                                         <div class="sendingCountDiv" style="${!ENAPP.isBulk ? 'display: none;' : ''}font-size: 16px; text-align: left; width: 100%; font-weight: 600; padding-bottom: 10px;text-align: center;"><span class="sendingCount">0</span>/${ENAPP.currentRecords.length}</div>
+            //                                         <div class="sendingContent" style="display: block;width: 100%;"><span style="padding-bottom: 25px;display: block"><span style="padding-left: 11px;">Sending...</span></span></div>
+            //                                     </div>
+            //                                 </div>`;
+            // let popupObject = { htmlText: sendingPopupBodyElement, backgroundColor: "#ffffffa3", buttonsDivPadding: "20px 0 0", earseAll: true};
+            // encodeLib.popup(popupObject);
+            // encodeLib.popupButtons.hide();
             
             let toNumber = "";
             if(!ENAPP.isBulk && !await encodeLib.saveToInPutValueCheck(await encodeLib.inputToMobileNumberCheck(ENAPP.toNumber), ENAPP.toNumber, ENAPP.toNumberError)) {
@@ -208,33 +240,33 @@ var SMS = {
                 encodeLib.popupClose();
                 return;
             }
-            let message = "";
-            if(!await encodeLib.saveToInPutValueCheck(await ENAPP.textAreaToMessageCheck(ENAPP.MESSAGE), ENAPP.MESSAGE, ENAPP.MESSAGE_ERROR)) {
-                encodeLib.popupClose();
-                return;
-            }
-            else {
-                message = ENAPP.MESSAGE.val().trim();
-            }
-            if(ENAPP.isScheduled && !ENAPP.scheduleTime.val()) {
-                $(".sendingHead").html(encodeLib.svg({outer: {width: "32px", height: "32px"}, svg: {icon: "sendSchdule", width: "32px", height: "32px", fill: "chocolate"}}));
-                $(".progressBody").hide();
-                $(".sendingCountDiv").hide();
-                $(".sendingContent").html("Please select schedule time.");
-                encodeLib.popupButtons.show();
-                return;
-            }
-            else if(ENAPP.isScheduled && new Date(ENAPP.scheduleTime.val()).getTime() < new Date().getTime()) {
-                $(".sendingHead").html(encodeLib.svg({outer: {width: "32px", height: "32px"}, svg: {icon: "sendSchdule", width: "32px", height: "32px", fill: "chocolate"}}));
-                $(".progressBody").hide();
-                $(".sendingCountDiv").hide();
-                $(".sendingContent").html("Schedule time should be in future.");
-                encodeLib.popupButtons.show();
-                return;
-            }
-            else if(ENAPP.isScheduled) {
-                ENAPP.scheduledTime = encodeLib.toIsoString(ENAPP.scheduleTime.val());
-            }
+            let message = text;
+            // if(!await encodeLib.saveToInPutValueCheck(await ENAPP.textAreaToMessageCheck(ENAPP.MESSAGE), ENAPP.MESSAGE, ENAPP.MESSAGE_ERROR)) {
+            //     encodeLib.popupClose();
+            //     return;
+            // }
+            // else {
+            //     message = ENAPP.MESSAGE.val().trim();
+            // }
+            // if(ENAPP.isScheduled && !ENAPP.scheduleTime.val()) {
+            //     $(".sendingHead").html(encodeLib.svg({outer: {width: "32px", height: "32px"}, svg: {icon: "sendSchdule", width: "32px", height: "32px", fill: "chocolate"}}));
+            //     $(".progressBody").hide();
+            //     $(".sendingCountDiv").hide();
+            //     $(".sendingContent").html("Please select schedule time.");
+            //     // encodeLib.popupButtons.show();
+            //     return;
+            // }
+            // else if(ENAPP.isScheduled && new Date(ENAPP.scheduleTime.val()).getTime() < new Date().getTime()) {
+            //     $(".sendingHead").html(encodeLib.svg({outer: {width: "32px", height: "32px"}, svg: {icon: "sendSchdule", width: "32px", height: "32px", fill: "chocolate"}}));
+            //     $(".progressBody").hide();
+            //     $(".sendingCountDiv").hide();
+            //     $(".sendingContent").html("Schedule time should be in future.");
+            //     // encodeLib.popupButtons.show();
+            //     return;
+            // }
+            // else if(ENAPP.isScheduled) {
+            //     ENAPP.scheduledTime = encodeLib.toIsoString(ENAPP.scheduleTime.val());
+            // }
             let countryCode = ENAPP.toNumberCountrycode.attr("value") ? ENAPP.toNumberCountrycode.attr("value") : "";
             if((!ENAPP.isBulk && toNumber && message) || (message)) {
 
@@ -259,7 +291,7 @@ var SMS = {
                     }
                     
                     let reqData = {};
-                    reqData[SMS.extensionFieldName] = `SMS to ${ENAPP.phoneRecord.recipientName}`;
+                    reqData[SMS.extensionFieldName] = `WhatsApp to ${ENAPP.phoneRecord.recipientName}`;
                     reqData[SMS.extensionFieldMessage] = filledMessage;
                     reqData[SMS.extensionFieldContactNumber] = ENAPP.phoneRecord.Mobile;
                     reqData[SMS.extensionFieldModule] = ENAPP.module;
@@ -300,21 +332,27 @@ var SMS = {
                         $(".progressBody").hide();
                         $(".sendingCountDiv").hide();
                         $(".sendingContent").html("To number or message is wrong.");
-                        encodeLib.popupButtons.show();
+                        // encodeLib.popupButtons.show();
                     }, 1000);
                 }
             }
         },
         sendSMSRequest: async function(requestMap, reqData) {
             let request = {
-                url : `https://rest.nexmo.com/sms/json`,
-                headers: { "Content-Type": "application/json"},
+                url : `https://graph.facebook.com/v22.0/581984271672102/messages`,
+                headers: { Authorization: "Bearer "+"EAAmTNTZCXDTkBO3a6QuouhqCxMxmC3QyR9GEGArZAtUvy92P2X6SqqA1BYfZCEJYmuWslwhkt40PFgCPb1ZAEU7ajbJ72WZBih5t1DHVnZAqyPjRhcLJAfIJTVZBV0RU5uxYB5CdRKo24NCZAHwJladGSnj78ofWM7Q1cCLlMR8QUb4jZA1s3MhHfBIuv9ITx8bwA0Q34dj4INRnscW0R1ycqYXZAdVCl43ArBRiYZD", "Content-Type": "application/json"},
                 body: {
-                    "from": "Vonage APIs",
+                    "messaging_product": "whatsapp",
                     "to": requestMap.to,
-                    "text": requestMap.msg,
-                    "api_key": SMS.credentials.apikey,
-                    "api_secret": SMS.credentials.apisecret
+                    "type": "text",                    
+                    "recipient_type": "individual",
+                    // "template": {
+                    //     "name": "test_template", "language": { "code": "en_US" }
+                    // },                    
+                    "text": {
+                        "preview_url": false,
+                        "body": requestMap.msg
+                    }
                 }
             };
             return await ENAPP.zohoHttpRequest('post', request).then(function(resp) {
@@ -323,9 +361,9 @@ var SMS = {
         },
         sendSMSResponse: async function(resp, requestMap, reqData) {
             if(resp && typeof resp === 'object') {
-                if(resp.messages && resp.messages[0] && resp.messages[0]["message-id"]) {
+                if(resp.messages && resp.messages[0] && resp.messages[0]["id"]) {
                     reqData[SMS.extensionFieldStatus] = "Sent";
-                    reqData[SMS.extensionFieldMsgId] = resp.messages[0]["message-id"]+"";
+                    reqData[SMS.extensionFieldMsgId] = resp.messages[0]["id"]+"";
                     await SMS.SEND.smsResponseToHistory(true, requestMap, reqData);
                 }
                 else if(resp.messages && resp.messages[0] && resp.messages[0]["error-text"]) {
@@ -359,6 +397,69 @@ var SMS = {
                     await SMS.SEND.smsResponseToHistory(false, requestMap, reqData);
                 }
             }
+        },
+        addMessage: function(type, text, time, media) {
+
+            let chatMessages = document.getElementById('chat-messages');
+            time = time ? time : Date.now();
+            time = SMS.SEND.getCurrentTime(time);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            if (text) {
+                messageDiv.innerHTML = `
+                    <div class="message-text">${text}</div>
+                    <div class="message-time">${time}</div>
+                `;
+            }
+            
+            if (media) {
+                let mediaHtml = '';
+                
+                if (media.type === 'image') {
+                    mediaHtml = `
+                        <div class="media-attachment">
+                            <img src="${media.url}" alt="Attached image">
+                        </div>
+                    `;
+                } else if (media.type === 'video') {
+                    mediaHtml = `
+                        <div class="media-attachment">
+                            <video controls>
+                                <source src="${media.url}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    `;
+                } else if (media.type === 'file') {
+                    mediaHtml = `
+                        <div class="media-attachment">
+                            <div class="file">
+                                <span class="file-icon">📄</span>
+                                <span>${media.name}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (!text) {
+                    messageDiv.innerHTML = mediaHtml + `<div class="message-time">${time}</div>`;
+                } else {
+                    messageDiv.innerHTML += mediaHtml;
+                }
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        },
+        getCurrentTime: function (time) {
+            const now = time ? new Date(time) : new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            return `${hours}:${minutes} ${ampm}`;
         },
         smsResponseToHistory: async function(Success, requestMap, reqData) {
             return await ENAPP.createRecord(SMS.extensionHistory, reqData).then(async function(resp) {
@@ -397,7 +498,7 @@ var SMS = {
                         $(".sendingHead").html(encodeLib.svg({outer: {width: "24px", height: "24px"}, svg: {icon: "sendError", fill: "#cd5d04"}}));
                         $(".progressBody").hide();
                         $(".sendingContent").html(requestMap.status);
-                        encodeLib.popupButtons.show();
+                        // encodeLib.popupButtons.show();
                         await SMS.SEND.credentialUpdate();
                     }, 1000); 
                 }
@@ -406,8 +507,8 @@ var SMS = {
                         $(".sendingHead").html(encodeLib.svg({outer: {width: "24px", height: "24px"}, svg: {icon: "sendSuccess", fill: "green"}}));
                         $(".progressBody").hide();
                         $(".sendingContent").html(requestMap.status);
-                        encodeLib.popupButtons.show();
-                        setTimeout(function() {	ENAPP.popupClose(); }, 1500);
+                        // encodeLib.popupButtons.show();
+                        // setTimeout(function() {	ENAPP.popupClose(); }, 1500);
                     }, 1000);
                 }
             }
@@ -436,8 +537,8 @@ var SMS = {
                         $(".progressBody").hide();
                         $(".sendingCountDiv").hide();
                         $(".sendingContent").html(`Your Bulk SMS has been ${ENAPP.isScheduled && ENAPP.scheduledTime ? 'scheduled ':'sent '}successfully.`);
-                        encodeLib.popupButtons.show();
-                        setTimeout(function() {	ENAPP.popupClose(); }, 1500);
+                        // encodeLib.popupButtons.show();
+                        // setTimeout(function() {	ENAPP.popupClose(); }, 1500);
                     }, 2000);                
                 }
             }
@@ -1295,7 +1396,7 @@ var SMS = {
                     $(".savingSvgContent").show().html(encodeLib.svg({outer: {width: "35px", height: "35px"}, svg: {icon: "tick", fill: "green", width: "35px", height: "35px"}}));
                     $(".saveTemplateLoader").hide();
                     $(".savingContent").html("Saved");
-                    encodeLib.popupButtons.show();
+                    // encodeLib.popupButtons.show();
                 }
             }
         }

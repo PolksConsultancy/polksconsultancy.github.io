@@ -7,7 +7,6 @@
         <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     </head>
 <body>
-    <style class="loaderStyle">/* message loading style */ .enLoadingInner { margin: 0 auto; background-color: #fff; border-radius: 50%; box-shadow: 0 1px 1px 0 rgba(0,0,0,.06),0 2px 5px 0 rgba(0,0,0,.2); display: flex; align-items: center; justify-content: center; width: 35px; height: 35px; } .enLoadingOuter { display: flex; flex: none; justify-content: center; padding: 15px 0px; box-sizing: border-box; } .enLoadingSvgCircle { stroke: #ccc; stroke-dasharray: 1,150; stroke-dashoffset: 0; stroke-linecap: round; animation: enLoadingSvgCircle 1.5s ease-in-out infinite; } .enLoadingSVG { animation: enLoadingSVG 2s linear infinite; } @keyframes enLoadingSVG{ to{transform:rotate(1turn)} } @keyframes enLoadingSvgCircle{ 0%{stroke-dasharray:1,150;stroke-dashoffset:0} 50%{stroke-dasharray:90,150;stroke-dashoffset:-35} to{stroke-dasharray:90,150;stroke-dashoffset:-124} } /* message loading style */</style><div id="loader" class="enContent " style="height: 100%; background-color: white;color: black; overflow: hidden;  line-height: initial; resize: none; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: inherit; font-weight: inherit; word-break: break-word; word-wrap: break-word; box-sizing: border-box;   width: 100%; padding: 0; cursor: default;   font-family: sans-serif;      z-index: 10000000; position: absolute; left: 0;  top: 0;      max-width: 100%; min-width: 0; text-align: left; white-space: normal;     "><div style="display: flex; align-items: center; justify-content: center; flex-direction: column; width: 100%; height: 100%;   max-width: 100%; min-width: 0; overflow: hidden; word-break: break-word; word-wrap: break-word; white-space: normal; text-align: left;    " class="content"><div class="enLoadingInner" title="loading…"><svg class="enLoadingSVG" width="17" height="17" viewBox="0 0 46 46" role="status"><circle class="enLoadingSvgCircle" cx="23" cy="23" r="20" fill="none" stroke-width="6" style="stroke: rgb(57 82 234);"></circle></svg></div></div></div>
     <div class="outer">
         <div class="inner">
             <div class="accountPage">
@@ -24,7 +23,7 @@
                 </div>
             </div>
             <div class="mainPageOuter">
-                <div class="whatsapp-container">
+                <div class="whatsapp-container single">
                     <!-- Sidebar -->
                     <div class="sidebar">
                         <div class="sidebar-header">
@@ -92,6 +91,16 @@
                                 </button> -->
                             </div>
                         </div>
+                        <div class="send-mode-types">
+                            <div class="single-send-mode" onclick="APP.updateSendModeType('single')"> Direct </div>
+                            <div class="bulk-send-mode" onclick="APP.updateSendModeType('bulk')"> Bulk </div>
+                        </div>
+                        <div class="contacts-selectAll-box">
+                            <div class="selectAll-checkbox">
+                                <input class="selectAll-checkbox-inp" type="checkbox" onchange="APP.handleBulkSelectAllCheckboxOnChange()">
+                                <span class="">Select All</span>
+                            </div>
+                        </div>
                         <div class="chat-list" id="chat-list">
                                 <!-- Chat items will be populated by JavaScript -->
                         </div>
@@ -116,52 +125,92 @@
                             <!-- Messages will be populated by JavaScript -->
                         </div>
                         <div class="input-container">
+                            <div tabindex="-1" class="emojiListBox" role="application" style="
+"><ul><div class="emojiListBody" role="grid"><div tabindex="-1" class="x1stofjc x1q0q8m5 x1mw571z" style="
+    border-bottom-width: .47px;
+    border-bottom-style: solid;
+    border-bottom-color: #3c3c434a;
+    display: none;
+"><div class="emojitagsList"><div class="emojitagsSelected"><div class="" style="width: 100%; height: 4px;"></div></div><div role="button" class="emojitags" title="Smileys &amp; People" tabindex="0"><span aria-hidden="true" data-icon="panel-emoji-people" class=""><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>panel-emoji-people</title><path fill="currentColor" d="M12,22.1C6.4,22.1,1.9,17.6,1.9,12S6.4,1.9,12,1.9S22.1,6.4,22.1,12S17.6,22.1,12,22.1z M12,3.5 c-4.7,0-8.5,3.8-8.5,8.5s3.8,8.5,8.5,8.5s8.5-3.8,8.5-8.5S16.7,3.5,12,3.5z"></path><path fill="currentColor" d="M8.9,11.6c0.7,0,1.3-0.7,1.3-1.5S9.6,8.6,8.9,8.6s-1.3,0.7-1.3,1.5C7.6,10.9,8.2,11.6,8.9,11.6z"></path><path fill="currentColor" d="M17.1,13.6c-1.1,0.1-3,0.4-5,0.4s-4-0.3-5-0.4c-0.4,0-0.6,0.3-0.4,0.7c1.1,2,3.1,3.5,5.5,3.5 c2.3,0,4.4-1.5,5.5-3.5C17.8,14,17.5,13.6,17.1,13.6z M12.3,16c-2.6,0-4.1-1-4.2-1.6c0,0,4.4,0.9,8,0C16.1,14.4,15.6,16,12.3,16z"></path><path fill="currentColor" d="M15.1,11.6c0.7,0,1.3-0.7,1.3-1.5s-0.6-1.5-1.3-1.5s-1.3,0.7-1.3,1.5C13.8,10.9,14.4,11.6,15.1,11.6z"></path></svg></span></div><div role="button" class="emojitags" title="Animals &amp; Nature" tabindex="0"><span aria-hidden="true" data-icon="panel-emoji-nature" class=""><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>panel-emoji-nature</title><path fill="currentColor" d="M7.2,12.2c0.608,0,1.1,0.627,1.1,1.4S7.808,15,7.2,15s-1.1-0.627-1.1-1.4S6.592,12.2,7.2,12.2z M16.9,12.2 c0.608,0,1.1,0.627,1.1,1.4S17.508,15,16.9,15s-1.1-0.627-1.1-1.4S16.292,12.2,16.9,12.2z M21.5,11.1c-0.3-0.6-0.7-1.4-1.2-2.4 c0.9-0.4,1.7-1.3,2-2.2c0.3-0.7,0.4-2.1-1-3.5l0,0c-1-0.9-2-1.2-2.9-1c-1.1,0.3-1.9,1.2-2.3,1.9c-1.4-0.7-2.9-0.8-4.1-0.8 c-1.5,0-2.8,0.3-4,0.9C7.5,3.1,6.8,2.2,5.7,1.9c-1-0.2-2,0.1-2.9,1l0,0c-1,1-1.4,2.2-1,3.4c0.4,1.1,1.2,1.9,2,2.3 c-0.2,0.5-0.4,1-0.6,1.6L3,10.4c-0.3,0.7-0.5,1.3-0.8,1.9c-0.4,1-0.9,1.9-0.9,3.1c0,1.6,0.8,6.7,10.5,6.7c3.8,0,6.6-0.7,8.5-2.2 s2.2-3.4,2.2-4.3C22.7,13.5,22.3,12.7,21.5,11.1z M18.8,3.5c0.4-0.1,0.9,0.1,1.5,0.6c0.6,0.6,0.8,1.2,0.6,1.8 c-0.2,0.6-0.7,1.1-1.2,1.3c-0.6-1.2-1.3-2-2.1-2.6C17.8,4.2,18.2,3.6,18.8,3.5z M3.3,5.9c-0.2-0.6,0-1.2,0.6-1.8 C4.4,3.6,5,3.4,5.4,3.5c0.5,0.1,1.1,0.7,1.3,1.2C5.8,5.4,5.1,6.2,4.5,7.3C4,7,3.4,6.5,3.3,5.9z M21.1,15.6c0,0.7-0.2,2-1.6,3.1 c-1.5,1.2-4.1,1.8-7.5,1.8c-8.3,0-8.9-3.9-8.9-5.1c0-0.8,0.3-1.5,0.7-2.4c0.3-0.6,0.6-1.2,0.8-2.1l0.1-0.2c0.5-1.5,2-6.2,7.3-6.2 c1.2,0,2.5,0.2,3.7,0.9c0.1,0.1,0.5,0.3,0.5,0.3c0.9,0.7,1.7,1.7,2.4,3.2c0.6,1.3,1,2.2,1.4,2.9C20.8,13.4,21.1,13.9,21.1,15.6z  M14.6,17c-0.1,0.1-0.6,0.4-1.2,0.3c-0.4-0.1-0.7-0.3-0.9-0.8c0-0.1-0.1-0.1-0.1-0.2c0.8-0.1,1.3-0.6,1.3-1.3S13,15,12,15 c-0.9,0-1.7-0.7-1.7,0c0,0.6,0.6,1.2,1.4,1.3l-0.1,0.1c-0.3,0.4-0.5,0.7-0.9,0.8c-0.5,0.1-1.1-0.1-1.3-0.3c-0.2-0.2-0.5-0.1-0.7,0.1 s-0.1,0.5,0.1,0.7c0.1,0.1,0.8,0.5,1.6,0.5c0.2,0,0.4,0,0.5-0.1c0.4-0.1,0.8-0.3,1.1-0.7c0.4,0.4,0.9,0.6,1.2,0.7 c0.8,0.2,1.7-0.2,2-0.5c0.2-0.2,0.2-0.5,0-0.7C15.1,16.9,14.8,16.8,14.6,17z"></path></svg></span></div><div role="button" class="emojitags" title="Food &amp; Drink" tabindex="0"><span aria-hidden="true" data-icon="panel-emoji-food" class=""><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>panel-emoji-food</title><path fill="currentColor" d="M7.4,11.4L7.4,11.4c-0.4,0-0.8,0.4-0.8,0.8V14c0,0.4,0.4,0.8,0.8,0.8l0,0c0.4,0,0.8-0.4,0.6-0.8v-1.8 C8,11.6,7.8,11.4,7.4,11.4z"></path><path fill="currentColor" d="M4.6,10.4c-0.4,0-0.8,0.4-0.8,0.8V15c0,0.4,0.4,0.8,0.8,0.8s0.8-0.4,0.8-0.8v-3.8C5.4,10.6,5,10.4,4.6,10.4z "></path><path fill="currentColor" d="M23,7.2c-0.6-0.6-1.6-0.8-2.8-0.6c-0.2,0-0.4,0.2-0.6,0.2V4.2C19.6,3.6,19,3,18.4,3h-17 C0.8,3,0.2,3.6,0.2,4.2v7.4c0,5.4,3.2,9.6,8.4,9.6h2.2c4.2,0,7-2.6,8-6H19h0.2c2.2-0.4,4-2.6,4.4-4.8C24,9,23.8,8,23,7.2z M18.2,4.4 v3H1.6v-3H18.2z M11,19.8H8.8c-5.2,0-7-4.4-7-8.2V8.8h16.6v2.8C18.2,15.6,16,19.8,11,19.8z M19.4,13.6c0.2-0.6,0.2-1.4,0.2-2V8.4 C20,8.2,20.2,8,20.6,8c0.6-0.2,1.2,0,1.4,0.4c0.4,0.4,0.6,1,0.4,1.8C22.2,11.6,20.8,13.2,19.4,13.6z"></path></svg></span></div><div role="button" class="emojitags" title="Activity" tabindex="0"><span aria-hidden="true" data-icon="panel-emoji-activity" class=""><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>panel-emoji-activity</title><path fill="currentColor" d="M14.8,15.3l1.3-3.8c0.1-0.2,0-0.5-0.2-0.6l-3.3-2.4c-0.2-0.1-0.5-0.1-0.6,0l-3.3,2.4 c-0.2,0.1-0.3,0.4-0.2,0.6l1.3,3.8c0.1,0.2,0.3,0.4,0.5,0.4h4C14.5,15.7,14.7,15.5,14.8,15.3z"></path><path fill="currentColor" d="M12,1.9C6.4,1.9,1.9,6.4,1.9,12S6.4,22.1,12,22.1S22.1,17.6,22.1,12S17.6,1.9,12,1.9z M9.8,20.3 c0.1-0.2,0.1-0.4,0-0.6l-1.4-2.3c-0.1-0.1-0.2-0.2-0.4-0.3l-2.5-0.6c-0.2-0.1-0.5,0.1-0.6,0.2c-0.9-1.3-1.4-2.9-1.5-4.5 c0.2,0,0.4,0,0.5-0.2l1.7-2c0.1,0,0.2-0.2,0.2-0.3L5.5,7.1c0-0.2-0.1-0.3-0.3-0.4C6.2,5.4,7.5,4.5,9,4c0,0.1,0.2,0.3,0.3,0.3 l2.5,1.1c0.1,0.1,0.3,0.1,0.4,0l2.5-1.1C14.8,4.2,14.9,4.1,15,4c1.5,0.6,2.7,1.5,3.7,2.7c-0.1,0.1-0.2,0.2-0.2,0.4l-0.2,2.6 c0,0.2,0,0.3,0.1,0.4l1.7,2c0.1,0.1,0.3,0.2,0.4,0.2c0,1.6-0.5,3.1-1.3,4.4c-0.1-0.1-0.2-0.1-0.4-0.1l-2.5,0.6 c-0.1,0-0.3,0.1-0.4,0.3l-1.4,2.3c-0.1,0.2-0.1,0.3,0,0.5c-0.8,0.2-1.6,0.4-2.5,0.4C11.3,20.6,10.5,20.5,9.8,20.3z"></path></svg></span></div><div role="button" class="emojitags" title="Travel &amp; Places" tabindex="0"><span aria-hidden="true" data-icon="panel-emoji-travel" class=""><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>panel-emoji-travel</title><path fill="currentColor" d="M21.5,11.5c0-0.7-0.1-1.4-0.3-2l-1.5-4.3C19.2,3.9,18,3,16.6,3H7.3C5.9,3,4.7,3.9,4.2,5.2L2.6,9.9 c-0.1,0.4-0.2,0.7-0.2,1.1v1.2l0,0v7.4c0,0.6,0.5,1.1,1.1,1.1h1.1c0.6,0,1.1-0.5,1.1-1.1v-1.1h12.7v1.1c0,0.6,0.5,1.1,1.1,1.1h1.1 c0.6,0,1.1-0.5,1.1-1.1v-7.4l0,0L21.5,11.5L21.5,11.5z M4.1,10.4l1.6-4.7C5.9,5,6.6,4.5,7.4,4.5h9.2c0.7,0,1.4,0.5,1.6,1.2l1.5,4.3 c0.1,0.3,0.2,0.6,0.2,0.8H4C3.9,10.7,4,10.5,4.1,10.4z M5.5,16.1c-0.8,0-1.5-0.7-1.5-1.5s0.7-1.5,1.5-1.5S7,13.8,7,14.6 C6.9,15.4,6.3,16.1,5.5,16.1z M14.9,15.5H9.3c-0.5,0-1-0.4-1-1c0-0.5,0.4-1,1-1h5.6c0.5,0,1,0.4,1,1C15.8,15.1,15.4,15.5,14.9,15.5z  M18.6,16.1c-0.8,0-1.5-0.7-1.5-1.5s0.7-1.5,1.5-1.5s1.5,0.7,1.5,1.5C20.1,15.4,19.4,16.1,18.6,16.1z"></path></svg></span></div><div role="button" class="emojitags" title="Objects" tabindex="0"><span aria-hidden="true" data-icon="panel-emoji-objects" class=""><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>panel-emoji-objects</title><path fill="currentColor" d="M18.8,6.7c-0.9-2.6-3.2-4.6-6-4.9c-0.3,0-0.5,0-0.8,0h0c-0.3,0-0.5,0-0.8,0C8.4,2.1,6.1,4,5.2,6.7 c-1,3,0.1,6.2,2.7,8H8c0.2,0.1,0.3,0.4,0.3,0.6v2c0,0.8,0.6,1.4,1.4,1.4h4.5h0.1c0.8,0,1.4-0.6,1.4-1.4v-2c0-0.2,0.1-0.5,0.3-0.6 l0.1-0.1C18.6,12.8,19.7,9.6,18.8,6.7z M15.3,13.6l-0.1,0.1c-0.5,0.4-0.9,1-0.9,1.7v2c0,0,0,0.1-0.1,0.1c0,0,0,0-0.1,0H9.8 c0,0-0.1,0-0.1-0.1v-2c0-0.7-0.3-1.3-0.9-1.7l-0.1-0.1c-2-1.4-3-4-2.2-6.5C7.2,5,9.1,3.4,11.4,3.2c0.2,0,0.4,0,0.6,0h0.1 c0.2,0,0.4,0,0.6,0c2.2,0.2,4.2,1.8,4.9,3.9C18.3,9.5,17.4,12.1,15.3,13.6z"></path><path fill="currentColor" d="M9.2,21.2c0,0.6,0.5,1,1,1h3.7c0.6,0,1-0.5,1-1v-1H9.2V21.2L9.2,21.2z"></path><path fill="currentColor" d="M13.6,10.5c-0.4,0-0.8,0.3-0.8,0.8c0,0.1,0,0.2,0.1,0.3c-0.2,0.3-0.5,0.5-0.8,0.5s-0.6-0.2-0.8-0.5 c0-0.1,0.1-0.2,0.1-0.3c0-0.4-0.3-0.8-0.8-0.8c-0.4,0-0.8,0.3-0.8,0.8c0,0.4,0.3,0.7,0.7,0.8c0.3,0.4,0.7,0.7,1.1,0.8V15 c0,0.2,0.2,0.4,0.4,0.4s0.4-0.2,0.4-0.4v-2.1c0.4-0.1,0.8-0.4,1.1-0.8l0,0c0.4,0,0.8-0.3,0.8-0.8C14.3,10.8,14,10.5,13.6,10.5z"></path></svg></span></div><div role="button" class="emojitags" title="Symbols" tabindex="0"><span aria-hidden="true" data-icon="panel-emoji-symbols" class=""><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>panel-emoji-symbols</title><path fill="currentColor" d="M14.5,12.9V11h2.2l-0.2-1.3h-2V7.3H13v2.5h-2V7.4H9.5v2.4H7.2L7.4,11h2.1v1.9H7.3l0.2,1.3h2v2.4H11v-2.4h2 v2.4h1.5v-2.4h2.3l-0.2-1.3C16.6,12.9,14.5,12.9,14.5,12.9z M11,11h2v1.9h-2V11z"></path><path fill="currentColor" d="M16.1,2.6H7.9C5,2.6,2.6,5,2.6,7.9V16c0,3,2.4,5.3,5.3,5.3H16c3,0,5.3-2.4,5.3-5.3V7.9 C21.4,5,19,2.6,16.1,2.6z M19.8,16.1c0,2.1-1.6,3.8-3.7,3.8H7.9c-2.1,0-3.8-1.7-3.8-3.8V7.9c0-2.1,1.7-3.8,3.8-3.8H16 c2.1,0,3.8,1.7,3.8,3.8V16.1L19.8,16.1z"></path></svg></span></div><div role="button" class="emojitags" title="Flags" tabindex="0"><span aria-hidden="true" data-icon="panel-emoji-flags" class=""><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>panel-emoji-flags</title><path fill="currentColor" d="M5.5,3.8V3.6c0-0.3-0.2-0.5-0.5-0.5H4.5C4.2,3.1,4,3.3,4,3.6V21c0,0.3,0.2,0.5,0.5,0.5H5 c0.3,0,0.5-0.2,0.5-0.5v-6.2c5,1.8,9.3-2.7,14.5,0.6c0-5.6,0-5.6,0-11.3C14.9,1,10.3,5.6,5.5,3.8z M15.8,12.6 c-1.4,0-2.8,0.3-4.1,0.6c-1.2,0.3-2.4,0.5-3.5,0.5c-0.9,0-1.8-0.2-2.6-0.5V5.4c0.8,0.2,1.5,0.3,2.3,0.3c1.5,0,2.9-0.4,4.3-0.7 c1.3-0.3,2.5-0.6,3.8-0.6c0.9,0,1.7,0.2,2.5,0.5V13C17.6,12.8,16.7,12.6,15.8,12.6z"></path></svg></span></div></div></div><div tabindex="-1" class="emojibodyOuter"><div class="emojibodyInner"><span class="emojiSearchBody"><div tabindex="0" class="emojiSearchBodyInber" data-tab="5"><label class="emojiSearchLabel"><div class="emojisearchInputOuter"><input class="emojiSearchInput" role="searchbox" aria-label="Search emoji" dir="ltr" title="Search emoji" placeholder="Search emoji" type="text" value=""></div></label></div></span><div class="emojiBodyOuter"><div class="emojiBodyInner"><div tabindex="-1" class="emojibodyMain"><div class="emojibody"><span onclick="APP.emojiAddFunction(this);">😀</span><span onclick="APP.emojiAddFunction(this);">😃</span><span onclick="APP.emojiAddFunction(this);">😄</span><span onclick="APP.emojiAddFunction(this);">😁</span><span onclick="APP.emojiAddFunction(this);">😆</span><span onclick="APP.emojiAddFunction(this);">🥹</span><span onclick="APP.emojiAddFunction(this);">😅</span><span onclick="APP.emojiAddFunction(this);">😂</span><span onclick="APP.emojiAddFunction(this);">🤣</span><span onclick="APP.emojiAddFunction(this);">🥲</span><span onclick="APP.emojiAddFunction(this);">☺️</span><span onclick="APP.emojiAddFunction(this);">😊</span><span onclick="APP.emojiAddFunction(this);">😇</span><span onclick="APP.emojiAddFunction(this);">🙂</span><span onclick="APP.emojiAddFunction(this);">🙃</span><span onclick="APP.emojiAddFunction(this);">😉</span><span onclick="APP.emojiAddFunction(this);">😌</span><span onclick="APP.emojiAddFunction(this);">😍</span><span onclick="APP.emojiAddFunction(this);">🥰</span><span onclick="APP.emojiAddFunction(this);">😘</span><span onclick="APP.emojiAddFunction(this);">😗</span><span onclick="APP.emojiAddFunction(this);">😙</span><span onclick="APP.emojiAddFunction(this);">😚</span><span onclick="APP.emojiAddFunction(this);">😋</span><span onclick="APP.emojiAddFunction(this);">😛</span><span onclick="APP.emojiAddFunction(this);">😝</span><span onclick="APP.emojiAddFunction(this);">😜</span><span onclick="APP.emojiAddFunction(this);">🤪</span><span onclick="APP.emojiAddFunction(this);">🤨</span><span onclick="APP.emojiAddFunction(this);">🧐</span><span onclick="APP.emojiAddFunction(this);">🤓</span><span onclick="APP.emojiAddFunction(this);">😎</span><span onclick="APP.emojiAddFunction(this);">🥸</span><span onclick="APP.emojiAddFunction(this);">🤩</span><span onclick="APP.emojiAddFunction(this);">🥳</span><span onclick="APP.emojiAddFunction(this);">🙂</span><span onclick="APP.emojiAddFunction(this);">😏</span><span onclick="APP.emojiAddFunction(this);">😒</span><span onclick="APP.emojiAddFunction(this);">🙂</span><span onclick="APP.emojiAddFunction(this);">😞</span><span onclick="APP.emojiAddFunction(this);">😔</span><span onclick="APP.emojiAddFunction(this);">😟</span><span onclick="APP.emojiAddFunction(this);">😕</span><span onclick="APP.emojiAddFunction(this);">🙁</span><span onclick="APP.emojiAddFunction(this);">☹️</span><span onclick="APP.emojiAddFunction(this);">😣</span><span onclick="APP.emojiAddFunction(this);">😖</span><span onclick="APP.emojiAddFunction(this);">😫</span><span onclick="APP.emojiAddFunction(this);">😩</span><span onclick="APP.emojiAddFunction(this);">🥺</span><span onclick="APP.emojiAddFunction(this);">😢</span><span onclick="APP.emojiAddFunction(this);">😭</span><span onclick="APP.emojiAddFunction(this);">😤</span><span onclick="APP.emojiAddFunction(this);">😠</span><span onclick="APP.emojiAddFunction(this);">😡</span><span onclick="APP.emojiAddFunction(this);">🤬</span><span onclick="APP.emojiAddFunction(this);">🤯</span><span onclick="APP.emojiAddFunction(this);">😳</span><span onclick="APP.emojiAddFunction(this);">🥵</span><span onclick="APP.emojiAddFunction(this);">🥶</span><span onclick="APP.emojiAddFunction(this);">😶</span><span onclick="APP.emojiAddFunction(this);">😱</span><span onclick="APP.emojiAddFunction(this);">😨</span><span onclick="APP.emojiAddFunction(this);">😰</span><span onclick="APP.emojiAddFunction(this);">😥</span><span onclick="APP.emojiAddFunction(this);">😓</span><span onclick="APP.emojiAddFunction(this);">🤗</span><span onclick="APP.emojiAddFunction(this);">🤔</span><span onclick="APP.emojiAddFunction(this);">🫣</span><span onclick="APP.emojiAddFunction(this);">🤭</span><span onclick="APP.emojiAddFunction(this);">🫢</span><span onclick="APP.emojiAddFunction(this);">🫡</span><span onclick="APP.emojiAddFunction(this);">🤫</span><span onclick="APP.emojiAddFunction(this);">🫠</span><span onclick="APP.emojiAddFunction(this);">🤥</span><span onclick="APP.emojiAddFunction(this);">😶</span><span onclick="APP.emojiAddFunction(this);">🫥</span><span onclick="APP.emojiAddFunction(this);">😐</span><span onclick="APP.emojiAddFunction(this);">🫤</span><span onclick="APP.emojiAddFunction(this);">😑</span><span onclick="APP.emojiAddFunction(this);">🫨</span><span onclick="APP.emojiAddFunction(this);">😬</span><span onclick="APP.emojiAddFunction(this);">🙄</span><span onclick="APP.emojiAddFunction(this);">😯</span><span onclick="APP.emojiAddFunction(this);">😦</span><span onclick="APP.emojiAddFunction(this);">😧</span><span onclick="APP.emojiAddFunction(this);">😮</span><span onclick="APP.emojiAddFunction(this);">😲</span><span onclick="APP.emojiAddFunction(this);">🥱</span><span onclick="APP.emojiAddFunction(this);">😴</span><span onclick="APP.emojiAddFunction(this);">🤤</span><span onclick="APP.emojiAddFunction(this);">😪</span><span onclick="APP.emojiAddFunction(this);">😮</span><span onclick="APP.emojiAddFunction(this);">😵</span><span onclick="APP.emojiAddFunction(this);">😵</span><span onclick="APP.emojiAddFunction(this);">🤐</span><span onclick="APP.emojiAddFunction(this);">🥴</span><span onclick="APP.emojiAddFunction(this);">🤢</span><span onclick="APP.emojiAddFunction(this);">🤮</span><span onclick="APP.emojiAddFunction(this);">🤧</span><span onclick="APP.emojiAddFunction(this);">😷</span><span onclick="APP.emojiAddFunction(this);">🤒</span><span onclick="APP.emojiAddFunction(this);">🤕</span><span onclick="APP.emojiAddFunction(this);">🤑</span><span onclick="APP.emojiAddFunction(this);">🤠</span><span onclick="APP.emojiAddFunction(this);">😈</span><span onclick="APP.emojiAddFunction(this);">👿</span><span onclick="APP.emojiAddFunction(this);">👹</span><span onclick="APP.emojiAddFunction(this);">👺</span><span onclick="APP.emojiAddFunction(this);">🤡</span><span onclick="APP.emojiAddFunction(this);">💩</span><span onclick="APP.emojiAddFunction(this);">👻</span><span onclick="APP.emojiAddFunction(this);">💀</span><span onclick="APP.emojiAddFunction(this);">☠️</span><span onclick="APP.emojiAddFunction(this);">👽</span><span onclick="APP.emojiAddFunction(this);">👾</span><span onclick="APP.emojiAddFunction(this);">🤖</span><span onclick="APP.emojiAddFunction(this);">🎃</span><span onclick="APP.emojiAddFunction(this);">😺</span><span onclick="APP.emojiAddFunction(this);">😸</span><span onclick="APP.emojiAddFunction(this);">😹</span><span onclick="APP.emojiAddFunction(this);">😻</span><span onclick="APP.emojiAddFunction(this);">😼</span><span onclick="APP.emojiAddFunction(this);">😽</span><span onclick="APP.emojiAddFunction(this);">🙀</span><span onclick="APP.emojiAddFunction(this);">😿</span><span onclick="APP.emojiAddFunction(this);">😾</span><span onclick="APP.emojiAddFunction(this);">🫶</span><span onclick="APP.emojiAddFunction(this);">🤲</span><span onclick="APP.emojiAddFunction(this);">👐</span><span onclick="APP.emojiAddFunction(this);">🙌</span><span onclick="APP.emojiAddFunction(this);">👏</span><span onclick="APP.emojiAddFunction(this);">🤝</span><span onclick="APP.emojiAddFunction(this);">👍</span><span onclick="APP.emojiAddFunction(this);">👎</span><span onclick="APP.emojiAddFunction(this);">👊</span><span onclick="APP.emojiAddFunction(this);">✊"</span><span onclick="APP.emojiAddFunction(this);">🤛</span><span onclick="APP.emojiAddFunction(this);">🤜</span><span onclick="APP.emojiAddFunction(this);">🫷</span><span onclick="APP.emojiAddFunction(this);">🫸</span><span onclick="APP.emojiAddFunction(this);">🤞</span><span onclick="APP.emojiAddFunction(this);">✌️</span><span onclick="APP.emojiAddFunction(this);">🫰</span><span onclick="APP.emojiAddFunction(this);">🤟</span><span onclick="APP.emojiAddFunction(this);">🤘</span><span onclick="APP.emojiAddFunction(this);">👌</span><span onclick="APP.emojiAddFunction(this);">🤌</span><span onclick="APP.emojiAddFunction(this);">🤏</span><span onclick="APP.emojiAddFunction(this);">🫳</span><span onclick="APP.emojiAddFunction(this);">🫴</span><span onclick="APP.emojiAddFunction(this);">👈</span><span onclick="APP.emojiAddFunction(this);">👉</span><span onclick="APP.emojiAddFunction(this);">👆</span><span onclick="APP.emojiAddFunction(this);">👇</span><span onclick="APP.emojiAddFunction(this);">☝️</span><span onclick="APP.emojiAddFunction(this);">✋"</span><span onclick="APP.emojiAddFunction(this);">🤚</span><span onclick="APP.emojiAddFunction(this);">🖐</span><span onclick="APP.emojiAddFunction(this);">🖖</span><span onclick="APP.emojiAddFunction(this);">👋</span><span onclick="APP.emojiAddFunction(this);">🤙</span><span onclick="APP.emojiAddFunction(this);">🫲</span><span onclick="APP.emojiAddFunction(this);">🫱</span><span onclick="APP.emojiAddFunction(this);">💪</span><span onclick="APP.emojiAddFunction(this);">🦾</span><span onclick="APP.emojiAddFunction(this);">🖕</span><span onclick="APP.emojiAddFunction(this);">✍️</span></div></div></div></div></div></div></div><div class="x1c4vz4f xs83m0k xdl72j9 x1g77sc7 x78zum5 xozqiw3 x1oa3qoh x12fk4p8 xeuugli x2lwn1j xl56j7k x1q0g3np x6s0dn4 x178xt8z x13fuv20 xao2bj1 xsdox4t" style="
+    height: 48px;
+    min-width: 0;
+    border-top-color: #0b141a33;
+    min-height: 0;
+    border-top-width: 1px;
+    border-top-style: solid;
+    flex-shrink: 1;
+    flex-wrap: nowrap;
+    justify-content: center;
+    flex-basis: auto;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    align-self: auto;
+    order: 0;
+    flex-grow: 0;
+    justify-self: auto;
+"><div tabindex="-1" class="" role="tablist"><div class="x1c4vz4f xs83m0k xdl72j9 x1g77sc7 x78zum5 xozqiw3 x1oa3qoh x12fk4p8 xeuugli x2lwn1j x1nhvcw1 x1q0g3np x1cy8zhl" style="
+    min-width: 0;
+    min-height: 0;
+    flex-shrink: 1;
+    flex-wrap: nowrap;
+    flex-basis: auto;
+    display: flex;
+    flex-direction: row;
+    align-self: auto;
+    justify-content: flex-start;
+    order: 0;
+    align-items: flex-start;
+    flex-grow: 0;
+    justify-self: auto;
+"><div class="x1c4vz4f xs83m0k xdl72j9 x1g77sc7 xeuugli x2lwn1j xozqiw3 xkh2ocl x12fk4p8" style="
+    min-width: 0;
+    min-height: 0;
+    flex-shrink: 1;
+    flex-wrap: nowrap;
+    align-self: stretch;
+    flex-basis: auto;
+    order: 0;
+    flex-grow: 0;
+    justify-self: auto;
+"><button class="xjb2p0i xk390pu x1heor9g x1ypdohk x972fbf x1qhh985 xexx8yu x4uap5 x18d9i69 xkhd6sd xyendm2 x78zum5 xl56j7k x6s0dn4 x9f619 x1hdfv4t xj515ic x1fgtraw xo5x3gg x1rdkn19 xnrpbbs x1234w3m xqpth0e x1tlxs6b x230xth xy80clv x6ppb7v x1v2t631" tabindex="0" type="button" role="tab" aria-label="Emojis selector" aria-selected="true" style="
+    width: 70px;
+    padding-top: 0;
+    border-top-width: 0;
+    border-top-color: #d1d7db;
+    border-bottom-width: 0;
+    height: 28px;
+    padding-bottom: 0;
+    border-bottom-color: #d1d7db;
+    background-color: #e9edef;
+    border-left-width: 1px;
+    border-left-color: #d1d7db;
+    border-right-color: #d1d7db;
+    justify-content: center;
+    padding-left: 0;
+    font-size: 100%;
+    font-family: inherit;
+    border-right-width: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    padding-right: 0;
+    border-bottom-left-radius: 18px;
+    cursor: pointer;
+    border-radius: 18px;
+    color: inherit;
+    box-shadow: inset 0 0 0 1px #111b2133;
+    cursor: default;
+"><span aria-hidden="true" data-icon="smiley" class="x1i64zmx" style="animation-duration: 0.6s;animation-delay: 0.5s;/* margin-left: 8px; */height: 18px;"><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="x1ig0tib x1pwvq5b x1uqggnz" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24" style="
+    color: #848d92;
+    width: 19.5px;
+    height: 19.5px;
+"><title>smiley</title><path fill="currentColor" d="M9.153,11.603c0.795,0,1.439-0.879,1.439-1.962S9.948,7.679,9.153,7.679 S7.714,8.558,7.714,9.641S8.358,11.603,9.153,11.603z M5.949,12.965c-0.026-0.307-0.131,5.218,6.063,5.551 c6.066-0.25,6.066-5.551,6.066-5.551C12,14.381,5.949,12.965,5.949,12.965z M17.312,14.073c0,0-0.669,1.959-5.051,1.959 c-3.505,0-5.388-1.164-5.607-1.959C6.654,14.073,12.566,15.128,17.312,14.073z M11.804,1.011c-6.195,0-10.826,5.022-10.826,11.217 s4.826,10.761,11.021,10.761S23.02,18.423,23.02,12.228C23.021,6.033,17.999,1.011,11.804,1.011z M12,21.354 c-5.273,0-9.381-3.886-9.381-9.159s3.942-9.548,9.215-9.548s9.548,4.275,9.548,9.548C21.381,17.467,17.273,21.354,12,21.354z  M15.108,11.603c0.795,0,1.439-0.879,1.439-1.962s-0.644-1.962-1.439-1.962s-1.439,0.879-1.439,1.962S14.313,11.603,15.108,11.603z"></path></svg></span></button></div></div></div></div></ul></div>
                             <div class="input-icons">
-                                <i class="far fa-smile" id="emoji-btn"></i>
+                                <i class="far fa-smile" id="emoji-btn" onclick="APP.emojiOpenFunction();"></i>
                                 <i class="fas fa-paperclip" id="attachment-btn"></i>
                             </div>
-                            <div class="emoji-picker" id="emoji-picker">
-                                <div class="emoji-categories">
-                                    <span class="emoji-category active">😀</span>
-                                    <span class="emoji-category">🐶</span>
-                                    <span class="emoji-category">🍎</span>
-                                    <span class="emoji-category">⚽</span>
-                                    <span class="emoji-category">🚗</span>
-                                </div>
-                                <div class="emoji-list">
-                                    <span class="emoji">😀</span>
-                                    <span class="emoji">😃</span>
-                                    <span class="emoji">😄</span>
-                                    <span class="emoji">😁</span>
-                                    <span class="emoji">😆</span>
-                                    <span class="emoji">😅</span>
-                                    <span class="emoji">😂</span>
-                                    <span class="emoji">🤣</span>
-                                    <span class="emoji">😊</span>
-                                    <span class="emoji">😇</span>
-                                    <span class="emoji">🙂</span>
-                                    <span class="emoji">🙃</span>
-                                    <span class="emoji">😉</span>
-                                    <span class="emoji">😌</span>
-                                    <span class="emoji">😍</span>
-                                    <span class="emoji">🥰</span>
-                                    <span class="emoji">😘</span>
-                                    <span class="emoji">😗</span>
-                                    <span class="emoji">😙</span>
-                                    <span class="emoji">😚</span>
-                                    <span class="emoji">😋</span>
-                                    <span class="emoji">😛</span>
-                                    <span class="emoji">😝</span>
-                                    <span class="emoji">😜</span>
-                                    <span class="emoji">🤪</span>
-                                    <span class="emoji">🤨</span>
-                                    <span class="emoji">🧐</span>
-                                    <span class="emoji">🤓</span>
-                                    <span class="emoji">😎</span>
-                                    <span class="emoji">🤩</span>
-                                    <span class="emoji">🥳</span>
-                                </div>
-                            </div>
+                       
                             <div class="attachment-options" id="attachment-options">
                                 <div class="attachment-option" data-type="photo">
                                     <i class="fas fa-camera"></i>
@@ -191,20 +240,7 @@
                             </div>
                         </div>
             
-                        <!-- Emoji Picker -->
-                        <div class="emoji-picker" id="emoji-picker">
-                            <div class="emoji-category">
-                                <i class="fas fa-smile"></i>
-                                <i class="fas fa-thumbs-up"></i>
-                                <i class="fas fa-heart"></i>
-                                <i class="fas fa-surprise"></i>
-                                <i class="fas fa-sad-tear"></i>
-                            </div>
-                            <div class="emoji-grid" id="emoji-grid">
-                                <!-- Emojis will be populated by JavaScript -->
-                            </div>
-                        </div>
-            
+                     
                         <!-- Attachment Options -->
                         <div class="attachment-options" id="attachment-options">
                             <div class="attachment-option" id="attach-photo">

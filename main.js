@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 APP.recordId = record.EntityId[0];
             }
             else {
-                APP.recordId = record.EntityId;
+                APP.recordId = record.EntityId; 
             }
             APP.module = record.Entity;
         }

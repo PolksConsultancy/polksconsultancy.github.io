@@ -22,14 +22,14 @@ let isTyping = false;
 var APP = {
 
     extensionName: 'WhatsApp Business',
-    extensionAPI: 'telnyxforzohocrm__', // whatsappbusiness0__
+    extensionAPI: 'whatsappbusiness0__', // whatsappbusiness0__
     extensionSignal: "incomingmessages",
     extensionFunction: 'webhook',
     currentUser: {},
     allUsers: {},
     currentContactId: "",
     contacts: {},
-    at: "EAAmTNTZCXDTkBOZCW9Q4skQZBZAkuaKSpEZBl6IPK3z1cP3pFH912XiFbZB6nOHIwWaV9xF6xuadKHtMWyI3gKhsRsYOYH0Xu6zXZCLqSuW7563LCfZAkwlXmOdCI6eUdKzjYMfNN7JHPvqPctAIRSKqJWXOVY7HiiWKDwBxb5ZBjlY3WDp0CQhM4oEV1oM16rBZC7HAFXn3uhADrYJFGZBVmzqAGteXaBZCjRD9GEcZD",
+    at: "EAAmTNTZCXDTkBO12kuG89IADE0GBwaCXD9vyy62dMxEYn7CN4rWF3pCfp2NZAaOE7e0sRecxta3jknsdx5tA7TKnJsfI9DkG3wrVTkBKbJmxEQN2ThYptkgZApIgvpgTCkmw0UbWzBB4EGW6SD14YHKWl0xZBmQ6ZC7SMm7p1fYUPBobs7rgQQeClETc9vKwZAzuQo9yAPHZBpRYz5FrSdOMH0UdMQZA7nPFhJPC",
     realtimeDuplicateChaeckArr: [],
     lastMessageDirection: "",
     dealStagesList: "",
@@ -56,7 +56,7 @@ var APP = {
         APP.extensionFieldFrom = APP.extensionAPI + "From";
         APP.extensionFieldTo = APP.extensionAPI + "To";
         APP.extensionFieldStatus = APP.extensionAPI + "Status";
-        APP.extensionFieldMsgId = APP.extensionAPI + "Message_Id";
+        APP.extensionFieldMsgId = APP.extensionAPI + "MsgId";
         APP.extensionFieldDirection = APP.extensionAPI + "Direction";
         APP.extensionFieldActiveTime = APP.extensionAPI + "Active_Time";  
         APP.extensionFieldTimestamp = APP.extensionAPI + "Timestamp";        
@@ -112,10 +112,9 @@ var APP = {
                 let filter = e.target.value;
                 var chatList = document.getElementById('chat-list');
                 chatList.innerHTML = '';
-                let filteredChats = filter ? Object.values(APP.contacts).filter(chat => chat.id.toLowerCase().includes(filter.toLowerCase())) : Object.values(APP.contacts);
+                let filteredChats = filter ? Object.values(APP.contacts).filter(chat => chat.details.Name.toLowerCase().includes(filter.toLowerCase())) : Object.values(APP.contacts);
                 Object.values(filteredChats).forEach(chat => {
-                    let contactElement = APP.createContactElement(chat);
-                    APP.contactList.appendChild(contactElement);
+                    APP.addContactList(chat.id);
                 });
             });
         }
@@ -143,8 +142,7 @@ var APP = {
             chatList.innerHTML = '';
             let filteredChats = value ? Object.values(APP.contacts).filter(chat => chat.details[APP.extensionFieldModule] && chat.details[APP.extensionFieldModule].toLowerCase().includes(value.toLowerCase())) : value == "" ? Object.values(APP.contacts) : '';
             Object.values(filteredChats).forEach(chat => {
-                let contactElement = APP.createContactElement(chat);
-                APP.contactList.appendChild(contactElement);
+                APP.addContactList(chat.id);
             });
         });
 
@@ -545,7 +543,7 @@ var APP = {
         let contantListElement = `<div class="contactList">
                 <div class="contactListIn contactItem ${contactId === APP.currentContactId ? 'active' : ''}" data-id="${contactId}" id="contactid-${contactId}">
                     <div class="contactSelectionBox">
-                        <input type="checkbox" class="contact-checkbox" data-id="${contactId}" onclick="APP.handleOnContactSelectionOnChange('${contactId}', this.checked)">
+                        <input type="checkbox" class="contact-checkbox" ${APP.selectedContacts.includes(contactId)? "checked": "" } data-id="${contactId}" onclick="APP.handleOnContactSelectionOnChange('${contactId}', this.checked)">
                     </div>
                     <div class="contactListImgOut">
                         <div class="contactListImgIn">
@@ -645,11 +643,12 @@ var APP = {
     },
     contactListClickFunction: async function(e) {
 
-        if($(e.target).hasClass('chatUser-avatar')) {           
+        if($(e.target).hasClass('contact-checkbox')) {           
             return;
         }
 
         let contactElement = e.target.closest('.contactItem');
+
         if(APP.isBulk) {
             if(contactElement && contactElement.querySelector(".contact-checkbox")) {
                 let checkbox = contactElement.querySelector(".contact-checkbox");
@@ -660,20 +659,23 @@ var APP = {
 
         }
         if(contactElement && APP.currentContactId != contactElement.dataset.id) {
-
+            
             if(APP.initialChatDiv) APP.initialChatDiv.remove();
             $(".contactItem.active").removeClass("active");
             contactElement.setAttribute("class", "contactListIn contactItem active");
 
             APP.currentContactId = contactElement.dataset.id;
+            APP.renderMessages(APP.currentContactId);
             let contact = APP.contacts[APP.currentContactId];
 
             if(!APP.contacts[APP.currentContactId].initied) {
                 if(contact.details[APP.extensionFieldContact]) {
                     APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
+                    $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(APP.contacts[APP.currentContactId].details[APP.extensionFieldContact].Name);
                 }
                 else if(contact.details[APP.extensionFieldLead]) {
                     APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
+                    $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(APP.contacts[APP.currentContactId].details[APP.extensionFieldLead].Name);
                 }
                 else {
                     await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query:APP.currentContactId, delay:false}).then( async function(data){
@@ -681,28 +683,36 @@ var APP = {
                             await ZOHO.CRM.API.searchRecord({Entity: "Leads", Type:"phone",Query:APP.currentContactId, delay:false}).then(async function(resp){
                                 if(!resp || !resp.data) {
                                     let response = await ZOHO.CRM.API.insertRecord({Entity: "Lead",APIData:{Last_Name: APP.currentContactId, phone: APP.currentContactId},Trigger:["workflow"]}).then(function(data){});
+                                    
+                                    $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(response.data[0].Full_Name);
+                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = response.data[0].Full_Name;
                                     APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
                                     APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = response.data[0].id;
                                 }
                                 else {
+                                    $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(resp.data[0].Full_Name);
+                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = resp.data[0].Full_Name;
                                     APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
                                     APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = resp.data[0].id;
                                 }
                             });
                         }
                         else {
+                            $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(data.data[0].Full_Name);
+                            APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = data.data[0].Full_Name;
                             APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
                             APP.contacts[APP.currentContactId].details[APP.extensionFieldContact] = data.data[0].id;
                         }
                     });
                 }
+                APP.renderMessages(APP.currentContactId);
                 APP.contacts[APP.currentContactId].initied = true;
                 await APP.contactAction(APP.currentContactId);
             }
-            await APP.showRecordDetailsView(APP.contacts[APP.currentContactId].details[APP.extensionFieldModule]);
+            await APP.showRecordDetailsView(APP.contacts[APP.currentContactId].details[APP.extensionFieldModule]+"s");
 
             APP.isMessageLoading = false;
-            APP.messagesPerPage = 20;
+            APP.messagesPerPage = 200;
             APP.lastMessageDirection = "";
 
             if(contactElement.querySelector(".unread-count")) {
@@ -803,10 +813,6 @@ var APP = {
                 console.log(data);
             });
         }
-    },
-    createContactElement: function(chat) {
-        
-        return chatItem;
     },
     sortingArrOfOject: function() {
 
@@ -976,9 +982,12 @@ var APP = {
         let contactFieldList = ["First_Name", "Last_Name", "Account_Name", "Email", "Phone", "Mobile", "Secondary_Email", "Description", "Lead_Source", "Assistant", "Asst_Phone", "Home_Phone", "Other_Phone", "Created_Time", "id", "Full_Name"];
         let leadFieldList = ["First_Name", "Last_Name", "Company", "Email", "Phone", "Mobile", "Description", "Website", "Lead_Status", "Lead_Source", "Created_Time", "id", "Full_Name"];
         let fieldArr = module == "Leads" ? leadFieldList : contactFieldList;
-        await ZOHO.CRM.API.searchRecord({Entity: module+"s",Type:"phone",Query:APP.currentContactId.replaceAll(" ", ""),delay:false})
+        await ZOHO.CRM.API.searchRecord({Entity: module,Type:"phone",Query:APP.currentContactId.replaceAll(" ", ""),delay:false})
         .then(function(data){
-            if(!data || !data.data) return;
+            if(!data || !data.data) {
+                $(".contact-info").html("");
+                return;
+            }
             record = data.data[0];
             APP.contacts[APP.currentContactId].details.Name = record.Full_Name;
             if(module == "Leads") {
@@ -1047,6 +1056,7 @@ var APP = {
     },
     leadToContactCreateConfirmation: function() {
 
+
         let k = APP.loader+`<div style="
         z-index: 100000000;
         height: 100%;
@@ -1108,6 +1118,10 @@ var APP = {
         });
     },
     contactToDealCreateConfirmation: function() {
+
+        if($("#dealMapConfirmCondainer").length) {
+            return;
+        }
 
     let mapFieldElements = "";
     ["Deal_Name", "Stage", "Closing_Date", "Amount", "Probability", "Next_Step"].forEach(function(field) {
@@ -1305,7 +1319,7 @@ var APP = {
         chatHeaderInfo.innerHTML = `
         <div class="chat-header-info-head">
             <img src="${chat.avatar ? chat.avatar: 'person.png'}" alt="${contactid}" class="profile-pic">
-            <div class="chat-header-name"><span class="chat-header-nameText">${chat.details.Name}</span><span class="chat-header-nameId">+${chat.id}</span></div>
+            <div class="chat-header-name"><span class="chat-header-nameText">${chat.details.Name ? chat.details.Name : contactid}</span><span class="chat-header-nameId">+${chat.id}</span></div>
         </div>
         <div class="chat-header-info-body">
             <div class="rowOptions" id="createModuleSelectOptionInRecord">
@@ -1509,19 +1523,46 @@ var APP = {
             ':' + pad(date.getSeconds()) +
             dif + pad(Math.floor(Math.abs(tzo) / 60)) +
             ':' + pad(Math.abs(tzo) % 60);
-    },   
-    sendMessage: async function() {
+    },
+    sendMessage: async function(){
         if(APP.isBulk){
+            if(APP.selectedContacts.length == 0){
+                console.log("selected contacts: 0");
+                return;
+            }
             APP.renderLoaderPopupForBulkSending();
+            for(let i=0; i< APP.selectedContacts.length; i++){
+                let contactId = APP.selectedContacts[i];
+                contactId = Number(contactId);
+                if(!contactId || !APP.contacts[contactId]) continue;
+                try{
+                    await APP.sendMessageToContact(contactId);
+                }
+                catch(error){
+                    console.log(error);
+                }
+            }
+            setTimeout(() => {
+                document.getElementById('message-input').textContent = "";
+                APP.closeLoaderPopupForBulkSending();
+                APP.showNotification("Messages sent successfully");
+            }, 1000);
             return;
         }
+        else{
+            APP.sendMessageToContact();
+        }
+    },
+    sendMessageToContact: async function(contactId=null) {
+        contactId = contactId ? contactId : APP.currentContactId;
+        if(!contactId) return;
+        if(!APP.contacts[contactId]) return;
+        if(!APP.contacts[contactId].messages) APP.contacts[contactId].messages = {};
         let messageInput = document.getElementById('message-input');
         let messageText = messageInput.textContent.trim();
-        
+    
         if(!messageText) return;
-        if(!APP.contacts[APP.currentContactId]) return;
 
-        let contactId = APP.currentContactId;
         let message_id = new Date().getTime()+"";
         let from = "";
         let contactName = "WhatsApp Message to "+ contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldName] ? APP.contacts[contactId].details[APP.extensionFieldName] : contactId;
@@ -1555,10 +1596,12 @@ var APP = {
         message["Modified_Time"] = APP.toIsoString(new Date());
 
         APP.contacts[contactId].messages[message_id] = message;
-        APP.addMessage(message_id, contactId, "sendMessage");
+        if(!APP.isBulk) {
+            APP.addMessage(message_id, contactId, "sendMessage");
+            messageInput.textContent = '';
+        }
 
         let sendButton = document.getElementById('send-button');
-        messageInput.textContent = '';
         sendButton.classList.remove('active');
 
         let contact = {};
@@ -1781,7 +1824,7 @@ var APP = {
             let time = data.statuses[0].timestamp;
             let status = data.statuses[0].status;            
 
-            if(contactId && APP.contacts[contactId]) {
+            if(contactId && APP.contacts[contactId] && APP.contacts[contactId].messages[message_id]) {
                 APP.contacts[contactId].messages[message_id][APP.extensionFieldStatus] = status;
                 let message = APP.contacts[contactId].messages[message_id];
                 if(message && message[APP.extensionFieldMessage]) {
@@ -1801,8 +1844,8 @@ var APP = {
                     APP.contacts[contactId].details = Object.assign(APP.contacts[contactId].details, contact);
                     APP.addContactList(contactId);
                 }
+                APP.addMessage(message_id, contactId, "outgoing"); 
             }
-            APP.addMessage(message_id, contactId, "outgoing"); 
             setTimeout(() => {
                 APP.database.ref('outgoingMessages/'+key).remove().then(() => {
                     console.log("Data deleted successfully");
@@ -2088,6 +2131,7 @@ var APP = {
         APP.selectedContacts = [];
         if(APP.initialChatDiv) APP.initialChatDiv.remove();
         if(APP.isBulk){
+            if($(".bulk-selected-chats-list-div-text").length) return;
             //show initial selected chats name and number list. hide chat-header, messages-container. and here show list of selected contacts
             $(".chat-header").hide();
             $(".messages-container").hide();
@@ -2112,7 +2156,7 @@ var APP = {
         $(".contact-checkbox").prop("checked", isChecked);
         if (isChecked) {
             $(".contact-checkbox").map(function () {
-                let contactId = $(this).data("id").toString();``
+                let contactId = $(this).data("id").toString();
                 if(!APP.selectedContacts.includes(contactId)) APP.selectedContacts.push(contactId);
                 APP.renderSelectedBulkContacts(contactId);
                 return contactId
@@ -2177,6 +2221,13 @@ var APP = {
             </div>
         `;
         document.getElementById("chat-area").appendChild(loaderPopup);
-    },    
+    }, 
+
+    closeLoaderPopupForBulkSending: function() {
+        let loaderPopup = document.querySelector('.loader-popup');
+        if (loaderPopup) {
+            loaderPopup.remove();
+        }
+    },
 
 };

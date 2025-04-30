@@ -2027,7 +2027,7 @@ var APP = {
             }
         });
 
-        // APP.at = APP.credential[APP.extensionAPIAt];
+        APP.at = APP.credential[APP.extensionAPIAt];
         $('.accessKeyPopup .popupInitBodyInput').val(APP.at);
     },
     settingsPopupOpen: function() {

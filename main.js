@@ -2626,7 +2626,7 @@ var APP = {
                         </svg>    
                     </div>
                 </div>`;
-                $(".message-reply-tag").show();
+                $("#message-reply-tag").show();
             }
         }
     },
@@ -2635,7 +2635,7 @@ var APP = {
         APP.replyTagMessageId = null;
         let replyDiv = document.querySelector("#message-reply-tag");
         replyDiv.innerHTML = "";
-        $(".message-reply-tag").hide();
+        $("#message-reply-tag").hide();
     }
 
 };

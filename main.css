@@ -1558,19 +1558,10 @@ div#moduleSelectOption {
     padding-right: 0;
 }
 
-#moduleSelectOption button.rowOptionsButton {
-    border-radius: 10px;
-    font-weight: 500;
-    background-color: #dce2e4e3;
-}
-
 .moduleNameTitle {
     font-weight: 500;
 }
 
-.rowOptionsButtonSelected {
-    background-color: #d2e3fc !important;
-}
 
 .initialChatDiv {
     width: calc(74% - 1px);
@@ -1963,7 +1954,7 @@ img.accountInfoIcon {
     overflow-y: auto;
     background-color: #fff;
     position: relative;
-    height: calc(100% - 160px);
+    height: calc(100% - 206px);
     padding-bottom: 10px;
     box-sizing: border-box;
     bottom: 2px;
@@ -3544,6 +3535,11 @@ button.rowOptionsButton {
     min-height: 0;
     flex-wrap: nowrap;
     column-gap: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
+    display: block;
 }
 
 div#moduleSelectOption {
@@ -3557,7 +3553,8 @@ div#moduleSelectOption {
 #moduleSelectOption button.rowOptionsButton {
     border-radius: 10px;
     font-weight: 500;
-    background-color: #dce2e4e3;
+    background-color: #f5f6f6;
+    width: max-content;
 }
 
 .moduleNameTitle {
@@ -3565,7 +3562,8 @@ div#moduleSelectOption {
 }
 
 .rowOptionsButtonSelected {
-    background-color: #d2e3fc !important;
+    background-color: #e7fce3 !important;
+    color: #13a48a !important;
 }
 
 .initialChatDiv {
@@ -3598,6 +3596,7 @@ div#createModuleSelectOption {
     bottom: -12px;
     display: flex;
     justify-content: flex-end;
+    width: max-content;
 }
 
 #createModuleSelectOption .rowOptionsButton {
@@ -3848,6 +3847,17 @@ div#message-input[placeholder]:empty:before {
     font-weight: 400;
     justify-content: center;
     height: calc(100% - 120px);
+}
+
+div#chat-list:empty:before {
+    content: attr(placeholder);
+    color: #54656f57;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    justify-content: center;
+    height: calc(100% - 0px);
 }
 
 button.rowOptionsButton:hover {
@@ -4924,3 +4934,119 @@ div#messages-container:empty:before {
     justify-content: center;
     height: calc(100% - 0px);
 }
+
+/* templates css */
+
+div#templates-list-outer {
+    position: absolute;
+    bottom: 50px;
+    background: white;
+    padding: 5px;
+    z-index: 20;
+    border-radius: 7px;
+    box-shadow: 0px 1px 10px -3px #aaa;
+    font-size: 16px;
+    display: none;
+}
+
+.templates-list-innr {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.template-item:hover {
+    color: #232323 !important;
+}
+
+.template-item {
+    font-weight: 600;
+    min-width: 150px;
+    transition: all 0.05s;
+    font-size: 14px;
+}
+
+i#templates-btn {
+    color: rgb(84 101 111 / 62%);
+    position: relative;
+    cursor: pointer;
+}
+
+i#templates-btn:hover {
+    color: #232323;
+}
+
+i#templates-btn:hover .template-item {
+    color: rgb(84 101 111 / 62%);
+}
+
+div#templates-placeholders {
+    display: flex;
+    padding: 10px 30px;
+    gap: 5px;
+    overflow: auto;
+    width: max-content;
+    height: max-content;
+    margin: auto;
+    flex-wrap: wrap;
+    flex-direction: row;
+    max-width: 500px;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+
+}
+input.template-placeholder-input {
+    padding: 4px 20px;
+    border-radius: 3px;
+    box-shadow: inset 0px 0px 5px -1px #aaa;
+}
+
+div#template-btn {
+    background: white;
+    padding: 7px 10px;
+    margin-right: -10px;
+    border-radius: 7px;
+}
+
+
+/* templates css */
+
+div#contactloader {
+    height: 68px !important;
+    position: relative !important;
+}
+
+#messages-container div#contactloader {
+    background-color: transparent !important;
+    height: 91px !important;
+    position: relative !important;
+}
+
+.settingpageopenButt {
+    padding: 8px;
+    /* background-color: #0000000f; */
+    border-radius: 50%;
+    margin-top: 2px;
+    cursor: pointer;
+    display: block;
+    margin-right: -8px;
+}
+
+.settingpageopenButt:hover {
+    background-color: #0000000f;
+}
+
+.filterMode-module-selected {
+    display: flex;
+}
+
+.filterMode-module-selected svg {
+    width: 17px;
+    height: 17px;
+    position: relative;
+    top: 3px;
+    margin-left: 2px;
+}
+

@@ -1700,7 +1700,7 @@ var APP = {
         message[APP.extensionFieldMsgId] = message_id;
         message[APP.extensionFieldReactionFrom] = reactionFrom;
         message[APP.extensionFieldReactionTo] = reactionTo;
-        if(APP.replyTagMessageId && APP.replyTagMessageId.startsWith("wamid.")){
+        if(APP.replyTagMessageId){
             message[APP.extensionFieldReplyMessageId] = APP.replyTagMessageId;
         }
         if(APP.selectedModule && APP.selectedRecord) {
@@ -1764,7 +1764,7 @@ var APP = {
             };
         }
 
-        if(APP.replyTagMessageId && APP.replyTagMessageId.startsWith("wamid.")) {
+        if(APP.replyTagMessageId) {
             reqBody["context"] = {
                 "message_id": APP.replyTagMessageId
             };

@@ -22,7 +22,7 @@ let isTyping = false;
 var APP = {
 
     extensionName: 'WhatsApp Business',
-    extensionAPI: 'telnyxforzohocrm__', // whatsappbusiness0__
+    extensionAPI: 'whatsappbusiness0__', // whatsappbusiness0__
     extensionSignal: "incomingmessages",
     extensionFunction: 'webhook',
     currentUser: {},

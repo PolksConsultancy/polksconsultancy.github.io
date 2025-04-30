@@ -63,6 +63,7 @@ var APP = {
         APP.extensionFieldTimestamp = APP.extensionAPI + "Timestamp";        
         APP.extensionFieldReactionFrom = APP.extensionAPI + "Reaction_From";        
         APP.extensionFieldReactionTo = APP.extensionAPI + "Reaction_To";
+        APP.extensionFieldReplyMessageId = APP.extensionAPI + "Reply_Message_Id";
 
         APP.extensionHistory = APP.extensionAPI + "WhatsApp_Business_History";
         APP.extensionContacts = APP.extensionAPI + "WhatsApp_Contacts";

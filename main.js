@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 APP.recordId = record.EntityId[0];
             }
             else {
-                APP.recordId = record.EntityId; 
+                APP.recordId = record.EntityId;
             }
             APP.module = record.Entity;
         }
@@ -22,14 +22,14 @@ let isTyping = false;
 var APP = {
 
     extensionName: 'WhatsApp Business',
-    extensionAPI: 'whatsappbusiness0__', // whatsappbusiness0__
+    extensionAPI: 'telnyxforzohocrm__', // whatsappbusiness0__
     extensionSignal: "incomingmessages",
     extensionFunction: 'webhook',
     currentUser: {},
     allUsers: {},
     currentContactId: "",
     contacts: {},
-    at: "EAAmTNTZCXDTkBO5aIUQ7YiejVRF1QhZBSVlsUquzV2uAumtrRnJ1WHMIxfsXEG7IjjozVOZCe6f1av0PiefNJ2tGCrEMvFm9fr26peXBPqDNpz1eNsYXobW6h7avW7LB8wl92oSMnFTOHekmvSNPxdrOa3q0zDHNjiEPdscRdk4RYDRoDOSUJ5VH4Fe8jxL92EuMFrK7WZCuZAEnmFhc34DAHMZCs3zAcpZC2MZD",
+    at: "EAAmTNTZCXDTkBO5ZCZBnSMyVEYe9U3Ur7OCek9kOxQm1KnudnUic9uEKHnkyv9bn4hn3TqaxPh4VxFystIvNQ6E1fWJ80VFSgwdOlLClPquKOewTilVZBy4WzxDjJMyZByZAvdbKVBpdzsVRn51CugeWOS80xYzlLRHNLbQiKN15gBBAxsvxURMyZCZAR25eAlIA4m5VYtUpm3o7Arn7u37rfqt19cEGkUZCn3DwZD",
     realtimeDuplicateChaeckArr: [],
     lastMessageDirection: "",
     dealStagesList: "",
@@ -39,6 +39,7 @@ var APP = {
     sendModeType: 'single',
     isBulk: false,
     selectedContacts: [],
+    whatsappTemplates: {},
     logo: `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="40" viewBox="0 0 180 40" fill="none"> <g clip-path="url(#clip0_2864_5776)"> <g clip-path="url(#clip1_2864_5776)"> <path d="M9.84909 0.5H0.978027L13.633 29.2527C13.7297 29.4724 14.0421 29.4702 14.1358 29.2495L18.3447 19.3485L9.84909 0.5Z" fill="black"/> <path d="M36.8708 0.5C36.8708 0.5 23.2742 31.6392 21.453 34.5108C19.3363 37.8492 17.9334 39.1235 15.3375 39.5318C15.3135 39.5355 15.2957 39.5563 15.2957 39.5807C15.2957 39.6081 15.318 39.6304 15.3453 39.6304H23.4696C26.989 39.6304 29.527 36.6915 30.9335 34.0962C32.532 31.1464 45.8982 0.5 45.8982 0.5H36.8708Z" fill="black"/> </g> <path d="M72.2275 25.4738C72.2088 25.5149 72.1505 25.5149 72.1317 25.4738L65.408 10.7144H61.6304C61.6304 10.7144 68.5601 26.376 69.2523 27.5462C69.9287 28.6898 70.7473 29.6326 72.1797 29.6326C73.6121 29.6326 74.4307 28.6898 75.1072 27.5462C75.7994 26.376 82.7291 10.7144 82.7291 10.7144H78.9515L72.2275 25.4738Z" fill="black"/> <path d="M92.7333 26.7567C89.0796 26.7567 86.6868 24.3696 86.6868 20.0652C86.6868 15.7609 89.0796 13.3741 92.7333 13.3741C96.374 13.3741 98.7795 15.7609 98.7795 20.0652C98.7795 24.3696 96.374 26.7567 92.7333 26.7567ZM92.7333 10.2828C87.0121 10.2828 83.3322 14.0002 83.3322 20.0652C83.3322 26.1306 87.0121 29.848 92.7333 29.848C98.4415 29.848 102.134 26.1306 102.134 20.0652C102.134 14.0002 98.4415 10.2828 92.7333 10.2828Z" fill="black"/> <path d="M121.463 10.7132V29.4176H117.59L108.564 15.7429V29.4176H105.261V10.7132H109.146L118.173 24.4791V10.7132H121.463Z" fill="black"/> <path d="M130.314 21.748L133.567 14.1088C133.585 14.0659 133.646 14.0659 133.664 14.1088L136.917 21.748H130.314ZM133.615 10.4994C132.255 10.4994 131.424 11.5346 130.876 12.5698C130.314 13.6306 123.598 29.4176 123.598 29.4176H127.049L128.977 24.8884H138.254L140.182 29.4176H143.633C143.633 29.4176 136.917 13.6306 136.355 12.5698C135.807 11.5346 134.975 10.4994 133.615 10.4994Z" fill="black"/> <path d="M152.969 22.2046H158.876C158.849 25.1108 156.144 26.7568 153.278 26.7568C149.683 26.7568 147.328 24.3695 147.328 20.0653C147.328 15.418 149.508 13.3468 153.479 13.3468C155.965 13.3468 158.033 14.3666 158.468 16.7169H161.893C161.293 12.602 157.515 10.2827 153.278 10.2827C147.648 10.2827 144.028 14.0001 144.028 20.0653C144.028 26.1305 147.648 29.7753 153.278 29.7753C155.651 29.7753 158.045 28.4987 158.888 27.1503L158.877 29.4175H162.037V19.3422H152.969V22.2046Z" fill="black"/> <path d="M179.022 13.8435V10.7132H165.616V29.4176H179.022V26.287H168.918V21.3698H178.234V18.2392H168.918V13.8435H179.022Z" fill="black"/> </g> <defs> <clipPath id="clip0_2864_5776"> <rect width="178.043" height="39.1304" fill="white" transform="translate(0.978271 0.5)"/> </clipPath> <clipPath id="clip1_2864_5776"> <rect width="45" height="39.1304" fill="white" transform="translate(0.978271 0.5)"/> </clipPath> </defs> </svg>`,
     init: async function() {
 
@@ -65,7 +66,7 @@ var APP = {
 
         APP.extensionHistory = APP.extensionAPI + "WhatsApp_Business_History";
         APP.extensionContacts = APP.extensionAPI + "WhatsApp_Contacts";
-        APP.extensionAPIAt = APP.extensionAPI+"at"
+        APP.extensionAPIAt = APP.extensionAPI+"at";
 
         await APP.inboxChatSetup();
         await APP.clickFunctions();
@@ -133,11 +134,14 @@ var APP = {
             APP.showRecordDetailsView("Contacts");
         });
 
-        $('#filterModuleList').on('change', function() {
+        $('#filterModuleList').on('change', function(e) {
+            let value = this.value;
+            $(".filterMode-module-selected-text").text(value ? value+'s' : 'All Modules');
+            APP.filterModeChangeAction(e.target.closest("#filterMode-modules"), true);
+            return;
             $(".filter-container .rowOptionsButton.selected").removeClass("selected");
             this.parentNode.parentNode.setAttribute("class", "rowOptionsButton selected");
-            let value = this.value;
-            $(".filterMode-module-selected").text(value ? value+'s ▼' : 'All Modules ▼');
+            value = this.value;
             var chatList = document.getElementById('chat-list');
             chatList.innerHTML = '';
             let filteredChats = value ? Object.values(APP.contacts).filter(chat => chat.details[APP.extensionFieldModule] && chat.details[APP.extensionFieldModule].toLowerCase().includes(value.toLowerCase())) : value == "" ? Object.values(APP.contacts) : '';
@@ -301,9 +305,6 @@ var APP = {
         APP.loaderElement = document.createElement('div');
         APP.loaderElement.innerHTML = APP.loader("loader");
 
-        APP.contactListloaderElement = document.createElement('div')
-        APP.contactListloaderElement.innerHTML = APP.loader("contactloader");
-
         APP.body.appendChild(APP.loaderElement);
 
         APP.contactList = document.getElementById('chat-list');
@@ -373,11 +374,15 @@ var APP = {
 
         await APP.firebaseSetup();
         await APP.realtimeListener();
+        await APP.renderWhatsappTemplates();
 
         $(APP.loaderElement).remove();
         
     },
-    filterModeChangeAction: function(thisSelected) {
+    filterModeChangeAction: function(thisSelected, dropdwonChangeAccess=false) {
+        if(!dropdwonChangeAccess && thisSelected.getAttribute("class").includes("selected")) {
+            return;
+        }
         $(".filter-container .rowOptionsButton.selected").removeClass("selected");
         thisSelected.setAttribute("class", "rowOptionsButton selected");
         if(thisSelected.getAttribute("id") == "filterMode-yours") {
@@ -389,10 +394,13 @@ var APP = {
         else if(thisSelected.getAttribute("id") == "filterMode-modules") {
             document.getElementById('filterModuleList').focus();
             document.getElementById('filterModuleList').click();
-            if($("#filterModuleList").val() == "Lead") {
+            if(APP.filterMode == "all" && $("#filterModuleList").val() == "") {
+                return;
+            }
+            else if($("#filterModuleList").val() == "Lead") {
                 APP.filterMode = "leads";
             }
-            if($("#filterModuleList").val() == "Contact") {
+            else if($("#filterModuleList").val() == "Contact") {
                 APP.filterMode = "contacts";
             }
             else {
@@ -404,7 +412,7 @@ var APP = {
         }
         APP.contactList.innerHTML = "";
         APP.filterModes[APP.filterMode].contacts.forEach(async contactId => {
-            await APP.addContactList(contactId);
+            await APP.addContactList(contactId, "loaded");
         });
         if(APP.filterModes[APP.filterMode].contacts.length < APP.contactsPerPage+1) {
             APP.loadContacts();
@@ -415,7 +423,7 @@ var APP = {
             return;
         }
         APP.isContactLoading = true;
-        APP.contactList.appendChild(APP.contactListloaderElement);
+        $("#chat-list").append(APP.loader("contactloader"));
         APP.contactListloader = document.getElementById('contactloader');
         setTimeout(async function() {
             await APP.getContacts(APP.filterModes[APP.filterMode].currentPage);
@@ -505,7 +513,7 @@ var APP = {
                 if(!APP.filterModes[APP.filterMode].contacts.includes(contactId)) {
                     let currentTime = new Date();
                     let oneWeekAgo = currentTime.setDate(currentTime.getDate() - 7);
-                    let contactLastActivityTime = APP.contacts[contactId].details.Modified_Time ? APP.contacts[contactId].details.Modified_Time : "";
+                    let contactLastActivityTime = APP.contacts[contactId].details[APP.extensionFieldActiveTime] ? APP.contacts[contactId].details[APP.extensionFieldActiveTime] : "";
                     if(APP.filterMode != "inActive" || new Date(contactLastActivityTime) < oneWeekAgo) {
                         APP.filterModes[APP.filterMode].contacts.push(contactId);
                         loadedContacts.push(APP.contacts[contactId]);
@@ -514,9 +522,9 @@ var APP = {
                 loadedContactsCount -= 1;
                 if(!loadedContactsCount) {
                     // sorted = Object.fromEntries(Object.entries(k).sort(([, a], [, b]) => a.text - b.text));
-                    loadedContacts.sort((a, b) => new Date(b.details.Modified_Time) - new Date(a.details.Modified_Time));
-                    loadedContacts.forEach(async function(contact) {
-                        await APP.addContactList(contact.id);
+                    loadedContacts.sort((a, b) => new Date(b.details[APP.extensionFieldActiveTime]) - new Date(a.details[APP.extensionFieldActiveTime]));
+                    loadedContacts.forEach(async function(contact) {  // contact active, his, timestamp
+                        await APP.addContactList(contact.id, "loaded");
                     });
                 }
             });
@@ -529,7 +537,7 @@ var APP = {
         let img = contact.details && contact.details.avatar ? contact.details.avatar : "person.png";
         let ownerImg = contact.details && contact.details.Owner && contact.details.Owner.id && APP.allUsers[contact.details.Owner.id].image_link ? APP.allUsers[contact.details.Owner.id].image_link : "user-thumbnail.png";
         let name = contact.details && contact.details.Name ? contact.details.Name : contactId;
-        let time = lastMessage && lastMessage.Modified_Time ? APP.formatWhatsAppTime(lastMessage.Modified_Time) : 'New';
+        let time = lastMessage && lastMessage[APP.extensionFieldTimestamp] ? APP.formatWhatsAppTime(lastMessage[APP.extensionFieldTimestamp]) : 'New';
         let user = lastMessage && lastMessage[APP.extensionFieldDirection] && lastMessage[APP.extensionFieldDirection] == "incoming" ? '' : contact.details && contact.details.Owner && contact.details.Owner.name && APP.currentUser.id != contact.details.Owner.id ? contact.details.Owner.name : 'You';
         let status = lastMessage && lastMessage[APP.extensionFieldDirection] && lastMessage[APP.extensionFieldDirection] == "incoming" ? '' : lastMessage && lastMessage[APP.extensionFieldStatus] ? lastMessage[APP.extensionFieldStatus] == "sent" ? APP.sentStatus : lastMessage[APP.extensionFieldStatus] == "delivered" ? APP.deliveredStatus : lastMessage[APP.extensionFieldStatus] == "read" ? APP.readStatus : APP.addedStatus : APP.addedStatus;          
         let message = lastMessage && lastMessage[APP.extensionFieldMessage] ? lastMessage[APP.extensionFieldMessage] : 'Start Coversation';
@@ -592,7 +600,9 @@ var APP = {
             contactElement.innerHTML = contantListElement;
             APP.contactList.appendChild(contactElement);
         }
-        // APP.moveContactToTop(contactId);
+        if(type != "loaded") {
+            APP.moveContactToTop(contactId);
+        }
     },
     histroryMap: function(contactId, messageId) {
 
@@ -656,7 +666,6 @@ var APP = {
                 APP.handleOnContactSelectionOnChange(contactElement.dataset.id, checkbox.checked);
             }
             return;
-
         }
         if(contactElement && APP.currentContactId != contactElement.dataset.id) {
             
@@ -672,28 +681,52 @@ var APP = {
                 if(contact.details[APP.extensionFieldContact]) {
                     APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
                     $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(APP.contacts[APP.currentContactId].details[APP.extensionFieldContact].Name);
+                    if($("#leadSelectOption").length) {
+                        $("#leadSelectOption").hide();
+                    }
+                    if($("#contactSelectOption").length) {
+                        $("#contactSelectOption").show();
+                    }
                 }
                 else if(contact.details[APP.extensionFieldLead]) {
                     APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
                     $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(APP.contacts[APP.currentContactId].details[APP.extensionFieldLead].Name);
+                    if($("#leadSelectOption").length) {
+                        $("#leadSelectOption").show();
+                    }
+                    if($("#contactSelectOption").length) {
+                        $("#contactSelectOption").hide();
+                    }
                 }
                 else {
                     await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query:APP.currentContactId, delay:false}).then( async function(data){
                         if(!data || !data.data) {
                             await ZOHO.CRM.API.searchRecord({Entity: "Leads", Type:"phone",Query:APP.currentContactId, delay:false}).then(async function(resp){
                                 if(!resp || !resp.data) {
-                                    let response = await ZOHO.CRM.API.insertRecord({Entity: "Lead",APIData:{Last_Name: APP.currentContactId, phone: APP.currentContactId},Trigger:["workflow"]}).then(function(data){});
-                                    
-                                    $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(response.data[0].Full_Name);
-                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = response.data[0].Full_Name;
-                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
-                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = response.data[0].id;
+                                    await ZOHO.CRM.API.insertRecord({Entity: "Leads",APIData:{Last_Name: APP.currentContactId, Phone: APP.currentContactId},Trigger:["workflow"]}).then(function(response){
+                                        $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(APP.currentContactId);
+                                        APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = APP.currentContactId;
+                                        APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
+                                        APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = response.data[0].details.id;
+                                    });
+                                    if($("#leadSelectOption").length) {
+                                        $("#leadSelectOption").show();
+                                    }
+                                    if($("#contactSelectOption").length) {
+                                        $("#contactSelectOption").hide();
+                                    }
                                 }
                                 else {
                                     $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(resp.data[0].Full_Name);
                                     APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = resp.data[0].Full_Name;
                                     APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
                                     APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = resp.data[0].id;
+                                    if($("#leadSelectOption").length) {
+                                        $("#leadSelectOption").show();
+                                    }
+                                    if($("#contactSelectOption").length) {
+                                        $("#contactSelectOption").hide();
+                                    }
                                 }
                             });
                         }
@@ -702,8 +735,30 @@ var APP = {
                             APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = data.data[0].Full_Name;
                             APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
                             APP.contacts[APP.currentContactId].details[APP.extensionFieldContact] = data.data[0].id;
+                            if($("#leadSelectOption").length) {
+                                $("#leadSelectOption").hide();
+                            }
+                            if($("#contactSelectOption").length) {
+                                $("#contactSelectOption").show();
+                            }
                         }
                     });
+                }
+                if(APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] == "Contact") {
+                    if($("#leadSelectOption").length) {
+                        $("#leadSelectOption").hide();
+                    }
+                    if($("#contactSelectOption").length) {
+                        $("#contactSelectOption").show();
+                    }
+                }
+                else {
+                    if($("#leadSelectOption").length) {
+                        $("#leadSelectOption").show();
+                    }
+                    if($("#contactSelectOption").length) {
+                        $("#contactSelectOption").hide();
+                    }
                 }
                 APP.renderMessages(APP.currentContactId);
                 APP.contacts[APP.currentContactId].initied = true;
@@ -725,7 +780,7 @@ var APP = {
             messagesContainer.innerHTML = "";
 
             if(Object.keys(APP.contacts[APP.currentContactId].messages).length) {
-                let sortingContacts = Object.values(APP.contacts[APP.currentContactId].messages).sort((a, b) => new Date(b.Modified_Time) - new Date(a.Modified_Time));
+                let sortingContacts = Object.values(APP.contacts[APP.currentContactId].messages).sort((a, b) => new Date(b[APP.extensionFieldTimestamp]) - new Date(a[APP.extensionFieldTimestamp]));
                 sortingContacts.forEach(async message => {
                     await APP.addMessage(message[APP.extensionFieldMsgId], APP.currentContactId, "loaded");
                 });
@@ -742,13 +797,14 @@ var APP = {
             return;
         }
         APP.isMessageLoading = true;
-        // APP.contactList.appendChild(APP.contactListloaderElement);
-        // APP.contactListloader = document.getElementById('contactloader');
+        messagesContainer = document.getElementById('messages-container');
+        $('#messages-container').prepend(APP.loader("contactloader"));
+        APP.contactListloader = document.getElementById('contactloader');
         setTimeout(async function() {
             await APP.getMessages(contactId);
             APP.contacts[contactId].currentPage++;
             APP.isMessageLoading = false;
-            // APP.contactListloader.remove();
+            APP.contactListloader.remove();
         }, 1000);
     },
     getMessages: async function(contactId) {
@@ -770,7 +826,7 @@ var APP = {
                 }
                 loadedMessagesCount -= 1;
                 if(!loadedMessagesCount) {
-                    loadedMessages.sort((a, b) => new Date(b.Modified_Time) - new Date(a.Modified_Time));
+                    loadedMessages.sort((a, b) => new Date(b[APP.extensionFieldTimestamp]) - new Date(a[APP.extensionFieldTimestamp]));
                     loadedMessages.forEach(async function(message) {
                         await APP.addMessage(message[APP.extensionFieldMsgId], contactId, "loaded");
                     });
@@ -828,7 +884,7 @@ var APP = {
                     APP.database.ref('incomingMessages/'+key).remove().then(() => {
                         console.log("Data deleted successfully");
                     }).catch((error) => {
-                        console.error("Error deleting data: ", error);
+                        console.log("Error deleting data: ", error);
                     });
                 }, 2000);
             });
@@ -1018,12 +1074,12 @@ var APP = {
                                                 <div class="rowOptions" id="createModuleSelectOption">
                                                     ${module == "Contacts" ? `<button class="rowOptionsButton" id="contactCreateSelectOption">
                                                         <div class="rowOptionsButtonIn">
-                                                        <div>Create Deal</div>
+                                                        <span>Create Deal</span>
                                                         </div>
                                                     </button>` : ''}
                                                     ${module == "Leads" ? `<button class="rowOptionsButton" id="leadCreateSelectOption">
                                                         <div class="rowOptionsButtonIn">
-                                                        <div>Create Contact</div>
+                                                        <span>Create Contact</span>
                                                         </div>
                                                     </button>` : ''}
                                                 </div>
@@ -1078,29 +1134,16 @@ var APP = {
         
         leadRecord = leadRecord ? leadRecord : APP.leadRecord;
         ZOHO.CRM.API.insertRecord({
-                Entity: "Contacts",
-                APIData: leadRecord
-            }).then(function(dealResponse) {
-                $("#dealMapConfirmCondainer .map-container").html(`<div style="
-                    z-index: 100000000;
-                    height: 100%;
-                    position: absolute;
-                    display: flex;
-                    overflow: hidden;
-                    align-items: center;
-                    width: 100%;
-                    justify-content: center;
-                    bottom: 0;
-                    padding: 0px 0px 35px 0px;
-                    left: 5px;
-                ">Created.</div>`);
-                setTimeout(() => {
-                    $("#dealMapConfirmCondainer").remove();
-                }, 1000);
-                
+            Entity: "Contacts",
+            APIData: leadRecord
+        }).then(function(contactResponse) {
+            // setTimeout(() => {
+                APP.updateLeadAfterConversion(leadRecord.id, contactResponse.data[0].details.id);
+            // }, 1000);
+            
         }).catch(function(error) {
-            console.error("Error in contact to deal conversion:", error);
-            let k = error.data[0].details.api_name+" "+error.data[0].message;
+            console.log("Error in contact to deal conversion:", error);
+            let errorStr = error.data[0].details.api_name+" "+error.data[0].message;
             $("#dealMapConfirmCondainer .map-container").html(`<div style="
                 z-index: 100000000;
                 height: 100%;
@@ -1113,7 +1156,7 @@ var APP = {
                 bottom: 0;
                 padding: 0px 0px 35px 0px;
                 left: 5px;
-            ">${k}</div>`);
+            ">${errorStr}</div>`);
             throw error; // Re-throw for caller to handle
         });
     },
@@ -1207,13 +1250,62 @@ var APP = {
                 APIData: contactRecord
             }).then(function(dealResponse) {
                 // setTimeout(() => {
-                    APP.updateContactAfterConversion(contactRecord.id, dealResponse.id);
+                    APP.updateContactAfterConversion(contactRecord.id, dealResponse.data[0].details.id);
                 // }, 1000);
                 console.log("Deal created successfully with ID:", dealResponse);
                 
         }).catch(function(error) {
-            console.error("Error in contact to deal conversion:", error);
+            console.log("Error in contact to deal conversion:", error);
             throw error; // Re-throw for caller to handle
+        });
+    },
+    updateLeadAfterConversion: function(lead_id, contact_id) {
+        let updateData = {
+            "Conversion_Status": "Converted",
+            "Converted_Contact": contact_id,
+            id: lead_id,
+            "Last_Conversion_Date": new Date().toISOString()
+        };
+        
+        ZOHO.CRM.API.updateRecord({
+            Entity: "Leads",
+            APIData: updateData
+        }).then(function(response) {
+            if($("#leadSelectOption").length) {
+                $("#leadSelectOption").hide();
+            }
+            if($("#contactSelectOption").length) {
+                $("#contactSelectOption").show();
+            }
+            APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
+            APP.contacts[APP.currentContactId].details[APP.extensionFieldContact] = contact_id;
+            APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = "";
+            APP.filterModes["leads"].contacts = APP.filterModes["leads"].contacts.filter(e => e !== lead_id);
+            APP.contactAction(APP.currentContactId);
+            ZOHO.CRM.API.deleteRecord({Entity:"Leads",RecordID: lead_id})
+            .then(function(data){
+                console.log(data)
+            });
+            console.log("lead updated after conversion");
+            $("#dealMapConfirmCondainer .map-container").html(`<div style="
+                z-index: 100000000;
+                height: 100%;
+                position: absolute;
+                display: flex;
+                overflow: hidden;
+                align-items: center;
+                width: 100%;
+                justify-content: center;
+                bottom: 0;
+                padding: 0px 0px 35px 0px;
+                left: 5px;
+            ">Created.</div>`);
+            setTimeout(() => {
+                $("#dealMapConfirmCondainer").remove();
+                $("#contactSelectOption").click();
+            }, 1000);
+        }).catch(function(error) {
+            console.warn("Failed to update contact after conversion", error);
         });
     },
     updateContactAfterConversion: function(contactId, dealId) {
@@ -1325,12 +1417,12 @@ var APP = {
             <div class="rowOptions" id="createModuleSelectOptionInRecord">
                 ${APP.module == "Contacts" ? `<button class="rowOptionsButton" id="contactCreateSelectOption">
                     <div class="rowOptionsButtonIn">
-                    <div>Create Deal</div>
+                    <span>Create Deal</span>
                     </div>
                 </button>` : ''}
                 ${APP.module == "Leads" ? `<button class="rowOptionsButton" id="leadCreateSelectOption">
                     <div class="rowOptionsButtonIn">
-                    <div>Create Contact</div>
+                    <span>Create Contact</span>
                     </div>
                 </button>` : ''}
             </div>
@@ -1372,7 +1464,7 @@ var APP = {
             let messageDirection = incoming ? 'message-in' : 'message-out';
             let messageboxHook = incoming ? `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-in</title><path opacity="0.13" fill="#0000000" d="M1.533,3.568L8,12.193V1H2.812 C1.042,1,0.474,2.156,1.533,3.568z"></path><path fill="currentColor" d="M1.533,2.568L8,11.193V0L2.812,0C1.042,0,0.474,1.156,1.533,2.568z"></path></svg></span>` : `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-out</title><path opacity="0.13" d="M5.188,1H0v11.193l6.467-8.625 C7.526,2.156,6.958,1,5.188,1z"></path><path fill="currentColor" d="M5.188,0H0v11.193l6.467-8.625C7.526,1.156,6.958,0,5.188,0z"></path></svg></span>`;
             let messageToReact = `<div class="message-text-to-react-out"><div class="message-text-to-react-in"><div><div class="message-text-to-react"><span class="message-text-to-react-icon" msgId="${msgId}"><svg viewBox="0 0 15 15" width="15" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>react</title><path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.5C0 11.6305 3.36946 15 7.5 15C11.6527 15 15 11.6305 15 7.5C15 3.36946 11.6305 0 7.5 0C3.36946 0 0 3.36946 0 7.5ZM10.995 8.69333C11.1128 8.67863 11.2219 8.66503 11.3211 8.65309C11.61 8.63028 11.8076 8.91918 11.6784 9.13965C10.8573 10.6374 9.29116 11.793 7.50455 11.793C5.71794 11.793 4.15181 10.6602 3.33072 9.16246C3.18628 8.91918 3.37634 8.63028 3.66524 8.65309C3.79123 8.66749 3.93521 8.68511 4.09426 8.70457C4.94292 8.80842 6.22074 8.96479 7.48174 8.96479C8.81855 8.96479 10.1378 8.80025 10.995 8.69333ZM5.41405 7.37207C6.05761 7.37207 6.60923 6.72851 6.60923 6.02978C6.60923 5.30348 6.05761 4.6875 5.41405 4.6875C4.77048 4.6875 4.21886 5.33106 4.21886 6.02978C4.20967 6.75609 4.77048 7.37207 5.41405 7.37207ZM10.7807 6.05619C10.7807 6.74114 10.24 7.37201 9.60912 7.37201C8.97825 7.37201 8.4375 6.76818 8.4375 6.05619C8.4375 5.37124 8.97825 4.74037 9.60912 4.74037C10.24 4.74037 10.7807 5.34421 10.7807 6.05619Z" fill="currentColor"></path></svg></span></div></div></div></div>`;
-            let messageTime = APP.getCurrentTime(message.Created_Time);
+            let messageTime = APP.getCurrentTime(message[APP.extensionFieldTimestamp]);
             let messageText = decodeURIComponent(decodeURIComponent(message[APP.extensionFieldEncodeMessage]));
             let messageChatImg = `<div class="message-chat-img-div"><img alt="" draggable="false" class="message-chat-img" tabindex="-1" src="${incoming ? 'person.png' : APP.currentUser.image_link ? APP.currentUser.image_link : 'person.png'}"></div>`;
             let messageOwnerName = !incoming && message.Owner && typeof(message.Owner) == "object" && message.Owner.name ? `<div class="message-owner"><span class="message-owner-name">${message.Owner.name}</span></div>` : !incoming && message.Owner && typeof(message.Owner) == "string" && APP.allUsers[message.Owner] && APP.allUsers[message.Owner].full_name ? `<div class="message-owner"><span class="message-owner-name">${APP.allUsers[message.Owner].full_name}</span></div>` : '';
@@ -1505,7 +1597,7 @@ var APP = {
         let month = String(date.getMonth() + 1).padStart(2, '');
         let year = date.getFullYear();
         
-        return `${day}-${month}-${year}`;
+        return `${day}/${month}/${year}`;
     },
     toIsoString: function(date) {
         if(!date) return;
@@ -1546,6 +1638,10 @@ var APP = {
                 document.getElementById('message-input').textContent = "";
                 APP.closeLoaderPopupForBulkSending();
                 APP.showNotification("Messages sent successfully");
+                APP.selectedTemplate = null;
+                $("#templates-placeholders").empty();
+                $("#templates-placeholders").hide();
+
             }, 1000);
             return;
         }
@@ -1562,6 +1658,14 @@ var APP = {
         let messageText = messageInput.textContent.trim();
     
         if(!messageText) return;
+        let parameters = [];
+        if(APP.selectedTemplate && APP.selectedTemplate.placeholders && APP.selectedTemplate.placeholders.length > 0) {
+            parameters = await APP.getAllCurrentTemplateParameters();
+            if(APP.selectedTemplate.placeholders && APP.selectedTemplate.placeholders.length > 0){
+                messageText = APP.updatePlaceholderValuesInMessageText(messageText);
+            }
+            if(parameters == false) return;
+        }
 
         let message_id = new Date().getTime()+"";
         let from = "";
@@ -1575,6 +1679,7 @@ var APP = {
         let reactionTo = "";
 
         let message = {};
+
         message[APP.extensionFieldId] = "";
         message[APP.extensionFieldName] = contactName;
         message[APP.extensionFieldOwner] = owner;
@@ -1593,12 +1698,12 @@ var APP = {
             message[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
             message[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
         }
-        message["Modified_Time"] = APP.toIsoString(new Date());
 
         APP.contacts[contactId].messages[message_id] = message;
         if(!APP.isBulk) {
             APP.addMessage(message_id, contactId, "sendMessage");
             messageInput.textContent = '';
+            $("#templates-placeholders").hide();
         }
 
         let sendButton = document.getElementById('send-button');
@@ -1621,25 +1726,42 @@ var APP = {
         APP.contacts[contactId].details = Object.assign(APP.contacts[contactId].details, contact);
         await APP.addContactList(contactId);
 
+        let reqBody = {};
+        if(APP.selectedTemplate){
+            reqBody = {
+                "messaging_product": "whatsapp",
+                "to": contactId,
+                "type": "template",                    
+                "recipient_type": "individual",
+                "template": {
+                    "name": APP.selectedTemplate.name, 
+                    "language": { "code": APP.selectedTemplate.language },
+                },
+            };
+            if(parameters.length){
+                reqBody.template.components = parameters;
+            }
+        }
+        else{
+            reqBody = {
+                "messaging_product": "whatsapp",
+                "to": contactId,
+                "type": "text",                    
+                "recipient_type": "individual",
+                "text": {
+                    "preview_url": false,
+                    "body": String(messageText)
+                }
+            };
+        }
+
         let request = {
             url : `https://graph.facebook.com/v22.0/581984271672102/messages`,
             headers: { 
                 "Authorization": "Bearer "+APP.at,
                 "Content-Type": "application/json"
             },
-            body: {
-                "messaging_product": "whatsapp",
-                "to": contactId,
-                "type": "text",                    
-                "recipient_type": "individual",
-                // "template": {
-                //     "name": "test_template", "language": { "code": "en_US" }
-                // },                    
-                "text": {
-                    "preview_url": false,
-                    "body": String(messageText)
-                }
-            }
+            body: reqBody
         };
 
         ZOHO.CRM.HTTP.post(request).then(async function(resp) {
@@ -1665,6 +1787,10 @@ var APP = {
 
             await APP.histroyAction(contactId, message_id);
             await APP.contactAction(contactId);
+            if(!APP.isBulk) {
+                APP.selectedTemplate = null;
+                $("#templates-placeholders").empty();
+            }
 
         });
         
@@ -1678,13 +1804,13 @@ var APP = {
     firebaseSetup: function() {
         // Your Firebase config
         var firebaseConfig = {
-            apiKey: "AIzaSyD2EuYfB9ZM7j4Uerei3vtGGFJ65kkSJ9Y",
-            authDomain: "pols-whatsapp.firebaseapp.com",
-            databaseURL: "https://pols-whatsapp-default-rtdb.firebaseio.com",
-            projectId: "pols-whatsapp",
-            storageBucket: "pols-whatsapp.firebasestorage.app",
-            messagingSenderId: "300523207681",
-            appId: "1:300523207681:web:d2174d4676e4a0dd465400"
+                apiKey: "AIzaSyBCf6IVr19vkFBrrKD8KM8-G7pIewuwlwQ",
+                authDomain: "whatsapp-ddb1d.firebaseapp.com",
+                databaseURL: "https://whatsapp-ddb1d-default-rtdb.europe-west1.firebasedatabase.app",
+                projectId: "whatsapp-ddb1d",
+                storageBucket: "whatsapp-ddb1d.firebasestorage.app",
+                messagingSenderId: "539599988080",
+                appId: "1:539599988080:web:87978ba53561d30c881bb5"
             };
     
             // Initialize Firebase
@@ -1706,7 +1832,7 @@ var APP = {
             let message_id = data.messages[0].reaction && data.messages[0].reaction.message_id ? data.messages[0].reaction.message_id : data.messages[0].id;
             let from = data.messages[0].from;
             let contactId = from;
-            let contactName = "incoming from "+ contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldName] ? APP.contacts[contactId].details[APP.extensionFieldName] : contactId;
+            let contactName = "incoming from "+ contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldName] ? APP.contacts[contactId].details[APP.extensionFieldName] : data.contacts && data.contacts[0] && data.contacts[0].profile && data.contacts[0].profile.name ? data.contacts[0].profile.name : contactId;
             let owner = contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldOwner] && APP.contacts[contactId].details[APP.extensionFieldOwner].id ? APP.contacts[contactId].details[APP.extensionFieldOwner].id : '';
             let to = data.metadata.display_phone_number;
             let time = Number(data.messages[0].timestamp);
@@ -1734,11 +1860,10 @@ var APP = {
                 message[APP.extensionFieldReactionTo] = reactionTo;
             }
             message[APP.extensionFieldMsgId] = message_id;
-            if(APP.selectedModule && APP.selectedRecord) {
-                message[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-                message[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
-            }
-            message["Modified_Time"] = APP.toIsoString(new Date());
+            // if(APP.selectedModule && APP.selectedRecord) {
+            //     message[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
+            //     message[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+            // }
 
             if(contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id]) {
                 if(!reactionFrom) {
@@ -1759,10 +1884,10 @@ var APP = {
             contact[APP.extensionFieldLastMessage] = contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id] ? APP.contacts[contactId].messages[message_id] : message;
             contact[APP.extensionFieldActiveTime] = reactionFrom ? '' : time;
             contact[APP.extensionFieldStatus] = "";
-            if(APP.selectedModule && APP.selectedRecord) {
-                contact[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-                contact[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
-            }
+            // if(APP.selectedModule && APP.selectedRecord) {
+            //     contact[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
+            //     contact[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+            // }
             
             if(APP.contacts[contactId]) {
                 contact = Object.entries(contact).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
@@ -1782,6 +1907,23 @@ var APP = {
                     currentPage: 1
                 };
                 APP.contacts[contactId].messages[message_id] = message;
+
+                await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query:contactId, delay:false}).then( async function(data){
+                    if(!data || !data.data) {
+                        await ZOHO.CRM.API.searchRecord({Entity: "Leads", Type:"phone",Query:contactId, delay:false}).then(async function(resp){
+                            if(resp && resp.data) {
+                                APP.contacts[contactId].details[APP.extensionFieldName] = resp.data[0].Full_Name;
+                                APP.contacts[contactId].details[APP.extensionFieldModule] = "Lead";
+                                APP.contacts[contactId].details[APP.extensionFieldLead] = resp.data[0].id;
+                            }
+                        });
+                    }
+                    else {
+                        APP.contacts[contactId].details[APP.extensionFieldName] = data.data[0].Full_Name;
+                        APP.contacts[contactId].details[APP.extensionFieldModule] = "Contact";
+                        APP.contacts[contactId].details[APP.extensionFieldContact] = data.data[0].id;
+                    }
+                });
             }
             
             if(APP.currentContactId == contactId) {
@@ -1791,18 +1933,20 @@ var APP = {
                     APP.database.ref('incomingMessages/'+key).remove().then(() => {
                         // console.log("Data deleted successfully");
                     }).catch((error) => {
-                        console.error("Error deleting data: ", error);
+                        console.log("Error deleting data: ", error);
                     });
                 }, 2000);
             }
             else if(data.messages[0].type == "text" && APP.currentContactId != contactId) {
                 APP.contacts[contactId].unread += 1;
             }
+            if(!APP.filterModes["all"].contacts.includes(contactId)) {
+                APP.filterModes["all"].contacts.push(contactId);
+            }
             await APP.addContactList(contactId);
             
         }, (error) => {
-            console.error("Listener error:", error);
-            document.getElementById('data-container').textContent = "Error: " + error.message;
+            console.log("Listener error:", error);
         });
 
 
@@ -1819,44 +1963,46 @@ var APP = {
             let from = "";
             let to = data.statuses[0].recipient_id;
             let contactId = to;
-            let contactName = contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldName] ? APP.contacts[contactId].details[APP.extensionFieldName] : contactId;
+            let contactName = contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldName] ? APP.contacts[contactId].details[APP.extensionFieldName] : data.contacts && data.contacts[0] && data.contacts[0].profile && data.contacts[0].profile.name ? data.contacts[0].profile.name : contactId;
             let owner = contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldOwner] && APP.contacts[contactId].details[APP.extensionFieldOwner].id ? APP.contacts[contactId].details[APP.extensionFieldOwner].id : '';
             let time = data.statuses[0].timestamp;
             let status = data.statuses[0].status;            
 
             if(contactId && APP.contacts[contactId] && APP.contacts[contactId].messages[message_id]) {
-                APP.contacts[contactId].messages[message_id][APP.extensionFieldStatus] = status;
-                let message = APP.contacts[contactId].messages[message_id];
-                if(message && message[APP.extensionFieldMessage]) {
-                    let contact = APP.contacts[contactId];
-                    contact[APP.extensionFieldId] = "";
-                    contact[APP.extensionFieldName] = contactName;
-                    contact[APP.extensionFieldOwner] = owner;
-                    contact[APP.extensionFieldWhatsAppNumber] = contactId;
-                    contact[APP.extensionFieldLastMessage] = contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id] ? APP.contacts[contactId].messages[message_id] : message;
-                    contact[APP.extensionFieldActiveTime] = time;
-                    contact[APP.extensionFieldStatus] = "";
-                    if(APP.selectedModule && APP.selectedRecord) {
-                        contact[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-                        contact[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+                let thisStatus = APP.contacts[contactId].messages[message_id][APP.extensionFieldStatus];
+                if((thisStatus != "read" && status == "read") || (thisStatus != "read" && status == "delivered") || (thisStatus != "delivered" && thisStatus != "read" && status == "sent")) {
+                    APP.contacts[contactId].messages[message_id][APP.extensionFieldStatus] = status;
+                    let message = APP.contacts[contactId].messages[message_id];
+                    if(message && message[APP.extensionFieldMessage]) {
+                        let contact = APP.contacts[contactId];
+                        contact[APP.extensionFieldId] = "";
+                        contact[APP.extensionFieldName] = contactName;
+                        contact[APP.extensionFieldOwner] = owner;
+                        contact[APP.extensionFieldWhatsAppNumber] = contactId;
+                        contact[APP.extensionFieldLastMessage] = contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id] ? APP.contacts[contactId].messages[message_id] : message;
+                        contact[APP.extensionFieldActiveTime] = time;
+                        contact[APP.extensionFieldStatus] = "";
+                        // if(APP.selectedModule && APP.selectedRecord) {
+                        //     contact[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
+                        //     contact[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+                        // }
+                        contact = Object.entries(contact).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
+                        APP.contacts[contactId].details = Object.assign(APP.contacts[contactId].details, contact);
+                        APP.addContactList(contactId);
                     }
-                    contact = Object.entries(contact).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
-                    APP.contacts[contactId].details = Object.assign(APP.contacts[contactId].details, contact);
-                    APP.addContactList(contactId);
+                    APP.addMessage(message_id, contactId, "outgoing"); 
                 }
-                APP.addMessage(message_id, contactId, "outgoing"); 
             }
             setTimeout(() => {
                 APP.database.ref('outgoingMessages/'+key).remove().then(() => {
                     console.log("Data deleted successfully");
                 }).catch((error) => {
-                    console.error("Error deleting data: ", error);
+                    console.log("Error deleting data: ", error);
                 });
             }, 2000);
 
         }, (error) => {
-            console.error("Listener error:", error);
-            document.getElementById('data-container').textContent = "Error: " + error.message;
+            console.log("Listener error:", error);
         });
 
     },
@@ -1866,11 +2012,23 @@ var APP = {
     emojiAddFunction: function(thisSelected) {
         $(".message-input").append($(thisSelected).text());
     },
-    settingsPopup: function() {
+    settingsPopup: async function() {
         APP.passwordOpenIcon = `<svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-on</title><path fill-rule="evenodd" clip-rule="evenodd" d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM9 12C9 10.34 10.34 9 12 9C13.66 9 15 10.34 15 12C15 13.66 13.66 15 12 15C10.34 15 9 13.66 9 12Z" fill="currentColor"></path></svg>`;
         APP.passwordCloseIcon = `<svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-off</title><path d="M12 7C14.76 7 17 9.24 17 12C17 12.65 16.87 13.26 16.64 13.83L19.56 16.75C21.07 15.49 22.26 13.86 22.99 12C21.26 7.61 16.99 4.5 11.99 4.5C10.59 4.5 9.25 4.75 8.01 5.2L10.17 7.36C10.74 7.13 11.35 7 12 7ZM2 4.27L4.28 6.55L4.74 7.01C3.08 8.3 1.78 10.02 1 12C2.73 16.39 7 19.5 12 19.5C13.55 19.5 15.03 19.2 16.38 18.66L16.8 19.08L19.73 22L21 20.73L3.27 3L2 4.27ZM7.53 9.8L9.08 11.35C9.03 11.56 9 11.78 9 12C9 13.66 10.34 15 12 15C12.22 15 12.44 14.97 12.65 14.92L14.2 16.47C13.53 16.8 12.79 17 12 17C9.24 17 7 14.76 7 12C7 11.21 7.2 10.47 7.53 9.8ZM11.84 9.02L14.99 12.17L15.01 12.01C15.01 10.35 13.67 9.01 12.01 9.01L11.84 9.02Z" fill="currentColor"></path></svg>`;
         APP.settingsPopupElement = `<div class="popupInit accessKeyPopup" style="opacity: 0; overflow: auto; width: 100%; height: 100%; top: 0px; visibility: visible; position: fixed; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.32); z-index: 0; left: 0px; transition: 0.1s;"><div class="popupInitIn" role="dialog" style="width: 100%;min-height: 100%;height: 600px;justify-content: center;flex-direction: column;box-sizing: border-box;display: flex;align-items: center;" onclick="$(event.target).attr('class') == $('.accessKeyPopup .popupInitIn').attr('class') ? APP.settingsPopupClose() : '';"><div class="popupInitBody" data-animate-modal-popup="true" style="opacity: 1; transform: scaleX(0) scaleY(0); padding: 22px 24px 20px; overflow: hidden; width: 400px; box-shadow: rgba(0, 0, 0, 0.26) 0px 2px 18px 0px, rgba(0, 0, 0, 0.1) 0px 8px 10px 0px; flex-direction: column; flex: 0 0 auto; box-sizing: border-box; display: flex; border-radius: 18px; background-color: rgb(255, 255, 255); transition: 0.3s;"><div class="popupInitBodyOut" data-animate-modal-body="true" style=" flex-shrink: 1; white-space: normal; position: relative; word-wrap: break-word; flex-basis: 100%; flex-grow: 1; "><div class="popupInitBodyIn" style=" font-size: .8875rem; line-height: 1.43; "><div class="popupInitBodyMain" style=" display: flex; flex-direction: column; flex-wrap: nowrap; align-self: auto; justify-self: auto; min-width: 0; min-height: 0; "> <div class="popupInitBodyMainIn" style=" "> <div class="popupInitBodyTitle" style="min-width: 0;min-height: 0;flex-shrink: 1;flex-wrap: nowrap;flex-basis: auto;align-self: center;order: 0;flex-grow: 0;justify-self: auto;width: 100%;text-align: left;padding-left: 15px;padding-bottom: 20px;"><div class="popupInitBodyTitleText" style=" padding-top: 20px; color: #0a0a0a; font-size: 1.1875rem; line-height: 1.4737; font-weight: 600; ">Enter your access token</div></div> <div style="padding-bottom: 12px;min-width: 0;min-height: 0;padding-top: 20px;padding-left: 8px;flex-shrink: 1;flex-wrap: nowrap;align-self: stretch;flex-basis: auto;padding-right: 8px;order: 0;flex-grow: 0;justify-self: auto;" padding="40,8,12,8" class="popupInitBodyInputOut"><div class="popupInitBodyInputIn" style=" min-width: 150px; border-bottom-width: 1px; border-bottom-style: solid; padding-bottom: 1px; border-bottom-color: #959393; background-color: #fff; display: flex; position: relative; "><input class="popupInitBodyInput" placeholder="Access Token" type="password" fdprocessedid="43n9wk" style=" border-bottom-style: unset; border-top-width: unset; border-top-style: unset; border-bottom-width: unset; overflow-x: hidden; padding-top: 6px; border-top-color: unset; border-bottom-color: unset; overflow-y: hidden; padding-bottom: 6px; color: var(--primary); padding-right: 6px; border-left-width: unset; background-color: #fff; border-right-color: unset; border-left-style: unset; border-left-color: unset; font-size: 1rem; border-right-width: unset; flex-grow: 1; padding-left: 6px; border-right-style: unset; outline: none; -webkit-user-select: text; margin: 0; font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif; "><button class="popupInitBodyInputButton" tabindex="0" type="button" aria-label="Show" style=" margin: 0; font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif; background: none; border: 0; outline: none; padding: 0; font-size: 100%; cursor: pointer; color: inherit; " onclick="$('.accessKeyPopup .popupInitBodyInput').attr('type') == 'text' ? $('.accessKeyPopup .popupInitBodyInput').attr('type', 'password').parent().find('.popupInitBodyInputButtonSpan').html(APP.passwordCloseIcon) : $('.accessKeyPopup .popupInitBodyInput').attr('type', 'text').parent().find('.popupInitBodyInputButtonSpan').html(APP.passwordOpenIcon);"><span aria-hidden="true" data-icon="visibility-off" class="popupInitBodyInputButtonSpan" style=" color: #1daa61; "><svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-off</title><path d="M12 7C14.76 7 17 9.24 17 12C17 12.65 16.87 13.26 16.64 13.83L19.56 16.75C21.07 15.49 22.26 13.86 22.99 12C21.26 7.61 16.99 4.5 11.99 4.5C10.59 4.5 9.25 4.75 8.01 5.2L10.17 7.36C10.74 7.13 11.35 7 12 7ZM2 4.27L4.28 6.55L4.74 7.01C3.08 8.3 1.78 10.02 1 12C2.73 16.39 7 19.5 12 19.5C13.55 19.5 15.03 19.2 16.38 18.66L16.8 19.08L19.73 22L21 20.73L3.27 3L2 4.27ZM7.53 9.8L9.08 11.35C9.03 11.56 9 11.78 9 12C9 13.66 10.34 15 12 15C12.22 15 12.44 14.97 12.65 14.92L14.2 16.47C13.53 16.8 12.79 17 12 17C9.24 17 7 14.76 7 12C7 11.21 7.2 10.47 7.53 9.8ZM11.84 9.02L14.99 12.17L15.01 12.01C15.01 10.35 13.67 9.01 12.01 9.01L11.84 9.02Z" fill="currentColor"></path></svg></span></button></div><div class="" style=" padding-top: 4px; display: flex; flex-direction: row; "><div>&nbsp;</div></div></div> </div> <div class="popupInitBodyMainOut popupInitBodyTitle" style="min-width: 0;min-height: 0;flex-shrink: 1;flex-wrap: nowrap;flex-basis: auto;align-self: center;order: 0;flex-grow: 0;justify-self: auto;width: 100%;text-align: left;padding-left: 15px;padding-bottom: 20px;display: none;"><div class="popupInitBodyTitleText" style=" padding-top: 20px; color: #0a0a0a; font-size: 1.1875rem; line-height: 1.4737; font-weight: 600; ">Saving...</div></div><div class="popupBottomDiv" paddingtop="20" style="min-width: 0px;min-height: 0px;padding-top: 20px;flex-flow: row;place-self: stretch auto;flex-basis: auto;display: flex;column-gap: 16px;order: 0;align-items: flex-start;flex-grow: 0;justify-content: flex-end;"><button class="popupBottomCloseButton" fdprocessedid="arjw17" style="margin: 0;font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif;background: none;border: 0;outline: none;border-bottom-width: 1px;padding-top: 10px;border-top-color: transparent;border-bottom-style: solid;padding-bottom: 10px;border-top-width: 1px;border-bottom-color: transparent;border-top-style: solid;line-height: 1.1429;border-left-width: 1px;padding-right: 24px;white-space: nowrap;border-right-style: solid;border-right-color: transparent;border-right-width: 1px;font-weight: 500;border-top-right-radius: 24px;transition-property: all;padding-left: 24px;transition-timing-function: ease-out;transition-duration: .18s;border-bottom-left-radius: 24px;background-color: #f7f5f3;border-left-style: solid;border-top-left-radius: 24px;display: inline-block;position: relative;border-bottom-right-radius: 24px;color: #00000099;outline-offset: 2px;border-left-color: transparent;font-size: .875rem;cursor: pointer;" onclick="$('.accessKeyPopup .popupInitIn').click();"><div class="popupBottomCloseButtonDiv"><div class="popupBottomCloseButtonText" gap="8" style="flex-grow: 1;">Cancel</div></div></button><button class="popupBottomSaveButton" fdprocessedid="u1g4au" style="margin: 0;font-family: &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, &quot;Lucida Grande&quot;, Arial, &quot;Ubuntu&quot;, &quot;Cantarell&quot;, &quot;Fira Sans&quot;, sans-serif;background: none;border: 0;outline: none;border-bottom-width: 1px;padding-top: 10px;border-top-color: transparent;border-bottom-style: solid;padding-bottom: 10px;border-top-width: 1px;border-bottom-color: transparent;border-top-style: solid;line-height: 1.1429;border-left-width: 1px;padding-right: 24px;white-space: nowrap;border-right-style: solid;border-right-color: transparent;border-right-width: 1px;font-weight: 500;border-top-right-radius: 24px;transition-property: all;padding-left: 24px;transition-timing-function: ease-out;transition-duration: .18s;border-bottom-left-radius: 24px;background-color: #1daa61;border-left-style: solid;border-top-left-radius: 24px;display: inline-block;position: relative;border-bottom-right-radius: 24px;color: #fff;outline-offset: 2px;border-left-color: transparent;font-size: .875rem;cursor: pointer;" onclick="APP.saveAccessToken($('.accessKeyPopup .popupInitBodyInput').val());"><div class="popupBottomSaveButtonDiv"><div class="popupBottomSaveButtonText" gap="8" style="flex-grow: 1;">Save</div></div></button></div></div></div></div></div></div></div>`;
         $("body").append(APP.settingsPopupElement);
+        
+        APP.credential = await ZOHO.CRM.API.getOrgVariable(APP.extensionAPIAt).then(function(apiKeyData){
+            if(apiKeyData && apiKeyData.Success && apiKeyData.Success.Content && apiKeyData.Success.Content != "0"){
+                return JSON.parse(apiKeyData.Success.Content);
+            }
+            else {
+                return {};
+            }
+        });
+
+        // APP.at = APP.credential[APP.extensionAPIAt];
+        $('.accessKeyPopup .popupInitBodyInput').val(APP.at);
     },
     settingsPopupOpen: function() {
         $('.accessKeyPopup.popupInit').css('opacity', '1').css('z-index', '800').find('.popupInitBody').css('transform', 'scaleX(1) scaleY(1)');
@@ -1880,6 +2038,8 @@ var APP = {
         $('.accessKeyPopup.popupInit').css('opacity', '0').css('z-index', '0').find('.popupInitBody').css('transform', 'scaleX(0) scaleY(0)');
     },
     saveAccessToken: async function(accesskey) {
+        accesskey = accesskey.trim();
+        if(!accesskey) return;
         let value = {};
         value[APP.extensionAPIAt] = accesskey;
         $(".accessKeyPopup .popupInitBodyMainIn").css("display", "none");
@@ -1887,9 +2047,10 @@ var APP = {
         $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Saving...");
         return await ZOHO.CRM.CONNECTOR.invokeAPI("crm.set", {"apiname": APP.extensionAPIAt, "value": value}).then(function(res) {
             if(res && JSON.parse(res) && JSON.parse(res).status_code && JSON.parse(res).status_code == "200"){
+                APP.at = accesskey;
                 $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Saved");
                 setTimeout(function() {
-                    if($(".accessKeyPopup .popupInitBodyMainIn").is(":visible")) {
+                    if($(".accessKeyPopup .popupInitBodyMain").is(":visible")) {
                         APP.settingsPopupClose();
                         $(".accessKeyPopup .popupInitBodyMainIn").css("display", "block");
                         $(".accessKeyPopup .popupInitBodyMainOut").css("display", "none");
@@ -1901,7 +2062,7 @@ var APP = {
             else {
                 $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Failed");
                 setTimeout(function() {
-                    if($(".accessKeyPopup .popupInitBodyMainIn").is(":visible")) {
+                    if($(".accessKeyPopup .popupInitBodyMain").is(":visible")) {
                         APP.settingsPopupClose();
                         $(".accessKeyPopup .popupInitBodyMainIn").css("display", "block");
                         $(".accessKeyPopup .popupInitBodyMainOut").css("display", "none");
@@ -2229,5 +2390,203 @@ var APP = {
             loaderPopup.remove();
         }
     },
+
+    // fetch whatsapp business api templates using api and render these list in ui and send to message
+    fetchTemplates: async function() {
+        try {
+            let request = {
+                url : `https://graph.facebook.com/v22.0/1424878765161652/message_templates`,
+                headers: { 
+                    "Authorization": "Bearer "+APP.at
+                }
+            };
+            
+            await ZOHO.CRM.HTTP.get(request).then(async function(resp) {
+                console.log(resp);
+                if(resp && JSON.parse(resp) && JSON.parse(resp).data && JSON.parse(resp).data.length > 0){
+                    let templates = JSON.parse(resp).data;
+                    console.log(templates);
+                    templates.forEach( async (template) => {
+                        template.display_name = template.name.replace(/_/g, " ");
+                        template.display_text_content = "";
+                        let previewContent = "";
+                        template.components.forEach((component) => {
+                            if (component.type === "HEADER" && component.text) {
+                              previewContent += `${component.text}\n\n`;
+                            }
+                            if (component.type === "BODY" && component.text) {
+                              previewContent += `${component.text}\n\n`;
+                            }
+                            if (component.type === "FOOTER" && component.text) {
+                              previewContent += `${component.text}\n\n`;
+                            }
+                            if (component.type === "BUTTONS") {
+                              component.buttons.forEach((button) => {
+                                previewContent += `${button.text}\n\n`;
+                              });
+                            }
+                        });
+                        template.display_text_content = previewContent;
+                        let placeholders = await APP.getPlaceHoldersListFromTemplate(template);
+                        template.placeholders = placeholders;
+                        APP.whatsappTemplates[template.name] = template;
+                    });
+                }
+                else{
+                    console.log("error in fetching templates");
+                }
+            });
+        } 
+        catch (error) {
+            console.error('Error fetching templates:', error.message);
+            return;
+        }
+    },
+
+    getPlaceHoldersListFromTemplate: async function(template) {
+        let placeholders = [];
+        if(template && template.components && template.components.length > 0){
+            template.components.forEach((component) => {
+                if (component.type === "HEADER" && component.text) {
+                    let headerText = component.text;
+                    let matches = headerText.match(/{{(.*?)}}/g);
+                    if (matches) {
+                        matches.forEach((match) => {
+                            placeholders.push({
+                                name: match.replace(/{{|}}/g, ""),
+                                type: component.type.toLowerCase()
+                            });
+                        });
+                    }
+                }
+                if (component.type === "BODY" && component.text) {
+                    let bodyText = component.text;
+                    let matches = bodyText.match(/{{(.*?)}}/g);
+                    if (matches) {
+                        matches.forEach((match) => {
+                            placeholders.push({
+                                name: match.replace(/{{|}}/g, ""),
+                                type: component.type.toLowerCase()
+                            });
+                        });
+                    }
+                }
+                if (component.type === "FOOTER" && component.text) {
+                    let footerText = component.text;
+                    let matches = footerText.match(/{{(.*?)}}/g);
+                    if (matches) {
+                        matches.forEach((match) => {
+                            placeholders.push({
+                                name: match.replace(/{{|}}/g, ""),
+                                type: component.type.toLowerCase()
+                            });
+                        });
+                    }
+                }
+                if (component.type === "BUTTONS") {
+                    component.buttons.forEach((button) => {
+                        let buttonText = button.text;
+                        let matches = buttonText.match(/{{(.*?)}}/g);
+                        if (matches) {
+                            matches.forEach((match) => {
+                                placeholders.push({
+                                    name: match.replace(/{{|}}/g, ""),
+                                    type: component.type.toLowerCase()
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        return placeholders;
+    },
+
+    renderWhatsappTemplates: async function(templates) {
+        await APP.fetchTemplates();
+        if(APP.whatsappTemplates.length == 0){
+            console.log("No templates available");
+            return;
+        }
+        let templateList = document.createElement('div');
+        templateList.className = 'templates-list-innr';
+        Object.keys(APP.whatsappTemplates).forEach(template => {
+            let templateData = APP.whatsappTemplates[template];
+            let templateItem = document.createElement('div');
+            templateItem.className = 'template-item';
+            templateItem.innerHTML = `
+                <div class="template-name" onclick="APP.handleTemplateOnClick('${template}')">${templateData.display_name}</div>
+            `;
+            templateList.appendChild(templateItem);
+        });
+        document.getElementById("templates-list-outer").appendChild(templateList);
+    },
+
+    showWhatsappTemplates: function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $("#templates-list-outer").toggle();
+        return;
+    },
+
+    handleTemplateOnClick: function(templateName) {
+        let template = APP.whatsappTemplates[templateName];
+        if(template){
+            console.log("Selected template: ", template);
+            APP.selectedTemplate = template;
+            const formattedText = template.display_text_content.replace(/\n/g, "<br>");
+            $("#message-input").html(formattedText);
+            if(template.placeholders){
+                let placeholders = template.placeholders;
+                let placeholderInputs = "";
+                placeholders.forEach((placeholder) => {
+                    placeholderInputs += `<input type="text" data-id="${placeholder.name}" data-type="${placeholder.type}" class="template-placeholder-input" placeholder="{{${placeholder.name}}}" />`;
+                });
+                $("#templates-placeholders").empty();
+                $("#templates-placeholders").show();
+                $("#templates-placeholders").html(placeholderInputs);
+            }
+        }
+        else{
+            console.log("Template not found");
+        }
+    },
+
+    getAllCurrentTemplateParameters: function() {
+        const components = [];
+        let isNotValid = false;
+        $(".template-placeholder-input").each(function () {
+            const sectionType = $(this).data("type"); 
+            const parameterName = $(this).data("id"); 
+            const parameterValue = $(this).val(); 
+            if(!parameterValue) {
+                isNotValid = true;
+                return false;
+            }
+            let section = components.find(comp => comp.type === sectionType);
+            if (!section) {
+                section = { type: sectionType, parameters: [] };
+                components.push(section);
+            }
+    
+            section.parameters.push({
+                type: "text", 
+                text: parameterValue,
+                parameter_name: parameterName
+            });
+        });
+    
+        return isNotValid? false: components;
+    },
+
+    updatePlaceholderValuesInMessageText: function(messageText) {
+        let updatedText = messageText;
+        $(".template-placeholder-input").each(function () {
+            const parameterName = $(this).data("id"); 
+            const parameterValue = $(this).val(); 
+            updatedText = updatedText.replace(`{{${parameterName}}}`, parameterValue);
+        });
+        return updatedText;
+    }
 
 };

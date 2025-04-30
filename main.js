@@ -29,7 +29,7 @@ var APP = {
     allUsers: {},
     currentContactId: "",
     contacts: {},
-    at: "EAAmTNTZCXDTkBO5ZCZBnSMyVEYe9U3Ur7OCek9kOxQm1KnudnUic9uEKHnkyv9bn4hn3TqaxPh4VxFystIvNQ6E1fWJ80VFSgwdOlLClPquKOewTilVZBy4WzxDjJMyZByZAvdbKVBpdzsVRn51CugeWOS80xYzlLRHNLbQiKN15gBBAxsvxURMyZCZAR25eAlIA4m5VYtUpm3o7Arn7u37rfqt19cEGkUZCn3DwZD",
+    at: "EAAmTNTZCXDTkBO9MCSLoeTFLwKcDtRiGd24iPgf90ebGSVZAnB6mDEJMxZBl1jtWQGl230jHIlHRt1qLVKjZBH6VwGS2IcTBwZAnBjE6wopgZAmXNAnBWx2IoeA9b4E38XxcoXdwxoUnNSQmdz5g3icrec2kCY5CvFgPLQ03suco8ej5RWRjATZBuZA48e0QP5EfA5x3I7pRYT2Kg6M1OBpyG7tZB9kPZAYaWo8CkZD",
     realtimeDuplicateChaeckArr: [],
     lastMessageDirection: "",
     dealStagesList: "",
@@ -2027,7 +2027,7 @@ var APP = {
             }
         });
 
-        APP.at = APP.credential[APP.extensionAPIAt];
+        // APP.at = APP.credential[APP.extensionAPIAt];
         $('.accessKeyPopup .popupInitBodyInput').val(APP.at);
     },
     settingsPopupOpen: function() {

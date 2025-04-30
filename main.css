@@ -5107,3 +5107,14 @@ i.fa-solid.fa-reply {
     color: #009688;
     font-weight: 600;
 }
+
+.reply-message-content-in {
+    width: 100%;
+}
+
+.reply-message-content-in .reply-message-content {
+    box-sizing: border-box;
+    margin: 5px 0px;
+    padding: 8px 10px;
+    zoom: 0.9;
+}

@@ -5074,11 +5074,14 @@ i.fa-solid.fa-reply {
     align-items: center;
     justify-content: center;
     gap: 19px;
+    background: #d9fdd3a3;
+    zoom: 0.85;
 }
 
 .reply-message-content {
     background: #ffffff87;
     padding: 10px 15px;
+    border: 0.1px solid #c7fabe;
     border-left: 4px solid #009688;
     border-radius: 7px;
     width: 100%;

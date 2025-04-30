@@ -1764,7 +1764,7 @@ var APP = {
             };
         }
 
-        if(APP.replyTagMessageId) {
+        if(APP.replyTagMessageId && APP.replyTagMessageId.startsWith("wamid.")) {
             reqBody["context"] = {
                 "message_id": APP.replyTagMessageId
             };

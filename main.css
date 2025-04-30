@@ -286,7 +286,7 @@ img.accountInfoIcon {
 }
 
 .input-container {
-    background-color: #f0f2f5;
+    background-color: #ececec;
     padding: 10px 16px;
     display: flex;
     align-items: center;
@@ -5050,3 +5050,61 @@ div#contactloader {
     margin-left: 2px;
 }
 
+
+
+
+
+
+.message-text-to-react-out {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+i.fa-solid.fa-reply {
+    color: #aaa;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.message-reply-tag-inner {
+    padding: 10px 20px;
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    gap: 19px;
+}
+
+.reply-message-content {
+    background: #ffffff87;
+    padding: 10px 15px;
+    border-left: 4px solid #009688;
+    border-radius: 7px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.close-reply-message svg path {
+    fill: #aaa;
+}
+
+.close-reply-message:hover svg path {
+    fill: crimson;
+}
+
+.close-reply-message:hover {
+    cursor: pointer;
+}
+
+.reply-message-text {
+    font-size: 15px;
+}
+
+.reply-message-author {
+    color: #009688;
+    font-weight: 600;
+}

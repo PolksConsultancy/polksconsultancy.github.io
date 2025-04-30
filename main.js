@@ -29,7 +29,7 @@ var APP = {
     allUsers: {},
     currentContactId: "",
     contacts: {},
-    at: "EAAmTNTZCXDTkBO9MCSLoeTFLwKcDtRiGd24iPgf90ebGSVZAnB6mDEJMxZBl1jtWQGl230jHIlHRt1qLVKjZBH6VwGS2IcTBwZAnBjE6wopgZAmXNAnBWx2IoeA9b4E38XxcoXdwxoUnNSQmdz5g3icrec2kCY5CvFgPLQ03suco8ej5RWRjATZBuZA48e0QP5EfA5x3I7pRYT2Kg6M1OBpyG7tZB9kPZAYaWo8CkZD",
+    at: "EAAmTNTZCXDTkBO5ZCZBnSMyVEYe9U3Ur7OCek9kOxQm1KnudnUic9uEKHnkyv9bn4hn3TqaxPh4VxFystIvNQ6E1fWJ80VFSgwdOlLClPquKOewTilVZBy4WzxDjJMyZByZAvdbKVBpdzsVRn51CugeWOS80xYzlLRHNLbQiKN15gBBAxsvxURMyZCZAR25eAlIA4m5VYtUpm3o7Arn7u37rfqt19cEGkUZCn3DwZD",
     realtimeDuplicateChaeckArr: [],
     lastMessageDirection: "",
     dealStagesList: "",
@@ -1484,12 +1484,17 @@ var APP = {
                 startConvImag = messageChatImg;
                 startConvOwner = messageOwnerName;
             }
+            if(message[APP.extensionFieldReplyMessageId]){
+                APP.replyMessageUIContent(messageId, contactId);
+            }
 
             let messageStatus = incoming ? '' : `<div class="message-status-out"><span class="message-status">${message[APP.extensionFieldStatus] == "sent" ? APP.sentStatus : message[APP.extensionFieldStatus] == "delivered" ? APP.deliveredStatus : message[APP.extensionFieldStatus] == "read" ? APP.readStatus : APP.addedStatus}</span></div>`;
             messageElement.innerHTML = `<div class="message-content-inner" data-id="">
                                         <div class="${ messageDirection }">
                                             <div class="message-content-main">
-                                                ${startConvIcon}${startConvImag}${messageToReact}
+                                                ${startConvIcon}${startConvImag}
+                                                
+                                                ${messageToReact}
                                                 <div class="message-content-main-div">
                                                     <div>
                                                         <div class="message-content-main-div-in">
@@ -2600,7 +2605,7 @@ var APP = {
         return updatedText;
     },
 
-    handleReplyMessageBtnOnClick: function(messageId, contactId) {
+    handleReplyMessageBtnOnClick: function(messageId, contactId, returnElem=false) {
         // add message content to message-reply-tag element in ui.
         APP.removeReplyTagMessage();
         if(!messageId) return;
@@ -2614,11 +2619,12 @@ var APP = {
             if(messageText && messageText.length > 0){
                 APP.replyTagMessageId = messageId;
                 let replyDiv = document.querySelector("#message-reply-tag");
-                replyDiv.innerHTML = `<div class="message-reply-tag-inner">
-                    <div class="reply-message-content">
+                let contentHTML = `<div class="reply-message-content">
                         <div class="reply-message-author">${message["whatsappbusiness0__Direction"]=="incoming"? APP.currentContactId: "You"}</div>
                         <div class="reply-message-text">${messageText}</div>
-                    </div>
+                    </div>`
+                let innerHTML = `<div class="message-reply-tag-inner">
+                    ${contentHTML}
                     <div class="close-reply-message" onclick="APP.removeReplyTagMessage()">
                         <svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none">
                             <title>close</title>
@@ -2626,6 +2632,9 @@ var APP = {
                         </svg>    
                     </div>
                 </div>`;
+
+                if(returnElem) return contentHTML;
+                replyDiv.innerHTML = innerHTML
                 $("#message-reply-tag").show();
             }
         }
@@ -2636,6 +2645,56 @@ var APP = {
         let replyDiv = document.querySelector("#message-reply-tag");
         replyDiv.innerHTML = "";
         $("#message-reply-tag").hide();
+    },
+
+    replyMessageUIContent: async function(messageId, contactId) {
+        if(!messageId) return;
+        if(APP.currentContactId != contactId) return;
+        if(!APP.contacts[contactId].messages[messageId]) return;
+        let message = APP.contacts[contactId].messages[messageId];
+        if(!message[APP.extensionFieldReplyMessageId]) return;
+        let replyMessageId = message[APP.extensionFieldReplyMessageId];
+        if(!APP.contacts[contactId].messages[replyMessageId]) {
+            await fetchMessageRecordByID(replyMessageId, contactId);
+            if(!APP.contacts[contactId].messages[replyMessageId]) return;
+        };
+        let msgId = message[APP.extensionFieldMsgId] ? encodeURIComponent(message[APP.extensionFieldMsgId].replaceAll(".", "_").replaceAll("=", "-")) : "";
+        let replyMessageHTML = await APP.handleReplyMessageBtnOnClick(replyMessageId, contactId, true);
+        let mensionDiv = $(`#${msgId} .message-content-main-div-in`);
+        if(mensionDiv){
+            mensionDiv.prepend(`<div class="reply-message-content-in">${replyMessageHTML}</div>`);
+        }
+    },
+
+    fetchMessageRecordByID: async function(messageId, contactId) {
+        const searchCriteria = `(${APP.extensionFieldMsgId}:equals:${messageId})`; 
+        ZOHO.CRM.API.searchRecord({
+            Entity: "whatsappbusiness0__WhatsApp_Business_History", 
+            Type: "criteria",
+            Query: searchCriteria,
+        })
+        .then(function (response) {
+            if (response && response.data) {
+                console.log("Search Results:", response.data);
+                let record = response.data[0];
+                if (record) {
+                    APP.contacts[contactId].messages[messageId] = record;
+                    return record;
+                } 
+                else {
+                    console.log("No matching records found.");
+                    return null;
+                }
+            } 
+            else {
+                console.log("No matching records found.");
+                return null;
+            }
+        })
+        .catch(function (error) {
+            console.error("Error searching records:", error);
+            return null;
+        });
     }
 
 };

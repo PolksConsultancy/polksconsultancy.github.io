@@ -627,6 +627,7 @@ var APP = {
         historyRecordData[APP.extensionFieldModule] = message[APP.extensionFieldModule] ? message[APP.extensionFieldModule] : "";
         historyRecordData[APP.extensionFieldLead] = message[APP.extensionFieldLead] ? message[APP.extensionFieldLead] : "";        
         historyRecordData[APP.extensionFieldContact] = message[APP.extensionFieldContact] ? message[APP.extensionFieldContact] : "";
+        historyRecordData[APP.extensionFieldReplyMessageId] = message[APP.extensionFieldReplyMessageId] ? message[APP.extensionFieldReplyMessageId] : "";
 
         historyRecordData = Object.entries(historyRecordData).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
         return historyRecordData;

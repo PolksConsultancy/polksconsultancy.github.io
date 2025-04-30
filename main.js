@@ -1463,7 +1463,7 @@ var APP = {
             let incoming = message[APP.extensionFieldDirection] == 'incoming' ? true : false;
             let messageDirection = incoming ? 'message-in' : 'message-out';
             let messageboxHook = incoming ? `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-in</title><path opacity="0.13" fill="#0000000" d="M1.533,3.568L8,12.193V1H2.812 C1.042,1,0.474,2.156,1.533,3.568z"></path><path fill="currentColor" d="M1.533,2.568L8,11.193V0L2.812,0C1.042,0,0.474,1.156,1.533,2.568z"></path></svg></span>` : `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-out</title><path opacity="0.13" d="M5.188,1H0v11.193l6.467-8.625 C7.526,2.156,6.958,1,5.188,1z"></path><path fill="currentColor" d="M5.188,0H0v11.193l6.467-8.625C7.526,1.156,6.958,0,5.188,0z"></path></svg></span>`;
-            let messageToReact = `<div class="message-text-to-react-out"><div class="message-text-to-react-in"><div><div class="message-text-to-react"><span class="message-text-to-react-icon" msgId="${msgId}"><svg viewBox="0 0 15 15" width="15" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>react</title><path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.5C0 11.6305 3.36946 15 7.5 15C11.6527 15 15 11.6305 15 7.5C15 3.36946 11.6305 0 7.5 0C3.36946 0 0 3.36946 0 7.5ZM10.995 8.69333C11.1128 8.67863 11.2219 8.66503 11.3211 8.65309C11.61 8.63028 11.8076 8.91918 11.6784 9.13965C10.8573 10.6374 9.29116 11.793 7.50455 11.793C5.71794 11.793 4.15181 10.6602 3.33072 9.16246C3.18628 8.91918 3.37634 8.63028 3.66524 8.65309C3.79123 8.66749 3.93521 8.68511 4.09426 8.70457C4.94292 8.80842 6.22074 8.96479 7.48174 8.96479C8.81855 8.96479 10.1378 8.80025 10.995 8.69333ZM5.41405 7.37207C6.05761 7.37207 6.60923 6.72851 6.60923 6.02978C6.60923 5.30348 6.05761 4.6875 5.41405 4.6875C4.77048 4.6875 4.21886 5.33106 4.21886 6.02978C4.20967 6.75609 4.77048 7.37207 5.41405 7.37207ZM10.7807 6.05619C10.7807 6.74114 10.24 7.37201 9.60912 7.37201C8.97825 7.37201 8.4375 6.76818 8.4375 6.05619C8.4375 5.37124 8.97825 4.74037 9.60912 4.74037C10.24 4.74037 10.7807 5.34421 10.7807 6.05619Z" fill="currentColor"></path></svg></span></div></div></div></div>`;
+            let messageToReact = `<div class="message-text-to-react-out"><i class="fa-solid fa-reply" onclick="APP.handleReplyMessageBtnOnClick('${messageId}', '${contactId}')"></i><div class="message-text-to-react-in"><div><div class="message-text-to-react"><span class="message-text-to-react-icon" msgId="${msgId}"><svg viewBox="0 0 15 15" width="15" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>react</title><path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.5C0 11.6305 3.36946 15 7.5 15C11.6527 15 15 11.6305 15 7.5C15 3.36946 11.6305 0 7.5 0C3.36946 0 0 3.36946 0 7.5ZM10.995 8.69333C11.1128 8.67863 11.2219 8.66503 11.3211 8.65309C11.61 8.63028 11.8076 8.91918 11.6784 9.13965C10.8573 10.6374 9.29116 11.793 7.50455 11.793C5.71794 11.793 4.15181 10.6602 3.33072 9.16246C3.18628 8.91918 3.37634 8.63028 3.66524 8.65309C3.79123 8.66749 3.93521 8.68511 4.09426 8.70457C4.94292 8.80842 6.22074 8.96479 7.48174 8.96479C8.81855 8.96479 10.1378 8.80025 10.995 8.69333ZM5.41405 7.37207C6.05761 7.37207 6.60923 6.72851 6.60923 6.02978C6.60923 5.30348 6.05761 4.6875 5.41405 4.6875C4.77048 4.6875 4.21886 5.33106 4.21886 6.02978C4.20967 6.75609 4.77048 7.37207 5.41405 7.37207ZM10.7807 6.05619C10.7807 6.74114 10.24 7.37201 9.60912 7.37201C8.97825 7.37201 8.4375 6.76818 8.4375 6.05619C8.4375 5.37124 8.97825 4.74037 9.60912 4.74037C10.24 4.74037 10.7807 5.34421 10.7807 6.05619Z" fill="currentColor"></path></svg></span></div></div></div></div>`;
             let messageTime = APP.getCurrentTime(message[APP.extensionFieldTimestamp]);
             let messageText = decodeURIComponent(decodeURIComponent(message[APP.extensionFieldEncodeMessage]));
             let messageChatImg = `<div class="message-chat-img-div"><img alt="" draggable="false" class="message-chat-img" tabindex="-1" src="${incoming ? 'person.png' : APP.currentUser.image_link ? APP.currentUser.image_link : 'person.png'}"></div>`;
@@ -1694,6 +1694,9 @@ var APP = {
         message[APP.extensionFieldMsgId] = message_id;
         message[APP.extensionFieldReactionFrom] = reactionFrom;
         message[APP.extensionFieldReactionTo] = reactionTo;
+        if(APP.replyTagMessageId){
+            message[APP.extensionFieldReplyMessageId] = APP.replyTagMessageId;
+        }
         if(APP.selectedModule && APP.selectedRecord) {
             message[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
             message[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
@@ -1755,6 +1758,12 @@ var APP = {
             };
         }
 
+        if(APP.replyTagMessageId) {
+            reqBody["context"] = {
+                "message_id": APP.replyTagMessageId
+            };
+        }
+
         let request = {
             url : `https://graph.facebook.com/v22.0/581984271672102/messages`,
             headers: { 
@@ -1790,6 +1799,7 @@ var APP = {
             if(!APP.isBulk) {
                 APP.selectedTemplate = null;
                 $("#templates-placeholders").empty();
+                APP.removeReplyTagMessage();
             }
 
         });
@@ -2587,6 +2597,44 @@ var APP = {
             updatedText = updatedText.replace(`{{${parameterName}}}`, parameterValue);
         });
         return updatedText;
+    },
+
+    handleReplyMessageBtnOnClick: function(messageId, contactId) {
+        // add message content to message-reply-tag element in ui.
+        APP.removeReplyTagMessage();
+        if(!messageId) return;
+        if(APP.currentContactId != contactId) return;
+        if(!APP.contacts[contactId].messages[messageId]) return;
+        let message = APP.contacts[contactId].messages[messageId];
+        let msgId = message[APP.extensionFieldMsgId] ? encodeURIComponent(message[APP.extensionFieldMsgId].replaceAll(".", "_").replaceAll("=", "-")) : "";
+        
+        if(message && message["whatsappbusiness0__WhatsApp_Message"]){
+            let messageText = message["whatsappbusiness0__WhatsApp_Message"];
+            if(messageText && messageText.length > 0){
+                APP.replyTagMessageId = messageId;
+                let replyDiv = document.querySelector("#message-reply-tag");
+                replyDiv.innerHTML = `<div class="message-reply-tag-inner">
+                    <div class="reply-message-content">
+                        <div class="reply-message-author">${message["whatsappbusiness0__Direction"]=="incoming"? APP.currentContactId: "You"}</div>
+                        <div class="reply-message-text">${messageText}</div>
+                    </div>
+                    <div class="close-reply-message" onclick="APP.removeReplyTagMessage()">
+                        <svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none">
+                            <title>close</title>
+                            <path d="M19.77 6.23L17.54 4L12 9.54L6.46 4L4.23 6.23L9.77 12L4.23 17.77L6.46 20L12 14.46L17.54 20L19.77 17.77L14.23 12L19.77 6.23Z" fill="currentColor"></path>
+                        </svg>    
+                    </div>
+                </div>`;
+                $(".message-reply-tag").show();
+            }
+        }
+    },
+
+    removeReplyTagMessage: function() {
+        APP.replyTagMessageId = null;
+        let replyDiv = document.querySelector("#message-reply-tag");
+        replyDiv.innerHTML = "";
+        $(".message-reply-tag").hide();
     }
 
 };

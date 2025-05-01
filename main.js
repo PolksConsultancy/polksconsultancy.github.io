@@ -667,7 +667,7 @@ var APP = {
         }
 
         let contactElement = e.target.closest('.contactItem');
-
+        APP.resetMessageInputContainer();
         if(APP.isBulk) {
             if(contactElement && contactElement.querySelector(".contact-checkbox")) {
                 let checkbox = contactElement.querySelector(".contact-checkbox");
@@ -1454,6 +1454,8 @@ var APP = {
     sentStatus: `<svg viewBox="0 0 12 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>msg-check</title><path d="M11.1549 0.652832C11.0745 0.585124 10.9729 0.55127 10.8502 0.55127C10.7021 0.55127 10.5751 0.610514 10.4693 0.729004L4.28038 8.36523L1.87461 6.09277C1.8323 6.04622 1.78151 6.01025 1.72227 5.98486C1.66303 5.95947 1.60166 5.94678 1.53819 5.94678C1.407 5.94678 1.29275 5.99544 1.19541 6.09277L0.884379 6.40381C0.79128 6.49268 0.744731 6.60482 0.744731 6.74023C0.744731 6.87565 0.79128 6.98991 0.884379 7.08301L3.88047 10.0791C4.02859 10.2145 4.19574 10.2822 4.38194 10.2822C4.48773 10.2822 4.58929 10.259 4.68663 10.2124C4.78396 10.1659 4.86436 10.1003 4.92784 10.0156L11.5738 1.59863C11.6458 1.5013 11.6817 1.40186 11.6817 1.30029C11.6817 1.14372 11.6183 1.01888 11.4913 0.925781L11.1549 0.652832Z" fill="currentcolor"></path></svg>`,
     deliveredStatus: `<svg viewBox="0 0 16 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>msg-dblcheck</title><path d="M11.0714 0.652832C10.991 0.585124 10.8894 0.55127 10.7667 0.55127C10.6186 0.55127 10.4916 0.610514 10.3858 0.729004L4.19688 8.36523L1.79112 6.09277C1.7488 6.04622 1.69802 6.01025 1.63877 5.98486C1.57953 5.95947 1.51817 5.94678 1.45469 5.94678C1.32351 5.94678 1.20925 5.99544 1.11192 6.09277L0.800883 6.40381C0.707784 6.49268 0.661235 6.60482 0.661235 6.74023C0.661235 6.87565 0.707784 6.98991 0.800883 7.08301L3.79698 10.0791C3.94509 10.2145 4.11224 10.2822 4.29844 10.2822C4.40424 10.2822 4.5058 10.259 4.60313 10.2124C4.70046 10.1659 4.78086 10.1003 4.84434 10.0156L11.4903 1.59863C11.5623 1.5013 11.5982 1.40186 11.5982 1.30029C11.5982 1.14372 11.5348 1.01888 11.4078 0.925781L11.0714 0.652832ZM8.6212 8.32715C8.43077 8.20866 8.2488 8.09017 8.0753 7.97168C7.99489 7.89128 7.8891 7.85107 7.75791 7.85107C7.6098 7.85107 7.4892 7.90397 7.3961 8.00977L7.10411 8.33984C7.01947 8.43717 6.97715 8.54508 6.97715 8.66357C6.97715 8.79476 7.0237 8.90902 7.1168 9.00635L8.1959 10.0791C8.33132 10.2145 8.49636 10.2822 8.69102 10.2822C8.79681 10.2822 8.89838 10.259 8.99571 10.2124C9.09304 10.1659 9.17556 10.1003 9.24327 10.0156L15.8639 1.62402C15.9358 1.53939 15.9718 1.43994 15.9718 1.32568C15.9718 1.1818 15.9125 1.05697 15.794 0.951172L15.4386 0.678223C15.3582 0.610514 15.2587 0.57666 15.1402 0.57666C14.9964 0.57666 14.8715 0.635905 14.7657 0.754395L8.6212 8.32715Z" fill="currentColor"></path></svg>`,
     readStatus: `<svg viewBox="0 0 16 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>msg-dblcheck</title><path fill="#53bdeb" d="M11.0714 0.652832C10.991 0.585124 10.8894 0.55127 10.7667 0.55127C10.6186 0.55127 10.4916 0.610514 10.3858 0.729004L4.19688 8.36523L1.79112 6.09277C1.7488 6.04622 1.69802 6.01025 1.63877 5.98486C1.57953 5.95947 1.51817 5.94678 1.45469 5.94678C1.32351 5.94678 1.20925 5.99544 1.11192 6.09277L0.800883 6.40381C0.707784 6.49268 0.661235 6.60482 0.661235 6.74023C0.661235 6.87565 0.707784 6.98991 0.800883 7.08301L3.79698 10.0791C3.94509 10.2145 4.11224 10.2822 4.29844 10.2822C4.40424 10.2822 4.5058 10.259 4.60313 10.2124C4.70046 10.1659 4.78086 10.1003 4.84434 10.0156L11.4903 1.59863C11.5623 1.5013 11.5982 1.40186 11.5982 1.30029C11.5982 1.14372 11.5348 1.01888 11.4078 0.925781L11.0714 0.652832ZM8.6212 8.32715C8.43077 8.20866 8.2488 8.09017 8.0753 7.97168C7.99489 7.89128 7.8891 7.85107 7.75791 7.85107C7.6098 7.85107 7.4892 7.90397 7.3961 8.00977L7.10411 8.33984C7.01947 8.43717 6.97715 8.54508 6.97715 8.66357C6.97715 8.79476 7.0237 8.90902 7.1168 9.00635L8.1959 10.0791C8.33132 10.2145 8.49636 10.2822 8.69102 10.2822C8.79681 10.2822 8.89838 10.259 8.99571 10.2124C9.09304 10.1659 9.17556 10.1003 9.24327 10.0156L15.8639 1.62402C15.9358 1.53939 15.9718 1.43994 15.9718 1.32568C15.9718 1.1818 15.9125 1.05697 15.794 0.951172L15.4386 0.678223C15.3582 0.610514 15.2587 0.57666 15.1402 0.57666C14.9964 0.57666 14.8715 0.635905 14.7657 0.754395L8.6212 8.32715Z" fill="currentColor"></path></svg>`,
+    lastMessageLabelDate: null,
+    firstMessageLabelDate: null,
     addMessage: async function(messageId, contactId, type) {
 
         if(!messageId) return;
@@ -1471,6 +1473,7 @@ var APP = {
             let messageInColor = "White";
             let messageOutColor = "#d9fdd3";
             let incoming = message[APP.extensionFieldDirection] == 'incoming' ? true : false;
+            messageElement.className = "message-content "+(incoming ? "message-incoming" : "message-outgoing");
             let messageDirection = incoming ? 'message-in' : 'message-out';
             let messageboxHook = incoming ? `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-in</title><path opacity="0.13" fill="#0000000" d="M1.533,3.568L8,12.193V1H2.812 C1.042,1,0.474,2.156,1.533,3.568z"></path><path fill="currentColor" d="M1.533,2.568L8,11.193V0L2.812,0C1.042,0,0.474,1.156,1.533,2.568z"></path></svg></span>` : `<span aria-hidden="true" class="message-in-content"><svg viewBox="0 0 8 13" height="13" width="8" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 8 13"><title>tail-out</title><path opacity="0.13" d="M5.188,1H0v11.193l6.467-8.625 C7.526,2.156,6.958,1,5.188,1z"></path><path fill="currentColor" d="M5.188,0H0v11.193l6.467-8.625C7.526,1.156,6.958,0,5.188,0z"></path></svg></span>`;
             let messageToReact = `<div class="message-text-to-react-out"><i class="fa-solid fa-reply" onclick="APP.handleReplyMessageBtnOnClick('${messageId}', '${contactId}')"></i><div class="message-text-to-react-in"><div><div class="message-text-to-react"><span class="message-text-to-react-icon" msgId="${msgId}"><svg viewBox="0 0 15 15" width="15" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>react</title><path fill-rule="evenodd" clip-rule="evenodd" d="M0 7.5C0 11.6305 3.36946 15 7.5 15C11.6527 15 15 11.6305 15 7.5C15 3.36946 11.6305 0 7.5 0C3.36946 0 0 3.36946 0 7.5ZM10.995 8.69333C11.1128 8.67863 11.2219 8.66503 11.3211 8.65309C11.61 8.63028 11.8076 8.91918 11.6784 9.13965C10.8573 10.6374 9.29116 11.793 7.50455 11.793C5.71794 11.793 4.15181 10.6602 3.33072 9.16246C3.18628 8.91918 3.37634 8.63028 3.66524 8.65309C3.79123 8.66749 3.93521 8.68511 4.09426 8.70457C4.94292 8.80842 6.22074 8.96479 7.48174 8.96479C8.81855 8.96479 10.1378 8.80025 10.995 8.69333ZM5.41405 7.37207C6.05761 7.37207 6.60923 6.72851 6.60923 6.02978C6.60923 5.30348 6.05761 4.6875 5.41405 4.6875C4.77048 4.6875 4.21886 5.33106 4.21886 6.02978C4.20967 6.75609 4.77048 7.37207 5.41405 7.37207ZM10.7807 6.05619C10.7807 6.74114 10.24 7.37201 9.60912 7.37201C8.97825 7.37201 8.4375 6.76818 8.4375 6.05619C8.4375 5.37124 8.97825 4.74037 9.60912 4.74037C10.24 4.74037 10.7807 5.34421 10.7807 6.05619Z" fill="currentColor"></path></svg></span></div></div></div></div>`;
@@ -1535,21 +1538,30 @@ var APP = {
         }
 
         messageElement.addEventListener('mouseover', function() {
-            this.querySelector(".message-text-to-react-out").style.display = 'flex';                    
-            this.querySelector(".message-text-to-out").style.display = 'flex';
+            this.querySelector(".message-text-to-react-out").setAttribute('style', 'display: flex !important;');              
+            this.querySelector(".message-text-to-out").setAttribute('style', 'display: flex !important;');
         });
         messageElement.addEventListener('mouseout', function() {                    
-            this.querySelector(".message-text-to-react-out").style.display = 'none';
-            this.querySelector(".message-text-to-out").style.display = 'none';
+            this.querySelector(".message-text-to-react-out").setAttribute('style', 'display: none !important;');
+            this.querySelector(".message-text-to-out").setAttribute('style', 'display: none !important;');
         });
+
+        const msgDate = APP.formatDateForStickyDateLabel(message[APP.extensionFieldTimestamp]);
         
         if($("#"+msgId).length) {
             $("#"+msgId).html(messageElement.innerHTML);
         }
-        else if(type == "loaded") {
+        else if (type == "loaded") {
+            const existingLabel = [...messagesContainer.children].find( (child) => child.className === 'date-label' && child.textContent === msgDate );
+            if (msgDate !== APP.firstMessageLabelDate) {
+                APP.addDateLabel(msgDate, 'prepend');
+            }
             messagesContainer.prepend(messageElement);
         }
         else {
+            if (msgDate !== APP.lastMessageLabelDate) {
+                APP.addDateLabel(msgDate, 'append');
+            }
             messagesContainer.appendChild(messageElement);
         }
 
@@ -1655,11 +1667,8 @@ var APP = {
                 document.getElementById('message-input').textContent = "";
                 APP.closeLoaderPopupForBulkSending();
                 APP.showNotification("Messages sent successfully");
-                APP.selectedTemplate = null;
-                $("#templates-placeholders").empty();
-                $("#templates-placeholders").hide();
-
-            }, 1000);
+                APP.resetMessageInputContainer();
+            }, 3000);
             return;
         }
         else{
@@ -1814,9 +1823,7 @@ var APP = {
             await APP.histroyAction(contactId, message_id);
             await APP.contactAction(contactId);
             if(!APP.isBulk) {
-                APP.selectedTemplate = null;
-                $("#templates-placeholders").empty();
-                APP.removeReplyTagMessage();
+                APP.resetMessageInputContainer();
             }
 
         });
@@ -2323,6 +2330,7 @@ var APP = {
     },
 
     resetBulkInitConfigs: function(){
+        APP.resetMessageInputContainer();
         $(".selectAll-checkbox-inp").prop("checked", false);
         $(".contact-checkbox").prop("checked", false);
         APP.selectedContacts = [];
@@ -2345,7 +2353,18 @@ var APP = {
             $(".chat-header").show();
             $(".messages-container").show();
             $(".bulk-selected-chats-list-div").remove();
+            document.getElementById("chat-area").insertAdjacentHTML("afterbegin", `<div class="initialChatDiv">Start Conversation</div>`);
+            APP.initialChatDiv = document.querySelector(".initialChatDiv");
         }
+    },
+
+    resetMessageInputContainer: function(){
+        APP.selectedTemplate = null;
+        $("#message-input").html("");
+        $("#templates-placeholders").empty();
+        $("#templates-placeholders").hide();
+        APP.removeReplyTagMessage();
+        $("#templates-list-outer").hide();
     },
 
     handleBulkSelectAllCheckboxOnChange: function(){
@@ -2417,7 +2436,7 @@ var APP = {
                 </div>
             </div>
         `;
-        document.getElementById("chat-area").appendChild(loaderPopup);
+        document.querySelector("body").appendChild(loaderPopup);
     }, 
 
     closeLoaderPopupForBulkSending: function() {
@@ -2566,6 +2585,7 @@ var APP = {
     },
 
     handleTemplateOnClick: function(templateName) {
+        $("#templates-list-outer").hide();
         let template = APP.whatsappTemplates[templateName];
         if(template){
             console.log("Selected template: ", template);
@@ -2730,6 +2750,44 @@ var APP = {
         messagesArray.forEach((message) => {
             messagesContainer.appendChild(message);
         });
+    },
+
+    formatDateForStickyDateLabel: function(datetime) {
+        const date = new Date(datetime);
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
+    },
+
+    updateStickyDateLabel: function () {
+        const messages = document.querySelectorAll('.message-content, .date-label');
+        const containerTop = messagesContainer.getBoundingClientRect().top;
+        for (const message of messages) {
+            const rect = message.getBoundingClientRect();
+            if (rect.top >= containerTop) {
+                if (message.classList.contains('date-label')) {
+                    stickyDateLabel.textContent = message.textContent;
+                    stickyDateLabel.style.display = 'block';
+                } else {
+                    stickyDateLabel.style.display = 'none';
+                }
+                break;
+            }
+        }
+    },
+
+    addDateLabel: function (date, direction = 'append') {
+        const messagesContainer = document.getElementById('messages-container');
+        const dateLabel = document.createElement('div');
+        dateLabel.className = 'date-label';
+        dateLabel.textContent = date;
+        if (direction === 'append') {
+            messagesContainer.appendChild(dateLabel);
+            APP.lastMessageLabelDate = date;
+        } else if (direction === 'prepend') {
+            const firstChild = messagesContainer.firstChild;
+            messagesContainer.insertBefore(dateLabel, firstChild);
+            APP.firstMessageLabelDate = date;
+        }
     },
 
 };

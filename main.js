@@ -1512,7 +1512,7 @@ var APP = {
                                                             <div class="data-pre-plain-text-out">
                                                                 <div class="data-pre-plain-text"><span dir="ltr" class="message-text"><span class="message">${messageText}</span></span><span class=""><span class="message-text-hide-formate"><span class="message-out-status-width"></span><span class="message-text-hide">${messageTime}</span></span></span></div>
                                                             </div>
-                                                            <div class="message-time-out">
+                                                            <div class="message-time-out" data-timestamp="${new Date(message[APP.extensionFieldTimestamp]).getTime()}">
                                                                 <div class="message-time-in"><span class="message-time" dir="auto">${messageTime}</span>${messageStatus}</div>
                                                             </div>
                                                         </div>
@@ -1563,6 +1563,7 @@ var APP = {
         //     e.preventDefault();
         //     showMessageContextMenu(e, message);
         // });
+        APP.handleMessagesOrderBasedOnTimeInChat();
     },
     showNotification: function(message) {
         notification.textContent = message;
@@ -2709,6 +2710,20 @@ var APP = {
             console.error("Error searching records:", error);
             return null;
         });
-    }
+    },
+
+    handleMessagesOrderBasedOnTimeInChat: function() {
+        const messagesContainer = document.getElementById("messages-container");
+        const messagesArray = Array.from(messagesContainer.getElementsByClassName("message-content"));
+        messagesArray.sort((a, b) => {
+            const timestampA = parseInt(a.querySelector(".message-time-out").getAttribute("data-timestamp"), 10);
+            const timestampB = parseInt(b.querySelector(".message-time-out").getAttribute("data-timestamp"), 10);
+            return timestampB - timestampA;
+        });
+        messagesContainer.innerHTML = ""; 
+        messagesArray.forEach((message) => {
+            messagesContainer.appendChild(message);
+        });
+    },
 
 };

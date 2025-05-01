@@ -189,6 +189,14 @@ var APP = {
             $(".emojiListBox").hide();
         }
 
+        if(!e.target.closest('#templates-list-outer') && !e.target.closest('#templates-btn')) {
+            $("#templates-list-outer").hide();
+        }
+
+        if(e.target.closest('.singleEmoji')) {
+            APP.emojiAddFunction(e.target.closest('.singleEmoji'));
+        }
+
         if($(e.target).attr('id') == "dealMapConfirmCondainer") {   
             $("#dealMapConfirmCondainer").remove();        
             return;
@@ -1664,7 +1672,7 @@ var APP = {
         if(!APP.contacts[contactId]) return;
         if(!APP.contacts[contactId].messages) APP.contacts[contactId].messages = {};
         let messageInput = document.getElementById('message-input');
-        let messageText = messageInput.textContent.trim();
+        let messageText = messageInput.innerText.trim();
     
         if(!messageText) return;
         let parameters = [];
@@ -2032,6 +2040,12 @@ var APP = {
     },
     emojiAddFunction: function(thisSelected) {
         $(".message-input").append($(thisSelected).text());
+    },
+    emojiSectionClick: function(section) {
+        $(".smiley-groups-heading").removeClass("selected");
+        $($(".smiley-groups-heading")[section]).addClass("selected");
+        $("#emojiMainDiv").scrollTop(0);
+        $("#emojiMainDiv").scrollTop($($(".smiley-groups-heading")[section]).parent().position().top);
     },
     settingsPopup: async function() {
         APP.passwordOpenIcon = `<svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>visibility-on</title><path fill-rule="evenodd" clip-rule="evenodd" d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM9 12C9 10.34 10.34 9 12 9C13.66 9 15 10.34 15 12C15 13.66 13.66 15 12 15C10.34 15 9 13.66 9 12Z" fill="currentColor"></path></svg>`;

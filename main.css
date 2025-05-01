@@ -4682,25 +4682,41 @@ input.selectAll-checkbox-inp {
 }
 
 .loader-popup {
-    position: absolute;
+    background: #1e1e1e14;
+    overflow: auto;
     width: 100%;
     height: 100%;
-    background: #1e1e1e14;
-    z-index: 10;
+    top: 0px;
+    position: fixed;
+    box-sizing: border-box;
+    background-color: rgba(0, 0, 0, 0.32);
+    z-index: 800;
+    left: 0px;
+    transition: 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .loader-popup-inner {
-    position: absolute;
     translate: 50% 50%;
-    width: max-content;
     height: max-content;
     background: white;
-    bottom: 150px;
-    padding: 20px 20px;
-    border-radius: 10px;
-    box-shadow: 0px 1px 8px -4px #aaa;
     text-align: center;
     border: .1px solid #dadada;
+    opacity: 1;
+    transform: scaleX(1) scaleY(1);
+    padding: 40px 30px;
+    overflow: hidden;
+    width: 400px;
+    box-shadow: rgba(0, 0, 0, 0.26) 0px 2px 18px 0px, rgba(0, 0, 0, 0.1) 0px 8px 10px 0px;
+    flex-direction: column;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    border-radius: 11px;
+    background-color: rgb(255, 255, 255);
+    transition: 0.3s;
 }
 
 .loader-popup-body {
@@ -4710,7 +4726,7 @@ input.selectAll-checkbox-inp {
 
 .loader-popup-header {
     color: #26a326;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     font-weight: 200;
 }
 
@@ -4734,8 +4750,6 @@ div#messages-container:empty:before {
 /* templates css */
 
 div#templates-list-outer {
-    position: absolute;
-    bottom: 50px;
     background: white;
     padding: 5px;
     z-index: 200;
@@ -4743,17 +4757,32 @@ div#templates-list-outer {
     box-shadow: 0px 1px 10px -3px #aaa;
     font-size: 16px;
     display: none;
+    width: max-content;
+    margin-left: 20px;
+    margin-bottom: 5px;
 }
 
 .templates-list-innr {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
     padding: 10px;
+    max-height: 200px;
+    overflow: auto;
 }
 
 .template-item:hover {
     color: #232323 !important;
+}
+
+.template-item:hover {
+    background: aliceblue;
+    cursor: pointer;
+    border-radius: 7px;
+}
+
+#chat-area:has(div#templates-list-outer[style="display: block;"]) div#templates-placeholders {
+    display: none;
 }
 
 .template-item {
@@ -4796,6 +4825,7 @@ div#templates-placeholders {
     align-items: center;
     justify-content: center;
     width: 100%;
+    margin-bottom: 5px;
 }
 input.template-placeholder-input {
     padding: 4px 20px;
@@ -5099,4 +5129,35 @@ input#emoji-search-bar {
 .emojis-container .smiley-groups span:active, .smiley-patch i:active {
     transform: unset;
     transform-origin: center;
+}
+
+/* Hide the profile logo for consecutive outgoing messages */
+.message-content.message-outgoing + .message-content.message-outgoing .message-chat-img-div,
+.message-content.message-incoming + .message-content.message-incoming .message-chat-img-div {
+    display: none;
+}
+
+/* Ensure the first message in a group shows the profile logo */
+.message-content.message-outgoing:not(.message-outgoing + .message-outgoing) .message-chat-img-div,
+.message-content.message-incoming:not(.message-incoming + .message-incoming) .message-chat-img-div {
+    display: block;
+}
+
+.date-label {
+    text-align: center;
+    font-weight: bold;
+    margin: 10px 0;
+    color: #666;
+}
+  
+.sticky-date-label {
+    position: fixed;
+    top: 0;
+    background-color: white;
+    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    z-index: 10;
+    display: none; 
 }

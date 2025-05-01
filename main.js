@@ -2623,7 +2623,6 @@ var APP = {
         if(message && message["whatsappbusiness0__WhatsApp_Message"]){
             let messageText = message["whatsappbusiness0__WhatsApp_Message"];
             if(messageText && messageText.length > 0){
-                APP.replyTagMessageId = messageId;
                 let replyDiv = document.querySelector("#message-reply-tag");
                 let contentHTML = `<div class="reply-message-content">
                         <div class="reply-message-author">${message["whatsappbusiness0__Direction"]=="incoming" ? APP.currentContactId: "You"}</div>
@@ -2640,6 +2639,7 @@ var APP = {
                 </div>`;
 
                 if(returnElem) return contentHTML;
+                APP.replyTagMessageId = messageId;
                 replyDiv.innerHTML = innerHTML
                 $("#message-reply-tag").show();
             }

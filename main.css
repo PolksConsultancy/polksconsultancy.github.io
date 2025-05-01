@@ -5133,7 +5133,11 @@ input#emoji-search-bar {
 
 /* Hide the profile logo for consecutive outgoing messages */
 .message-content.message-outgoing + .message-content.message-outgoing .message-chat-img-div,
-.message-content.message-incoming + .message-content.message-incoming .message-chat-img-div {
+.message-content.message-incoming + .message-content.message-incoming .message-chat-img-div,
+.message-content.message-outgoing + .message-content.message-outgoing .message-in-content,
+.message-content.message-incoming + .message-content.message-incoming .message-in-content,
+.message-content.message-outgoing + .message-content.message-outgoing .message-owner, 
+.message-content.message-incoming + .message-content.message-incoming .message-owner {
     display: none;
 }
 

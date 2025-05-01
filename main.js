@@ -2695,7 +2695,7 @@ var APP = {
         if(!message[APP.extensionFieldReplyMessageId]) return;
         let replyMessageId = message[APP.extensionFieldReplyMessageId];
         if(!APP.contacts[contactId].messages[replyMessageId]) {
-            await fetchMessageRecordByID(replyMessageId, contactId);
+            await APP.fetchMessageRecordByID(replyMessageId, contactId);
             if(!APP.contacts[contactId].messages[replyMessageId]) return;
         };
         let msgId = message[APP.extensionFieldMsgId] ? encodeURIComponent(message[APP.extensionFieldMsgId].replaceAll(".", "_").replaceAll("=", "-")) : "";

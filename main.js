@@ -2718,7 +2718,7 @@ var APP = {
         messagesArray.sort((a, b) => {
             const timestampA = parseInt(a.querySelector(".message-time-out").getAttribute("data-timestamp"), 10);
             const timestampB = parseInt(b.querySelector(".message-time-out").getAttribute("data-timestamp"), 10);
-            return timestampB - timestampA;
+            return timestampA - timestampB;
         });
         messagesContainer.innerHTML = ""; 
         messagesArray.forEach((message) => {

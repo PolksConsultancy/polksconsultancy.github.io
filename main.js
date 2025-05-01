@@ -1486,15 +1486,15 @@ var APP = {
 
             let rections = reactionFrom && reactionTo ? reactionFrom+reactionTo+" 2" : reactionFrom ? reactionFrom : reactionTo ? reactionTo : '';
 
-            let startConvIcon = "";
-            let startConvImag = "";
-            let startConvOwner = "";
+            let startConvIcon = messageboxHook;
+            let startConvImag = messageChatImg;
+            let startConvOwner = messageOwnerName;
             if(APP.lastMessageDirection != message[APP.extensionFieldDirection]) {
                 APP.lastMessageDirection = message[APP.extensionFieldDirection];
-                messageElement.className = "message-content startConversation";
-                startConvIcon = messageboxHook;
-                startConvImag = messageChatImg;
-                startConvOwner = messageOwnerName;
+                // messageElement.className = "message-content startConversation";
+                // startConvIcon = messageboxHook;
+                // startConvImag = messageChatImg;
+                // startConvOwner = messageOwnerName;
             }
 
             let messageStatus = incoming ? '' : `<div class="message-status-out"><span class="message-status">${message[APP.extensionFieldStatus] == "sent" ? APP.sentStatus : message[APP.extensionFieldStatus] == "delivered" ? APP.deliveredStatus : message[APP.extensionFieldStatus] == "read" ? APP.readStatus : APP.addedStatus}</span></div>`;

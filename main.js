@@ -1485,17 +1485,6 @@ var APP = {
                 startConvImag = messageChatImg;
                 startConvOwner = messageOwnerName;
             }
-            let replyMessageHTML = "";
-            if(message[APP.extensionFieldReplyMessageId]){
-                let replyMessageId = message[APP.extensionFieldReplyMessageId];
-                APP.replyMessageUIContent(messageId, contactId);
-                // if(!APP.contacts[contactId].messages[replyMessageId]) {
-                //     await fetchMessageRecordByID(replyMessageId, contactId);
-                // };
-                // if(APP.contacts[contactId].messages[replyMessageId]) {
-                //     replyMessageHTML = await APP.handleReplyMessageBtnOnClick(message[APP.extensionFieldReplyMessageId], contactId, true);
-                // }
-            }
 
             let messageStatus = incoming ? '' : `<div class="message-status-out"><span class="message-status">${message[APP.extensionFieldStatus] == "sent" ? APP.sentStatus : message[APP.extensionFieldStatus] == "delivered" ? APP.deliveredStatus : message[APP.extensionFieldStatus] == "read" ? APP.readStatus : APP.addedStatus}</span></div>`;
             messageElement.innerHTML = `<div class="message-content-inner" data-id="">
@@ -1508,7 +1497,7 @@ var APP = {
                                                     <div>
                                                         <div class="message-content-main-div-in">
                                                             ${startConvOwner}
-                                                            ${replyMessageHTML}
+                                                            <div class="reply-message-content-out"></div>
                                                             <div class="data-pre-plain-text-out">
                                                                 <div class="data-pre-plain-text"><span dir="ltr" class="message-text"><span class="message">${messageText}</span></span><span class=""><span class="message-text-hide-formate"><span class="message-out-status-width"></span><span class="message-text-hide">${messageTime}</span></span></span></div>
                                                             </div>
@@ -1563,6 +1552,9 @@ var APP = {
         //     e.preventDefault();
         //     showMessageContextMenu(e, message);
         // });
+        if(message[APP.extensionFieldReplyMessageId]){
+            APP.replyMessageUIContent(messageId, contactId);
+        }
         APP.handleMessagesOrderBasedOnTimeInChat();
     },
     showNotification: function(message) {
@@ -2674,7 +2666,7 @@ var APP = {
         };
         let msgId = message[APP.extensionFieldMsgId] ? encodeURIComponent(message[APP.extensionFieldMsgId].replaceAll(".", "_").replaceAll("=", "-")) : "";
         let replyMessageHTML = await APP.handleReplyMessageBtnOnClick(replyMessageId, contactId, true);
-        let mensionDiv = $(`#${msgId} .message-content-main-div-in`);
+        let mensionDiv = $(`#${msgId} .message-content-main-div-in .reply-message-content-out`);
         if(mensionDiv){
             mensionDiv.prepend(`<div class="reply-message-content-in">${replyMessageHTML}</div>`);
         }

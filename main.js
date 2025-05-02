@@ -1553,7 +1553,7 @@ var APP = {
             $("#"+msgId).html(messageElement.innerHTML);
         }
         else if (type == "loaded") {
-            const existingLabel = [...messagesContainer.children].find( (child) => child.className === "date-label" && child.textContent === formattedDate );
+            const existingLabel = [...messagesContainer.children].find( (child) => child.className.includes("date-label") && child.querySelector(".message-time-out").textContent === formattedDate );
             if (existingLabel) { existingLabel.remove(); }
             messagesContainer.prepend(messageElement);
             APP.addDateLabel(msgDate, 'prepend');

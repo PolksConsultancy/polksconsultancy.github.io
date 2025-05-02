@@ -342,6 +342,7 @@ var APP = {
 
         APP.messagesContainer = document.getElementById('messages-container');
         APP.messagesContainer.addEventListener('scroll', function() {
+            APP.updateStickyDateLabel();
             if(APP.isMessageLoading) return;
             let scrollTop = APP.messagesContainer.scrollTop;
             let scrollHeight = APP.messagesContainer.scrollHeight;
@@ -1547,19 +1548,18 @@ var APP = {
         });
 
         const msgDate = new Date(message[APP.extensionFieldTimestamp]).getTime();
-        
+        const formattedDate = APP.formatDateForStickyDateLabel(date);
         if($("#"+msgId).length) {
             $("#"+msgId).html(messageElement.innerHTML);
         }
         else if (type == "loaded") {
-            const existingLabel = [...messagesContainer.children].find( (child) => child.className === 'date-label' && child.textContent === msgDate );
-            if (msgDate !== APP.firstMessageLabelDate) {
-                APP.addDateLabel(msgDate, 'prepend');
-            }
+            const existingLabel = [...messagesContainer.children].find( (child) => child.className === "date-label" && child.textContent === formattedDate );
+            if (existingLabel) { existingLabel.remove(); }
             messagesContainer.prepend(messageElement);
+            APP.addDateLabel(msgDate, 'prepend');
         }
         else {
-            if (msgDate !== APP.lastMessageLabelDate) {
+            if (formattedDate !== APP.lastMessageLabelDate) {
                 APP.addDateLabel(msgDate, 'append');
             }
             messagesContainer.appendChild(messageElement);
@@ -2791,18 +2791,22 @@ var APP = {
     addDateLabel: function (date, direction = 'append') {
         const formattedDate = APP.formatDateForStickyDateLabel(date);
         if (formattedDate === APP.lastMessageLabelDate) return;
+
         const messagesContainer = document.getElementById('messages-container');
+
         const dateLabel = document.createElement('div');
         dateLabel.className = 'message-content date-label';
         dateLabel.innerHTML = `<div class="message-time-out" data-timestamp="${date}">${formattedDate}</div>`;
         dateLabel.setAttribute('data-date', date);
+
         if (direction === 'append') {
             messagesContainer.appendChild(dateLabel);
-            APP.lastMessageLabelDate = date;
-        } else if (direction === 'prepend') {
+            APP.lastMessageLabelDate = formattedDate;
+        } 
+        else if (direction === 'prepend') {
             const firstChild = messagesContainer.firstChild;
             messagesContainer.insertBefore(dateLabel, firstChild);
-            APP.firstMessageLabelDate = date;
+            APP.firstMessageLabelDate = formattedDate;
         }
     },
 

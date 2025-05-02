@@ -2816,9 +2816,9 @@ var APP = {
         const dateLabel = document.createElement('div');
         dateLabel.className = 'message-content date-label';
         dateLabel.innerHTML = `<div class="message-time-out" data-timestamp="${date}">${formattedDate}</div>`;
-        dateLabel.setAttribute('data-date', date);
+        dateLabel.setAttribute('data-date', formattedDate);
 
-        if (direction === 'append') {
+        if (direction === 'append' && !messagesContainer.querySelector(`.message-content.date-label[data-date="${formattedDate}"]`)) {
             messagesContainer.appendChild(dateLabel);
             APP.lastMessageLabelDate = formattedDate;
         } 

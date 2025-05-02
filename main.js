@@ -2770,23 +2770,41 @@ var APP = {
             return inputDate.toLocaleDateString(undefined, options);
         }
     },
-
+    
+    hideStickyDateLabelTimeout: null,
     updateStickyDateLabel: function () {
+        const messagesContainer = document.getElementById('messages-container');
+        const stickyDateLabel = document.getElementById('sticky-date-label');
         const messages = document.querySelectorAll('.message-content');
         const containerTop = messagesContainer.getBoundingClientRect().top;
-        const stickyDateLabel = document.getElementById('sticky-date-label');
+
+        clearTimeout(hideStickyDateLabelTimeout);
+
         for (const message of messages) {
             const rect = message.getBoundingClientRect();
             if (rect.top >= containerTop) {
                 if (message.classList.contains('date-label')) {
-                    stickyDateLabel.textContent = message.querySelector(".message-time-out").textContent;
+                    stickyDateLabel.textContent = message.querySelector('.message-time-out').textContent;
                     stickyDateLabel.style.display = 'block';
-                } else {
-                    stickyDateLabel.style.display = 'none';
+                } 
+                else {
+                    const date = message.querySelector('.message-time-out').getAttribute('data-timestamp'); 
+                    const dateLabel = APP.formatDateForStickyDateLabel(date);
+                    if (dateLabel) {
+                        stickyDateLabel.textContent = dateLabel;
+                        stickyDateLabel.style.display = 'block';
+                    } 
+                    else {
+                        stickyDateLabel.style.display = 'none'; 
+                    }
                 }
-                break;
+                hideStickyDateLabelTimeout = setTimeout(() => {
+                    stickyDateLabel.style.display = 'none';
+                }, 2000);
+                return;
             }
         }
+        stickyDateLabel.style.display = 'none';
     },
 
     addDateLabel: function (date, direction = 'append') {

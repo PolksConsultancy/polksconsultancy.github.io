@@ -1548,7 +1548,7 @@ var APP = {
         });
 
         const msgDate = new Date(message[APP.extensionFieldTimestamp]).getTime();
-        const formattedDate = APP.formatDateForStickyDateLabel(date);
+        const formattedDate = APP.formatDateForStickyDateLabel(msgDate);
         if($("#"+msgId).length) {
             $("#"+msgId).html(messageElement.innerHTML);
         }

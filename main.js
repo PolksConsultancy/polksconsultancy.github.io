@@ -2778,7 +2778,7 @@ var APP = {
         const messages = document.querySelectorAll('.message-content');
         const containerTop = messagesContainer.getBoundingClientRect().top;
 
-        clearTimeout(hideStickyDateLabelTimeout);
+        clearTimeout(APP.hideStickyDateLabelTimeout);
 
         for (const message of messages) {
             const rect = message.getBoundingClientRect();
@@ -2798,7 +2798,7 @@ var APP = {
                         stickyDateLabel.style.display = 'none'; 
                     }
                 }
-                hideStickyDateLabelTimeout = setTimeout(() => {
+                APP.hideStickyDateLabelTimeout = setTimeout(() => {
                     stickyDateLabel.style.display = 'none';
                 }, 2000);
                 return;

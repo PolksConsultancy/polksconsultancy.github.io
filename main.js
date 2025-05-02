@@ -2647,7 +2647,6 @@ var APP = {
 
     handleReplyMessageBtnOnClick: function(messageId, contactId, returnElem=false) {
         // add message content to message-reply-tag element in ui.
-        APP.removeReplyTagMessage();
         if(!messageId) return;
         if(APP.currentContactId != contactId) return;
         if(!APP.contacts[contactId].messages[messageId]) return;
@@ -2673,6 +2672,7 @@ var APP = {
                 </div>`;
 
                 if(returnElem) return contentHTML;
+                APP.removeReplyTagMessage();
                 APP.replyTagMessageId = messageId;
                 replyDiv.innerHTML = innerHTML
                 $("#message-reply-tag").show();

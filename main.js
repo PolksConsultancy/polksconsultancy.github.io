@@ -2774,11 +2774,12 @@ var APP = {
     updateStickyDateLabel: function () {
         const messages = document.querySelectorAll('.message-content');
         const containerTop = messagesContainer.getBoundingClientRect().top;
+        const stickyDateLabel = document.getElementById('sticky-date-label');
         for (const message of messages) {
             const rect = message.getBoundingClientRect();
             if (rect.top >= containerTop) {
                 if (message.classList.contains('date-label')) {
-                    stickyDateLabel.textContent = message.textContent;
+                    stickyDateLabel.textContent = message.querySelector(".message-time-out").textContent;
                     stickyDateLabel.style.display = 'block';
                 } else {
                     stickyDateLabel.style.display = 'none';

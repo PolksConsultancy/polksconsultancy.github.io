@@ -2753,7 +2753,7 @@ var APP = {
     },
 
     formatDateForStickyDateLabel: function (dateInput) {
-        const inputDate = new Date(dateInput);
+        const inputDate = new Date(Number(dateInput));
         const today = new Date();
         const yesterday = new Date();
         yesterday.setDate(today.getDate() - 1);

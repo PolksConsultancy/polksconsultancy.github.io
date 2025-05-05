@@ -2681,7 +2681,7 @@ var APP = {
             const parameterValue = $(this).val(); 
             updatedText = updatedText.replace(`{{${parameterName}}}`, parameterValue);
         });
-        return updatedText;
+        return updatedText.replace(/<br>/g, "\n");
     },
     PlaceholderValuesInMessageText: function(template) {
         if(template.placeholders) {

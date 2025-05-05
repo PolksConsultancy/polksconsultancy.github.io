@@ -268,7 +268,11 @@ var APP = {
             APP.filterModeChangeAction(e.target.closest('.rowOptionsButton'));
         }
 
-        // templates crm contacts fields popup
+        //  contacts fields popup hide if outer on click
+        const fieldsPopup = document.getElementById("fields-popup");
+        if (fieldsPopup.style.display === "block" && !fieldsPopup.contains(e.target) && (!APP.activeInput || !APP.activeInput.contains(e.target))) {
+            APP.hideCRMFieldsPlaceholderPopup();
+        }
 
 
     },

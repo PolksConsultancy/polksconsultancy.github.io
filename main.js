@@ -2930,12 +2930,12 @@ var APP = {
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0);
-                return range.startOffset;
+                return range.startOffset + 1;
             }
             return 0;
         } 
         else {
-            return input.selectionStart;
+            return input.selectionStart + 1;
         }
     },
 
@@ -2994,20 +2994,9 @@ var APP = {
         } 
         else {
             const rect = element.getBoundingClientRect();
-            const scrollOffset = element.scrollTop || window.scrollY;
-            const cursorPos = APP.getFieldsPopupCaretPosition(element);
-            const inputValue = element.value.substring(0, cursorPos);
-            const tempSpan = document.createElement("span");
-            tempSpan.style.position = "absolute";
-            tempSpan.style.visibility = "hidden";
-            tempSpan.style.whiteSpace = "pre";
-            tempSpan.style.font = getComputedStyle(element).font;
-            tempSpan.textContent = inputValue.replace(/ /g, "\u00A0");
-            document.body.appendChild(tempSpan);
-            const spanRect = tempSpan.getBoundingClientRect();
-            x = spanRect.right;
-            y = rect.top + scrollOffset;
-            document.body.removeChild(tempSpan);
+            const lineHeight = 20;
+            x = rect.left;
+            y = rect.top + rect.height + lineHeight;
         }
         return { x, y };
     },

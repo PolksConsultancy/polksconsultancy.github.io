@@ -5400,23 +5400,32 @@ span.recordFieldEditText {
     position: fixed;
     display: none;
     background: white;
-    border: 1px solid #ccc;
+    border: .1px solid #d4d4d4;
     max-height: 150px;
     overflow-y: auto;
     z-index: 1000;
-  }
-  
-  .fields-popup ul {
+    border-radius: 7px;
+    box-shadow: 0px 0px 15px -1px #aaa;
+    padding: 2px 2px;
+}
+
+.fields-popup ul {
     list-style: none;
     padding: 0;
     margin: 0;
-  }
-  
-  .fields-popup li {
-    padding: 5px 10px;
+}
+
+.fields-popup li {
+    padding: 5px 15px;
     cursor: pointer;
-  }
-  
-  .fields-popup li:hover {
-    background-color: #f0f0f0;
-  }
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.fields-popup li:hover {
+    background-color: #d0e7ff;
+}
+
+#fields-popup li.selected {
+    background: #f0f0f0;
+}

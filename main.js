@@ -2970,7 +2970,7 @@ var APP = {
         const fieldsPopup = document.getElementById("fields-popup");
 
         chatBox.addEventListener("keydown", (e) => {
-            if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+            if (e.target.tagName === "INPUT" || e.target.id === "message-input") {
                 APP.activeInput = e.target;
 
                 if (e.key === "#") {
@@ -3003,7 +3003,7 @@ var APP = {
 
                 if (e.key === "Backspace" || e.key === "Delete") {
                     const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
-                    const value = APP.activeInput.value;
+                    const value = APP.activeInput.innerText || APP.activeInput.value;
                     const textAfterTrigger = value.substring(APP.triggerPos, cursorPos);
                     if (APP.popupActive && textAfterTrigger === "") {
                         APP.hideCRMFieldsPlaceholderPopup();
@@ -3016,7 +3016,7 @@ var APP = {
         chatBox.addEventListener("input", (e) => {
             if (APP.popupActive && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
                 const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
-                const value = APP.activeInput.value;
+                const value = APP.activeInput.innerText || APP.activeInput.value;
                 const textAfterTrigger = value.substring(APP.triggerPos, cursorPos);
 
                 if (!value.includes("#") || cursorPos <= APP.triggerPos) {
@@ -3047,11 +3047,16 @@ var APP = {
 
     handleFieldSelection(selectedField) {
         const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
-        const value = APP.activeInput.value;
+        const value = APP.activeInput.innerText || APP.activeInput.value;
         const beforeTrigger = value.substring(0, APP.triggerPos - 1);
         const afterTrigger = value.substring(cursorPos);
 
-        APP.activeInput.value = beforeTrigger + "${contact." + selectedField + "}" + afterTrigger;
+        if(APP.activeInput.tagName === "DIV") {
+            APP.activeInput.innerText = beforeTrigger + "${contact." + selectedField + "}" + afterTrigger;
+        } 
+        else {
+            APP.activeInput.value = beforeTrigger + "${contact." + selectedField + "}" + afterTrigger;
+        }
         APP.setFieldsPopupCaretPosition(APP.activeInput, beforeTrigger.length + selectedField.length + 11);
         APP.hideCRMFieldsPlaceholderPopup();
     },

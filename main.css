@@ -293,13 +293,6 @@ img.accountInfoIcon {
     position: relative;
 }
 
-.input-icons {
-    display: flex;
-    gap: 15px;
-    color: #54656f;
-    margin-right: 15px;
-}
-
 .input-icons i {
     cursor: pointer;
     font-size: 24px;
@@ -1561,12 +1554,14 @@ html {
 }
 
 
-#createModuleSelectOption .rowOptionsButton {
+.chat-header-info-body .rowOptionsButton {
     box-shadow: 0 1px .5px #0b141a21;
     background-color: #52ab74;
     border-radius: 10px;
     font-weight: 500;
     color: white;
+    background-color: #e7fce3 !important;
+    color: #13a48a !important;
 }
 
 .record-header>div {
@@ -2112,32 +2107,27 @@ img.accountInfoIcon {
 }
 
 .input-container {
-    background-color: #ffffff;
-    padding: 16px 16px;
+    background-color: #ffffff00;
+    padding: 0 16px 16px 16px;
     display: flex;
-    align-items: center;
-    position: relative;
+    align-items: flex-start;
     height: max-content;
     width: 100%;
     box-sizing: border-box;
     position: relative;
-    box-shadow: 0 0px 4px 0 rgba(10, 10, 10, .12);
+    /* box-shadow: 0 0px 4px 0 rgba(10, 10, 10, .12); */
 }
 
 .input-icons {
-    display: flex;
-    gap: 15px;
+    /* gap: 15px; */
     color: #54656f80;
-    /* margin-right: 4px; */
-    /* display: none; */
     background-color: white;
-    width: 40px;
-    height: 40px;
+    width: 80px;
     position: absolute;
-    left: 57px;
+    left: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
     overflow: hidden;
@@ -2167,7 +2157,7 @@ img.accountInfoIcon {
     padding-right: 20px;
     transition: opacity .08s linear;
     box-shadow: 0 0 2px 0px #15590459;
-    box-shadow: 0 0 0 2px rgba(29, 170, 97, .5);
+    /* box-shadow: 0 0 0 2px rgba(29, 170, 97, .5); */
     /* position: absolute; */
     width: calc(100% - 0px);
     padding-left: 85px;
@@ -2175,11 +2165,10 @@ img.accountInfoIcon {
 }
 
 .send-button {
-    /* margin-left: 15px; */
     color: #54656f;
     cursor: pointer;
     position: absolute;
-    right: 16px;
+    right: 0px;
     font-size: 24px;
     z-index: 20;
     width: 40px;
@@ -2195,11 +2184,10 @@ img.accountInfoIcon {
 
 /* Contact Details Panel */
 .contact-details {
-    /* display: none; */
+    display: none;
     width: 25%;
     overflow-x: hidden;
     height: 100%;
-    /* max-width: 544px; */
     overflow-y: hidden;
     z-index: 100;
     border-left-width: 1px;
@@ -2209,17 +2197,17 @@ img.accountInfoIcon {
     position: relative;
     transform: translateZ(0);
     flex: 0 0 25%;
-    z-index: 200;
+    z-index: 500;
 }
 
 @media(max-width: 1300px) {
     .contact-details {
-        /* position: absolute; */
-        /* right: 0; */
-        /* width: calc(70% - -1px); */
-        /* min-width: calc(70% - -1px); */
-        /* max-width: calc(70% - -1px); */
-        /* height: 100%; */
+        position: absolute;
+        right: 0;
+        width: calc(70% - -1px);
+        min-width: calc(70% - -1px);
+        max-width: calc(70% - -1px);
+        height: 100%;
     }
 }
 
@@ -3410,10 +3398,13 @@ hr.dropdownSeprate {
   }
   
   .field-label {
-    width: 150px;
+    width: 100%;
     font-weight: 500;
     color: #454d52;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
   
   .field-value {
@@ -3534,15 +3525,14 @@ button.rowOptionsButton {
     white-space: nowrap;
     width: 100%;
     overflow: hidden;
-    display: block;
+    /* display: block; */
 }
 
 div#moduleSelectOption {
     background-color: transparent;
-    padding-right: 0;
     display: flex;
     justify-content: flex-end;
-    padding-right: 50px;
+    cursor: pointer;
 }
 
 #moduleSelectOption button.rowOptionsButton {
@@ -3586,20 +3576,13 @@ html {
 
 div#createModuleSelectOption {
     background-color: transparent;
-    position: absolute;
-    right: -12px;
-    bottom: -12px;
+    position: relative;
     display: flex;
     justify-content: flex-end;
     width: max-content;
-}
-
-#createModuleSelectOption .rowOptionsButton {
-    box-shadow: 0 1px .5px #0b141a21;
-    background-color: #52ab74;
-    border-radius: 10px;
-    font-weight: 500;
-    color: white;
+    align-items: center;
+    padding: unset;
+    right: -10px;
 }
 
 .record-header>div {
@@ -4143,7 +4126,7 @@ div#createModuleSelectOptionInRecord {
 }
 
 .chat-header-info-body {
-    padding: 0 10px;
+    padding: 0;
     box-sizing: border-box;
 }
 
@@ -4244,13 +4227,16 @@ img.contactListImg {
 .contactListContntHeadName {
     display: flex;
     flex-grow: 1;
-    overflow: hidden;
     font-size: 17px;
+    overflow: hidden;
     line-height: normal;
     color: #0a0a0a;
     text-align: left;
     word-wrap: break-word;
     font-weight: 400;
+    align-items: center;
+    \: 1;
+    gap: 5px;
 }
 
 span.contactListContntHeadNameText {
@@ -4260,9 +4246,8 @@ span.contactListContntHeadNameText {
     overflow-y: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    display: inline-block;
     position: relative;
-    flex-grow: 1;
+    display: inline-block;
 }
 
 .contactListContntHeadTime {
@@ -4758,8 +4743,23 @@ div#templates-list-outer {
     font-size: 16px;
     display: none;
     width: max-content;
-    margin-left: 20px;
-    margin-bottom: 5px;
+    position: absolute;
+    bottom: calc(100% + -5px);
+    left: 15px;
+    min-width: 200px;
+    min-height: 100px;
+}
+
+div#templates-list-outer:empty:before {
+    content: attr(placeholder);
+    color: #54656f57;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    justify-content: center;
+    height: 100px;
+    
 }
 
 .templates-list-innr {
@@ -4792,14 +4792,16 @@ div#templates-list-outer {
     font-size: 14px;
 }
 
-#templates-btn {
-    color: rgb(84 101 111 / 62%);
-    position: absolute;
+.input-icon-subDiv {
+    position: relative;
     cursor: pointer;
     z-index: 10;
-    height: 40px;
-    width: 40px;
     overflow: hidden;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 div#templates-btn:hover {
@@ -4811,26 +4813,40 @@ div#templates-btn:hover .template-item {
 }
 
 div#templates-placeholders {
-    display: flex;
-    /* padding: 10px 30px; */
-    gap: 5px;
     overflow: auto;
-    width: max-content;
     height: max-content;
     margin: auto;
-    flex-wrap: wrap;
-    flex-direction: row;
-    /* max-width: 500px; */
     position: relative;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 5px;
+    align-items: flex-start;
+    width: calc(100% + -40px);
+    background-color: white;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    white-space: pre-wrap;
+    line-height: normal;
+    font-size: 14px;
+    background-color: #ffffff;
+    box-shadow: 0 1px .5px rgba(11, 20, 26, .13);
+    position: relative;
+    z-index: 200;
+    border-radius: 7.5px;
+    margin: 0 20px;
 }
 input.template-placeholder-input {
-    padding: 4px 20px;
-    border-radius: 3px;
-    box-shadow: inset 0px 0px 5px -1px #aaa;
+    display: inline-block;
+    padding: 2px 5px 3px 5px;
+    border-radius: 5px;
+    box-shadow: none;
+    width: 100px;
+    box-sizing: border-box;
+    max-width: 100%;
+    transition: border .3s ease-out, box-shadow .3s ease-out;
+    border: 1px #c0c6cc70 solid !important;
+    font-size: 14px;
+    margin-top: 4px;
 }
 
 div#template-btn {
@@ -4973,6 +4989,19 @@ i.fa-solid.fa-reply {
 }
 
 div#emoji-picker {
+    background: white;
+    padding: 5px;
+    z-index: 200;
+    border-radius: 7px;
+    box-shadow: 0px 1px 10px -3px #aaa;
+    font-size: 16px;
+    display: none;
+    width: max-content;
+    position: absolute;
+    bottom: calc(100% + -5px);
+    left: 15px;
+    min-width: 200px;
+    min-height: 100px;
     position: absolute;
     left: -122px;
     bottom: 59px;
@@ -4988,6 +5017,7 @@ div#emoji-picker {
     z-index: 9999 !important;
     opacity: 1;
     display: none;
+    
 }
 
 .searchContainer.searchEmojiBlock {
@@ -5179,4 +5209,173 @@ input#emoji-search-bar {
     top: 70px;
     display: none;
     border-radius: 7px;
+}
+
+.input-container-main {width: 100%;position: relative;height: max-content;display: flex;align-items: center;}
+
+.mesgtemplateShowDiv {
+    background-color: transparent;
+}
+
+.mesgtemplateShowHeader {
+    color: #282828;
+    font-weight: 500;
+}
+
+.mesgtemplateShowBody {
+    color: #000000c2;
+}
+
+.mesgtemplateShowFooter {
+    color: #00000073;
+}
+
+input.template-placeholder-input:focus {
+    box-shadow: 0 0 6px #4796ed !important;
+    border: 1px solid #4c9ef7 !important;
+    border-radius: 5px;
+}
+
+.chat-header-info-body .rowOptionsButton svg {
+    width: 15px;
+    height: 15px;
+    fill: #13a48a;
+}
+
+span.chat-header-nameText {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+}
+
+span.chat-header-nameTextOpen {
+    color: #5e99fe;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 12px;
+    gap: 2px;
+    box-shadow: 0px 0px 1px #3f76d3;
+    padding: 0 5px 0 7px;
+    border-radius: 5px;
+    background-color: #5e99fe17;
+    transition: 0.3s;
+}
+
+span.chat-header-nameTextOpen svg {
+    width: 16px;
+    height: 16px;
+}
+
+span.chat-header-nameTextOpen:hover {
+    box-shadow: 0px 0px 1px #3f76d3, 0px 1px 2px #3f76d3;
+}
+
+span.chat-header-nameTextOpen:active {
+    box-shadow: 0px 0px 1px #3f76d3;
+}
+
+span.contactListContntModule {
+    color: #5e99fe;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 12px;
+    gap: 0;
+    border-radius: 5px;
+    transition: 0.3s;
+    font-weight: 500;
+    height: 18px;
+    /* filter: hue-rotate(265deg); */
+}
+
+span.contactListContntModule svg {
+    width: 18px;
+}
+
+span.contactListContntModuleContact {
+    filter: hue-rotate(265deg);
+}
+
+#recordDetailsSelectOption {
+    position: relative;
+    flex: none;
+    height: 100%;
+    transition: background-color .3s ease;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 11px;
+    top: 3px;
+   }
+  #recordDetailsSelectOption svg {
+   width: 20px; 
+   fill: #77848d; 
+   height: 20px; 
+   background-color: #f0f2f5;
+   z-index: 1; 
+   position: relative; 
+   border-radius: 3px; 
+   transition: 0.2s;
+  } 
+  #recordDetailsSelectOption:hover { 
+   svg.simpleNoteIconToIframeDir { 
+    transform: scale(1) !important; 
+   } 
+  } 
+  #recordDetailsSelectOption:active { 
+   background-color: #bac3cf38; 
+   svg { 
+    background-color: #e4e8ec; 
+   } 
+  }
+
+span.chat-header-nameTextOpen-contact {
+    filter: hue-rotate(265deg);
+}
+
+.recordFieldEdit {
+    display: flex;
+    font-size: 13px;
+    background-color: #66778114;
+    box-sizing: border-box;
+    padding: 0px 8px 0px 5px;
+    border-radius: 3px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    color: #667781;
+    border: 1px solid #66778136;
+    width: 55px;
+    gap: 0;
+}
+
+.recordFieldEdit svg {
+    width: 13px;
+    fill: #667781;
+}
+
+span.recordFieldEditText {
+    position: relative;
+    left: 5px;
+    white-space: nowrap;
+    font-weight: 300;
+    display: flex;
+    height: 20px;
+    align-items: center;
+    box-sizing: border-box;
+    padding-top: 1px;
+}
+
+.recordFieldEditOuter {
+    height: max-content;
+    border-radius: 4px;
+    border: 1px solid #00000000;
+    cursor: pointer;
+}
+
+.recordFieldEditOuter:hover {
+    border: 1px solid #d5d9dc;
 }

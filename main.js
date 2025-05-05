@@ -3146,13 +3146,13 @@ var APP = {
     replacePlaceholdersWithValues: function(template, contact) {
         return template.replace(/\${contact\.(.+?)}/g, (_, path) => {
             const value = APP.getValueFromPath(contact, path);
-            return value !== undefined ? value : "--";
+            return value ? value : "--";
         });
     },
 
     getValueFromPath: function(obj, path) {
         return path.split(".").reduce((acc, key) => {
-            if (acc && acc[key] !== undefined) {
+            if (acc && acc[key]) {
                 return acc[key];
             }
             return undefined;

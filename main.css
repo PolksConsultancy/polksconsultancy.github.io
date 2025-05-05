@@ -5397,7 +5397,7 @@ span.recordFieldEditText {
 
 
 .fields-popup {
-    position: absolute;
+    position: fixed;
     display: none;
     background: white;
     border: 1px solid #ccc;

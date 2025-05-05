@@ -844,12 +844,14 @@ var APP = {
                                         </div>`;
         $("#contactid-"+contactId+" .contactListContntHeadName").html(`<span title="${contact.details.Name}" class="contactListContntHeadNameText">${contact.details.Name}</span>${APP.contactModuleIconChoose(contact.details[APP.extensionFieldModule])}`);
     },
+
+    contactFieldList: ["First_Name", "Last_Name", "Account_Name", "Email", "Phone", "Mobile", "Secondary_Email", "Description", "Lead_Source", "Assistant", "Asst_Phone", "Home_Phone", "Other_Phone", "Created_Time", "Full_Name"],
+    leadFieldList: ["First_Name", "Last_Name", "Company", "Email", "Phone", "Mobile", "Description", "Website", "Lead_Status", "Lead_Source", "Created_Time", "Full_Name"],
+        
     contactDetailsSetup: async function(contactId) {
         let contact = APP.contacts[contactId];
         $(".contact-info").html(APP.loader);
-        let contactFieldList = ["First_Name", "Last_Name", "Account_Name", "Email", "Phone", "Mobile", "Secondary_Email", "Description", "Lead_Source", "Assistant", "Asst_Phone", "Home_Phone", "Other_Phone", "Created_Time", "Full_Name"];
-        let leadFieldList = ["First_Name", "Last_Name", "Company", "Email", "Phone", "Mobile", "Description", "Website", "Lead_Status", "Lead_Source", "Created_Time", "Full_Name"];
-        let fieldArr = contact.details[APP.extensionFieldModule] == "Leads" ? leadFieldList : contactFieldList;
+        let fieldArr = contact.details[APP.extensionFieldModule] == "Leads" ? APP.leadFieldList : APP.contactFieldList;
         APP.contactFieldsForPlaceHolders = fieldArr;
         await ZOHO.CRM.API.searchRecord({Entity: contact.details[APP.extensionFieldModule]+"s",Type:"phone",Query: contactId.replaceAll(" ", ""),delay:false}).then(async function(data){
             if(!data || !data.data) {
@@ -858,6 +860,7 @@ var APP = {
                 return;
             }
             APP.selectedRecord = data.data[0];
+            APP.contacts[contactId][contact.details[APP.extensionFieldModule]] = APP.selectedRecord;
             await APP.contactHeaderSetup(contactId);
 
             let fieldFlowElement = "";
@@ -1905,7 +1908,7 @@ var APP = {
         if(!contactId) return;
         if(!APP.contacts[contactId]) return;
         if(!APP.contacts[contactId].messages) APP.contacts[contactId].messages = {};
-        let recordDetails = APP.contacts[contactId]?.details || {};
+        let recordDetails = APP.contacts[contactId].details && APP.contacts[contactId][APP.contacts[contactId].details[APP.extensionFieldModule]] || {};
         let messageInput = document.getElementById('message-input');
         let messageText = messageInput.innerText.trim();
     

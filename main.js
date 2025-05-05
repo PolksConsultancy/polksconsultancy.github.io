@@ -1884,6 +1884,9 @@ var APP = {
                 return;
             }
             APP.renderLoaderPopupForBulkSending();
+            // filter contacts and leads ids that dosen't contain record and fetch bulk fetch records
+            await APP.checkAndFetchRecordsForBulkSending();
+
             for(let i=0; i< APP.selectedContacts.length; i++){
                 let contactId = APP.selectedContacts[i];
                 contactId = Number(contactId);
@@ -3155,5 +3158,61 @@ var APP = {
             return undefined;
         }, obj);
     },
+
+    checkAndFetchRecordsForBulkSending: async function(){
+        return await new Promise(async (resolve, reject) => {
+            let leadIds = {};
+            let contactIds = {};
+            if(!APP.selectedContacts || APP.selectedContacts.length == 0) return resolve();
+            for(let i=0; i< APP.selectedContacts.length; i++){
+                let contactId = Number(APP.selectedContacts[i]); 
+                if(APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldModule] && !APP.contacts[contactId][APP.contacts[contactId].details[APP.extensionFieldModule]]){
+                    let module = APP.contacts[contactId].details[APP.extensionFieldModule];
+                    let record = APP.contacts[contactId].details[APP.extensionAPI+module];
+                    if(record && record.module == "Contacts") contactIds[record.id.toString()] = contactId;
+                    if(record && record.module == "Leads") leadIds[record.id.toString()] = contactId;
+                };
+            }
+            if(Object.keys(contactIds).length > 0){
+                let contactRecords = await APP.getBulkRecordsByIds(Object.keys(contactIds), "Contacts");
+                if(contactRecords && contactRecords.length > 0){
+                    for(let i=0; i<contactRecords.length; i++){
+                        let record = contactRecords[i];
+                        let recordId = record.id;
+                        APP.contacts[contactIds[recordId]]["Contact"] = record;
+                    }
+                }
+            }
+            if(Object.keys(leadIds).length > 0){
+                let leadRecords = await APP.getBulkRecordsByIds(Object.keys(leadIds), "Leads");
+                if(leadRecords && leadRecords.length > 0){
+                    for(let i=0; i<leadRecords.length; i++){
+                        let record = leadRecords[i];
+                        let recordId = record.id;
+                        APP.contacts[leadIds[recordId]]["Lead"] = record;
+                    }
+                }
+            }
+            resolve();
+        });
+    },
+
+    getBulkRecordsByIds: async function(ids, module) {
+        return await new Promise(async (resolve, reject) => {
+            ZOHO.CRM.API.getRecord({ Entity: module, RecordID: ids })
+            .then(function (response) {
+                if (response && response.data) {
+                    resolve(response.data);
+                } 
+                else {
+                    resolve([]);
+                }
+            })
+            .catch(function (error) {
+                console.error("Error searching records:", error);
+                reject(error);
+            });
+        });
+    }
 
 };

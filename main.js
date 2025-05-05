@@ -121,20 +121,6 @@ var APP = {
             });
         }
 
-        if(document.querySelector("#leadSelectOption"))
-        document.querySelector("#leadSelectOption").addEventListener('click', (e) => {
-            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
-            $("#leadSelectOption").addClass("rowOptionsButtonSelected");
-            APP.showRecordDetailsView("Leads");
-        });
-
-        if(document.querySelector("#contactSelectOption"))
-        document.querySelector("#contactSelectOption").addEventListener('click', (e) => {
-            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
-            $("#contactSelectOption").addClass("rowOptionsButtonSelected");
-            APP.showRecordDetailsView("Contacts");
-        });
-
         $('#filterModuleList').on('change', function(e) {
             let value = this.value;
             $(".filterMode-module-selected-text").text(value ? value+'s' : 'All Modules');
@@ -155,7 +141,6 @@ var APP = {
             APP.outerClickFunctions(e);
         });
 
-        APP.unusedCodes();
     },
     outerClickFunctions: function(e) {
 
@@ -179,27 +164,86 @@ var APP = {
             $(".reactionPoupButton").css({transform: "scale(0)"});
         }
 
-        thisElement = $(".emojiListBox");
-        thisElement2 = $(".message-input");
-        thisElement3 = $("#emoji-btn");
-        if(thisElement.is(e.target) || thisElement.has(e.target).length != 0 || thisElement2.is(e.target) || thisElement2.has(e.target).length != 0 || thisElement3.is(e.target) || thisElement3.has(e.target).length != 0) {
-
+        // template
+        if(e.target.closest('#templates-btn')) {
+            $("#templates-list-outer").toggle();
+        }        
+        else if(e.target.closest('.template-item')) {
+            $("#templates-list-outer").hide();
+        }
+        else if(e.target.closest('#templates-list-outer')) {
+            $("#templates-list-outer").show();
         }
         else {
-            $(".emojiListBox").hide();
-        }
-
-        if(!e.target.closest('#templates-list-outer') && !e.target.closest('#templates-btn')) {
             $("#templates-list-outer").hide();
         }
 
+        // emoji
+        if(e.target.closest('#emoji-btn')) {
+            $("#emoji-picker").toggle();
+        }
+        else if(e.target.closest('#emoji-picker')) {
+            $("#emoji-picker").show();
+        }
+        else {
+            $("#emoji-picker").hide();
+        }
+        // emoji click
         if(e.target.closest('.singleEmoji')) {
             APP.emojiAddFunction(e.target.closest('.singleEmoji'));
         }
 
-        if($(e.target).attr('id') == "dealMapConfirmCondainer") {   
-            $("#dealMapConfirmCondainer").remove();        
+        // record details
+        if(e.target.closest('#recordDetailsSelectOption')) {
+            $("#contact-details").show();
+        }
+        if(e.target.closest('#recordDetailsCloseButton')) {
+            $("#contact-details").hide();
+        }
+
+        if(e.target.closest('#leadSelectOption')) {
+            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
+            $("#leadSelectOption").addClass("rowOptionsButtonSelected");
+            APP.contactDetailsSetup("Leads");
+        }
+        if(e.target.closest('#contactSelectOption')) {
+            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
+            $("#contactSelectOption").addClass("rowOptionsButtonSelected");
+            APP.contactDetailsSetup("Contacts");
+        }
+        if(e.target.closest('#contactCreateSelectOption')) {
+            APP.contactToDealCreateConfirmation(APP.contactRecord);
+        }
+        if(e.target.closest('#leadCreateSelectOption')) {
+            APP.leadToContactCreateConfirmation(APP.contactRecord);
+        }
+
+        if($(e.target).attr('id') == "dealMapConfirmCondainer") {
+            $("#dealMapConfirmCondainer").remove();
             return;
+        }
+
+        if(e.target.closest('.recordFieldEditOuter')) {
+            let thisEditElement = e.target.closest('.recordFieldEditOuter');
+            APP.closeEditPopup();
+            this.parentNode.insertAdjacentHTML('afterend', editPopupDiv);
+            let editPopupId = document.querySelector('#setDataPopupDiv');
+            editPopupId.style.padding = "0 0 30px 0px";
+            let editPopupOuter = document.querySelector('.setDataPopupOuter');
+            editPopupOuter.style.padding = "20px 20px 18px 20px";
+            document.querySelector(".setDataPopupButtonSave").setAttribute("action-id", "name");
+    
+            document.querySelector('.setDataPopupInputText').style.display = "block";
+            document.querySelector('.setDataPopupTextAreaText').style.display = "none";
+            document.querySelector('.setDataPopupInputColor').style.display = "none";
+    
+            document.querySelector('.setDataPopupInputText').setAttribute("placeholder", document.querySelector('.simpleNoteHeadText').innerText);
+            document.querySelector('.setDataPopupInputText').setAttribute("value", document.querySelector('.simpleNoteHeadText').innerText);
+            
+            document.querySelector('.setDataPopupInputText').focus();
+            document.querySelector('.setDataPopupInputText').setSelectionRange(document.querySelector('.setDataPopupInputText').value.length, document.querySelector('.setDataPopupInputText').value.length);
+    
+            this.style.display = 'none';
         }
 
         thisElement = $("#filterMode-all");
@@ -223,10 +267,6 @@ var APP = {
             APP.filterModeChangeAction(e.target.closest('.rowOptionsButton'));
         }
 
-
-
-        // emojiPicker.classList.remove('show');
-        // attachmentOptions.classList.remove('show');
     },
     loader: function(elementId) {
         if(!$(".loaderStyle").length) {
@@ -460,10 +500,11 @@ var APP = {
             if(APP.selectedRecord && APP.selectedRecordFields){
                 APP.selectedRecordFields.forEach(async function(field) {
                     if(field.data_type == "phone" && APP.selectedRecord[field.api_name]) {
+                        let phoneValue = APP.selectedRecord[field.api_name].replace(/[( )+]/g, '');
                         let selectedNumberDetails = {};
-                        selectedNumberDetails[APP.extensionFieldWhatsAppNumber] = APP.selectedRecord[field.api_name];
-                        selectedNumbers[APP.selectedRecord[field.api_name]] = selectedNumberDetails;
-                        searchQuery += `or(${APP.extensionFieldWhatsAppNumber}:equals:${APP.selectedRecord[field.api_name]})`;
+                        selectedNumberDetails[APP.extensionFieldWhatsAppNumber] = phoneValue;
+                        selectedNumbers[phoneValue] = selectedNumberDetails;
+                        searchQuery += `or(${APP.extensionFieldWhatsAppNumber}:equals:${phoneValue})`;
                     }
                 });
             }
@@ -557,6 +598,7 @@ var APP = {
         let userElement = user && message != 'Start Coversation' ? `<div class="contactListContntBodySender"><div class="contactListContntBodySenderIn"><span class="contactListContntBodySenderName">${user}</span><span>:&nbsp;</span></div></div>` : '';
         let messageElement = `${statusElement} ${userElement} <span class="contactListContntBodyContent">${message}</span>`;
 
+        let module = contact.details && contact.details && contact.details[APP.extensionFieldModule] ? contact.details[APP.extensionFieldModule] : "";
         let contantListElement = `<div class="contactList">
                 <div class="contactListIn contactItem ${contactId === APP.currentContactId ? 'active' : ''}" data-id="${contactId}" id="contactid-${contactId}">
                     <div class="contactSelectionBox">
@@ -581,6 +623,7 @@ var APP = {
                         <div class="contactListContntHead">
                             <div class="contactListContntHeadName">
                                 <span title="${name}" class="contactListContntHeadNameText">${name}</span>
+                                ${APP.contactModuleIconChoose(module)}
                             </div>
                             <div class="contactListContntHeadTime">${time}</div>
                         </div>
@@ -612,6 +655,9 @@ var APP = {
         if(type != "loaded") {
             APP.moveContactToTop(contactId);
         }
+    },
+    contactModuleIconChoose: function(module) {
+        return module && module == 'Lead' ? `<span class="contactListContntModule contactListContntModuleLead">${APP.svg.lead}</span>` : module && module == 'Contact' ? `<span class="contactListContntModule contactListContntModuleContact">${APP.svg.contact}</span>` : '';
     },
     histroryMap: function(contactId, messageId) {
 
@@ -684,98 +730,45 @@ var APP = {
             contactElement.setAttribute("class", "contactListIn contactItem active");
 
             APP.currentContactId = contactElement.dataset.id;
-            APP.renderMessages(APP.currentContactId);
-            let contact = APP.contacts[APP.currentContactId];
-
-            if(!APP.contacts[APP.currentContactId].initied) {
-                if(contact.details[APP.extensionFieldContact]) {
-                    APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
-                    $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(APP.contacts[APP.currentContactId].details[APP.extensionFieldContact].Name);
-                    if($("#leadSelectOption").length) {
-                        $("#leadSelectOption").hide();
-                    }
-                    if($("#contactSelectOption").length) {
-                        $("#contactSelectOption").show();
-                    }
+            let contactId = APP.currentContactId;
+            if(!APP.contacts[contactId].initied) {
+                if(APP.contacts[contactId].details[APP.extensionFieldContact]) {
+                    APP.contacts[contactId].details[APP.extensionFieldModule] = "Contact";
                 }
-                else if(contact.details[APP.extensionFieldLead]) {
-                    APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
-                    $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(APP.contacts[APP.currentContactId].details[APP.extensionFieldLead].Name);
-                    if($("#leadSelectOption").length) {
-                        $("#leadSelectOption").show();
-                    }
-                    if($("#contactSelectOption").length) {
-                        $("#contactSelectOption").hide();
-                    }
+                else if(APP.contacts[contactId].details[APP.extensionFieldLead]) {
+                    APP.contacts[contactId].details[APP.extensionFieldModule] = "Lead";
                 }
                 else {
-                    await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query:APP.currentContactId, delay:false}).then( async function(data){
+                    await ZOHO.CRM.API.searchRecord({Entity: "Contacts", Type:"phone",Query: contactId, delay:false}).then( async function(data){
                         if(!data || !data.data) {
-                            await ZOHO.CRM.API.searchRecord({Entity: "Leads", Type:"phone",Query:APP.currentContactId, delay:false}).then(async function(resp){
+                            await ZOHO.CRM.API.searchRecord({Entity: "Leads", Type:"phone",Query: contactId, delay:false}).then(async function(resp){
                                 if(!resp || !resp.data) {
-                                    let lastname = APP.contacts[APP.currentContactId].details[APP.extensionFieldName] != APP.currentContactId ? APP.contacts[APP.currentContactId].details[APP.extensionFieldName] : APP.currentContactId;
-                                    await ZOHO.CRM.API.insertRecord({Entity: "Leads",APIData:{Last_Name: lastname, Phone: APP.currentContactId},Trigger:["workflow"]}).then(function(response){
-                                        $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(lastname);
-                                        APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = lastname;
-                                        APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
-                                        APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = response.data[0].details.id;
+                                    let lastname = APP.contacts[contactId].details[APP.extensionFieldName] != contactId ? APP.contacts[contactId].details[APP.extensionFieldName] : contactId;
+                                    await ZOHO.CRM.API.insertRecord({Entity: "Leads",APIData:{Last_Name: lastname, Phone: contactId},Trigger:["workflow"]}).then(function(response){
+                                        APP.contacts[contactId].details[APP.extensionFieldName] = lastname;
+                                        APP.contacts[contactId].details[APP.extensionFieldModule] = "Lead";
+                                        APP.contacts[contactId].details[APP.extensionFieldLead] = response.data[0].details.id;
                                     });
-                                    if($("#leadSelectOption").length) {
-                                        $("#leadSelectOption").show();
-                                    }
-                                    if($("#contactSelectOption").length) {
-                                        $("#contactSelectOption").hide();
-                                    }
                                 }
                                 else {
-                                    $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(resp.data[0].Full_Name);
-                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = resp.data[0].Full_Name;
-                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Lead";
-                                    APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = resp.data[0].id;
-                                    if($("#leadSelectOption").length) {
-                                        $("#leadSelectOption").show();
-                                    }
-                                    if($("#contactSelectOption").length) {
-                                        $("#contactSelectOption").hide();
-                                    }
+                                    APP.contacts[contactId].details[APP.extensionFieldName] = resp.data[0].Full_Name;
+                                    APP.contacts[contactId].details[APP.extensionFieldModule] = "Lead";
+                                    APP.contacts[contactId].details[APP.extensionFieldLead] = resp.data[0].id;
                                 }
                             });
                         }
                         else {
-                            $("#contactid-"+APP.currentContactId+" .contactListContntHeadNameText").text(data.data[0].Full_Name);
-                            APP.contacts[APP.currentContactId].details[APP.extensionFieldName] = data.data[0].Full_Name;
-                            APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
-                            APP.contacts[APP.currentContactId].details[APP.extensionFieldContact] = data.data[0].id;
-                            if($("#leadSelectOption").length) {
-                                $("#leadSelectOption").hide();
-                            }
-                            if($("#contactSelectOption").length) {
-                                $("#contactSelectOption").show();
-                            }
+                            APP.contacts[contactId].details[APP.extensionFieldName] = data.data[0].Full_Name;
+                            APP.contacts[contactId].details[APP.extensionFieldModule] = "Contact";
+                            APP.contacts[contactId].details[APP.extensionFieldContact] = data.data[0].id;
                         }
                     });
                 }
-                if(APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] == "Contact") {
-                    if($("#leadSelectOption").length) {
-                        $("#leadSelectOption").hide();
-                    }
-                    if($("#contactSelectOption").length) {
-                        $("#contactSelectOption").show();
-                    }
-                }
-                else {
-                    if($("#leadSelectOption").length) {
-                        $("#leadSelectOption").show();
-                    }
-                    if($("#contactSelectOption").length) {
-                        $("#contactSelectOption").hide();
-                    }
-                }
-                APP.renderMessages(APP.currentContactId);
-                APP.contacts[APP.currentContactId].initied = true;
-                await APP.contactAction(APP.currentContactId);
+                APP.contacts[contactId].initied = true;
+                await APP.contactAction(contactId);
             }
-            await APP.showRecordDetailsView(APP.contacts[APP.currentContactId].details[APP.extensionFieldModule]+"s");
+            APP.selectedModule = APP.contacts[contactId].details[APP.extensionFieldModule]+"s";
+            await APP.contactDetailsSetup(contactId);
 
             APP.isMessageLoading = false;
             APP.messagesPerPage = 200;
@@ -785,22 +778,371 @@ var APP = {
                 contactElement.querySelector(".unread-count").remove();
             }
 
-            APP.contacts[APP.currentContactId].unread = 0;
+            APP.contacts[contactId].unread = 0;
 
             let messagesContainer = document.getElementById('messages-container');
             messagesContainer.innerHTML = "";
 
-            if(Object.keys(APP.contacts[APP.currentContactId].messages).length) {
-                let sortingContacts = Object.values(APP.contacts[APP.currentContactId].messages).sort((a, b) => new Date(b[APP.extensionFieldTimestamp]) - new Date(a[APP.extensionFieldTimestamp]));
+            if(Object.keys(APP.contacts[contactId].messages).length) {
+                let sortingContacts = Object.values(APP.contacts[contactId].messages).sort((a, b) => new Date(b[APP.extensionFieldTimestamp]) - new Date(a[APP.extensionFieldTimestamp]));
                 sortingContacts.forEach(async message => {
-                    await APP.addMessage(message[APP.extensionFieldMsgId], APP.currentContactId, "loaded");
+                    await APP.addMessage(message[APP.extensionFieldMsgId], contactId, "loaded");
                 });
             }
-            if(Object.keys(APP.contacts[APP.currentContactId].messages).length < APP.messagesPerPage+1) {
-                await APP.loadMessages(APP.currentContactId);
+            if(Object.keys(APP.contacts[contactId].messages).length < APP.messagesPerPage+1) {
+                await APP.loadMessages(contactId);
             }
             APP.currentChatUnreadNotification();
             $("#message-input").focus();
+        }
+    },
+    
+    contactHeaderSetup: function(contactId) {
+        let contact = APP.contacts[contactId];
+        if (!contact) return;
+
+        let urlParams = new URLSearchParams(window.location.search);
+        let serviceOrigin = urlParams.get('serviceOrigin');
+        let recordId = contact.details[APP.extensionFieldModule] == "Contact" && contact.details[APP.extensionFieldContact] ? contact.details[APP.extensionFieldContact].id : contact.details[APP.extensionFieldLead] ? contact.details[APP.extensionFieldLead].id : "";
+        let recordLink = serviceOrigin+"/crm/tab/"+contact.details[APP.extensionFieldModule]+"s/"+ recordId;
+        let contactHeaderInfo = document.querySelector('#chat-header .chat-header-info');
+        contactHeaderInfo.innerHTML = `<div class="chat-header-info-head">
+                                            <img src="${contact.avatar ? contact.avatar: 'person.png'}" alt="${contactId}" class="profile-pic">
+                                            <div class="chat-header-name">
+                                                <span class="chat-header-nameText">
+                                                    <span class="chat-header-nameTextDiv">${contact.details.Name ? contact.details.Name : contactId}</span>
+                                                    <span class="chat-header-nameTextOpen ${contact.details[APP.extensionFieldModule] == "Contact" ? 'chat-header-nameTextOpen-contact': 'chat-header-nameTextOpen-lead'}" onclick="window.open('${recordLink}', '_blank');">${contact.details[APP.extensionFieldModule]} ${APP.svg.opentab}</span>
+                                                </span>
+                                                <span class="chat-header-nameId">+${contactId}</span>
+                                            </div>
+                                        </div>
+                                        <div class="chat-header-info-body">
+                                            <div class="rowOptions" id="createModuleSelectOption">
+                                                ${contact.details[APP.extensionFieldModule] == "Contact" ? `
+                                                    <button class="rowOptionsButton" id="contactCreateSelectOption">
+                                                        <div class="rowOptionsButtonIn">
+                                                            <span>Create Deal</span>
+                                                        </div>
+                                                    </button>` : ''}
+                                                ${contact.details[APP.extensionFieldModule] == "Lead" ? `
+                                                    <button class="rowOptionsButton" id="leadCreateSelectOption">
+                                                        <div class="rowOptionsButtonIn">
+                                                            <span>Create Contact</span>
+                                                        </div>
+                                                    </button>` : ''}
+                                                <div id="recordDetailsSelectOption">
+                                                    <svg width="24" viewBox="0 96 960 960" height="24" xmlns="http://www.w3.org/2000/svg" style="position: absolute;top: 9px;left: 9px;width: 20px;height: 20px;background-color: #77848d;border-radius: 4px;transform: skew(10deg, 0deg);z-index: 0;"> <path d="M0 0h22v22H0z" sandboxuid="0" style=" fill: red; stroke: red; "></path></svg>
+                                                    <svg class="simpleNoteIconToIframeOpenSvg" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 96 960 960" width="24" style="z-index: 1;"><path d="M720 843q26 0 43.5-17.5T781 782q0-26-17.5-43.5T720 721q-26 0-43.5 17.5T659 782q0 26 17.5 43.5T720 843Zm0 122q31 0 57.5-14t43.5-40q-23-13-49-20t-52-7q-26 0-52 7t-49 20q17 26 43.5 40t57.5 14Zm0 106q-95 0-161.5-66.5T492 843q0-95 66.5-161.5T720 615q95 0 161.5 66.5T948 843q0 95-66.5 161.5T720 1071ZM317 462h326q22 0 37.5-15.5T696 409q0-22-15.5-37.5T643 356H317q-22 0-37.5 15.5T264 409q0 22 15.5 37.5T317 462Zm121 507H194q-45 0-75.5-30.5T88 863V293q0-45 30.5-75.5T194 187h572q45 0 75.5 30.5T872 293v283q-34-20-73.5-30.5T720 535h-12q-6 0-12 1-10-7-25-9t-28-2H317q-22 0-37.5 15.5T264 578q0 22 15.5 37.5T317 631h179q-14 14-25 30t-21 33H317q-22 0-37.5 15.5T264 747q0 22 15.5 37.5T317 800h98q-2 11-2.5 21.5T412 843q0 33 6 64.5t20 61.5Z"></path></svg>
+                                                    <svg viewBox="0 0 30 30" height="10" class="simpleNoteIconToIframeDir" x="0px" y="0px" style=" position: absolute; width: 10px; top: 6px; right: 3px; transition: 0.2s;transform: scale(0);transform-origin: left;background-color: transparent;"><path fill="#a2acb2" d="M11,21.212L17.35,15L11,8.65l1.932-1.932L21.215,15l-8.282,8.282L11,21.212z" style=" "></path></svg>
+                                                </div>
+                                            </div>
+                                        </div>`;
+        $("#contactid-"+contactId+" .contactListContntHeadName").html(`<span title="${contact.details.Name}" class="contactListContntHeadNameText">${contact.details.Name}</span>${APP.contactModuleIconChoose(contact.details[APP.extensionFieldModule])}`);
+    },
+    contactDetailsSetup: async function(contactId) {
+        let contact = APP.contacts[contactId];
+        $(".contact-info").html(APP.loader);
+        let contactFieldList = ["First_Name", "Last_Name", "Account_Name", "Email", "Phone", "Mobile", "Secondary_Email", "Description", "Lead_Source", "Assistant", "Asst_Phone", "Home_Phone", "Other_Phone", "Created_Time", "Full_Name"];
+        let leadFieldList = ["First_Name", "Last_Name", "Company", "Email", "Phone", "Mobile", "Description", "Website", "Lead_Status", "Lead_Source", "Created_Time", "Full_Name"];
+        let fieldArr = contact.details[APP.extensionFieldModule] == "Leads" ? leadFieldList : contactFieldList;
+        await ZOHO.CRM.API.searchRecord({Entity: contact.details[APP.extensionFieldModule]+"s",Type:"phone",Query: contactId.replaceAll(" ", ""),delay:false}).then(async function(data){
+            if(!data || !data.data) {
+                $(".contact-info").html("");
+                await APP.contactHeaderSetup(contactId);
+                return;
+            }
+            APP.selectedRecord = data.data[0];
+            await APP.contactHeaderSetup(contactId);
+
+            let fieldFlowElement = "";
+            fieldArr.forEach(function(field) {
+                let fieldValue = field == "Created_Time" && APP.selectedRecord[field] ? new Date(APP.selectedRecord[field]).toDateString() : field == "Account_Name" && APP.selectedRecord[field] && APP.selectedRecord[field].name ? APP.selectedRecord[field].name : APP.selectedRecord[field] ? APP.selectedRecord[field] : "";
+                if(fieldValue) {
+                    fieldFlowElement += `<div class="field-row">
+                                            <div class="field-label">
+                                                <div>${field.replaceAll('_', ' ')}</div>
+                                                <div class="recordFieldEditOuter" data-record-id="${APP.selectedRecord.id}" data-field-api="${field}" onclick="APP.editPopupDiv(event);">
+                                                    <div class="recordFieldEdit">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"></path><path d="m20.41 4.94-1.35-1.35c-.78-.78-2.05-.78-2.83 0L13.4 6.41 3 16.82V21h4.18l10.46-10.46 2.77-2.77c.79-.78.79-2.05 0-2.83zm-14 14.12L5 19v-1.36l9.82-9.82 1.41 1.41-9.82 9.83z"></path></svg>
+                                                        <span class="recordFieldEditText">edit</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="field-value">${fieldValue}</div>
+                                        </div>`;   
+                }
+            });
+            let recordDetailsViewElement = `<div class="record-container">
+                                        <div class="record-header">
+                                            <div>
+                                            <div class="record-title">
+                                                <img src="person.png" class="record-avatar">
+                                                <div>
+                                                <h1 class="record-name">${APP.selectedRecord["Full_Name"]}</h1>
+                                                </div>
+                                            </div>
+                                            </div>
+                                            <div class="record-actions">
+                                            <button class="btn btn-outline">Edit</button>
+                                            <button class="btn btn-primary">Save</button>
+                                            </div>
+                                        </div>
+                                        <div class="record-sections">
+                                            <div class="section">
+                                            <h2 class="section-title">${contact.details[APP.extensionFieldModule]} Information</h2>
+                                            ${fieldFlowElement}
+                                            </div>
+                                        </div>
+                                        </div>`;
+            $(".contact-info").html(recordDetailsViewElement);
+        });
+    },
+    function(e) {
+        APP.editPopupDiv = `<div class="setDataPopupMainOuter" id="setDataPopupDiv">
+                                <div class="setDataPopupOuter">
+                                    <style>
+                                    .setDataPopupMainOuter {
+                                        box-sizing: border-box;
+                                        position: relative;
+                                    }
+                                    .setDataPopupMainOuter.setDataPopupNumberOuter {
+                                        box-sizing: border-box;
+                                        position: relative;
+                                        position: fixed;
+                                        width: 100%;
+                                        height: 100%;
+                                        top: 0;
+                                        left: 0;
+                                        background-color: #ffffffc2;
+                                        display: flex;
+                                        z-index: 100;
+                                        align-items: center;
+                                        justify-content: center;
+                                    }
+                                    .setDataPopupOuter {
+                                        background-color: #fff;
+                                        border-radius: 8px;
+                                        box-shadow: 0px 1px 2px 0px rgb(60 64 67 / 30%), 0px 2px 6px 2px rgb(60 64 67 / 15%);
+                                        color: #000000de;
+                                        overflow: auto;
+                                        position: relative;
+                                        z-index: 40;
+                                        border: rgba(0,0,0,0);
+                                        outline: 2px solid rgba(0,0,0,0);
+                                        padding: 24px 32px;
+                                        width: 100%;
+                                        box-sizing: border-box;
+                                    }
+                                    .setDataPopupOuter.setNumberPopupOuter {
+                                        width: 30%;
+                                        min-width: 200px;
+                                    }
+                                    .setDataPopupFormInputs {
+                                        padding-bottom: 20px;
+                                        display: block;
+                                        position: relative;
+                                    }
+                                    .setDataPopupForm {
+                                        font-family: 'Roboto';
+                                    }
+
+                                    /* Chrome, Safari, Edge, Opera */
+                                input[type=number]::-webkit-outer-spin-button,
+                                input[type=number]::-webkit-inner-spin-button {
+                                -webkit-appearance: none;
+                                margin: 0;
+                                }
+
+                                /* Firefox */
+                                input[type=number] {
+                                -moz-appearance: textfield;
+                                }
+
+                                label.setDataPopupInputLabel {
+                                color: #0000008c;
+                                display: block;
+                                font-size: 13px;
+                                padding-bottom: 8px;
+                                user-select: none;
+                                }
+
+                                input.setDataPopupInputText, textarea.setDataPopupTextAreaText {
+                                font-family: "SF Pro Text", "SF Pro Icons", system, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "Lucida Grande", "Ubuntu", "Cantarell", "Fira Sans", sans-serif;
+                                border: transparent;
+                                outline: 2px solid transparent;
+                                background: #fff;
+                                border: 0;
+                                border-radius: 4px;
+                                box-sizing: border-box;
+                                color: #000000de;
+                                font-size: 16px;
+                                font-weight: 400;
+                                line-height: 20px;
+                                margin: 0;
+                                max-width: 100%;
+                                padding: 8px 12px;
+                                -webkit-transition: box-shadow .15s;
+                                transition: box-shadow .15s;
+                                vertical-align: middle;
+                                -webkit-appearance: none;
+                                box-shadow: 0 0 0 2px transparent inset, 0 0 0 1px #0000001f inset;
+                                width: 390px;
+                                max-height: 36px;
+                                width: 100%;
+                                }
+
+                                input.setDataPopupInputText {
+                                    padding: 8px 12px;
+                                }
+
+                                textarea.setDataPopupTextAreaText {
+                                    height: 100px;
+                                    min-height: 100px;
+                                    max-height: 300px;
+                                    min-width: 100%;
+                                    max-width: 100%;
+                                    font-size: 15px;
+                                    resize: none;
+                                }
+
+                                .setDataPopupButtons {
+                                display: flex;
+                                flex-flow: row;
+                                justify-content: flex-end;
+                                }
+
+                                .setDataPopupButtonClose, .setDataPopupButtonSave, .setDataPopupButtonTitle {
+                                font-family: "SF Pro Text", "SF Pro Icons", system, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "Lucida Grande", "Ubuntu", "Cantarell", "Fira Sans", sans-serif;
+                                font-size: 14px;
+                                font-weight: 500;
+                                -webkit-appearance: button;
+                                background: transparent;
+                                box-sizing: border-box;
+                                position: relative;
+                                -webkit-user-select: none;
+                                user-select: none;
+                                cursor: pointer;
+                                outline: none;
+                                border: none;
+                                -webkit-tap-highlight-color: rgba(0,0,0,0);
+                                display: inline-block;
+                                white-space: nowrap;
+                                text-decoration: none;
+                                vertical-align: baseline;
+                                text-align: center;
+                                margin: 0;
+                                min-width: 64px;
+                                line-height: 28px;
+                                padding: 0 16px;
+                                border-radius: 4px;
+                                overflow: visible;
+                                --mdc-shape-small: 8px;
+                                padding-left: 10px;
+                                padding-right: 10px;
+                                border: 0;
+                                border-radius: var(--mdc-shape-small);
+                                text-transform: none;
+                                letter-spacing: .25px;
+                                min-width: 60px;
+                                -webkit-transition: box-shadow .2s ease,background-color .2s ease;
+                                transition: box-shadow .2s ease,background-color .2s ease;
+                                --mdc-text-button-label-text-color: #0000008c;
+                                box-shadow: 0 0 0 0 rgb(0 0 0 / 20%), 0 0 0 0 rgb(0 0 0 / 14%), 0 0 0 0 rgb(0 0 0 / 12%);
+                                color: #0000008c;
+                                }
+
+                                .setDataPopupButtonSave {
+                                    background-color: #1a73e8;
+                                    box-shadow: none;
+                                    color: #fff;
+                                    --theme-color-focus-outline: #fff;
+                                    outline-offset: -4px;
+                                    margin-left: 8px;
+                                }
+
+                                .setDataPopupButtonClose:hover {
+                                    background: rgba(0,0,0,0.06);
+                                }
+
+                                .setDataPopupButtonTitle:hover {
+                                    background: #e7fce3;
+                                    color: #359c86;
+                                }
+
+                                .setDataPopupButtonSave:hover {
+                                    background-color: #1967d2;
+                                }
+
+                                .setDataPopupButtonTitle {
+                                    position: absolute;
+                                    left: 10px;
+                                    transition: 0.2s;
+                                    background: #e7fce3;
+                                    color: #359c86;
+                                }
+
+                                input.setDataPopupInputText:focus, textarea.setDataPopupTextAreaText:focus {
+                                    box-shadow: 0 0 0 2px #1a73e8 inset, 0 0 0 1px #0000001f inset;
+                                }
+
+                                input.setDataPopupInputColor {
+                                    width: 33px;
+                                    border: 0;
+                                    padding: 7px;
+                                    margin: 0;
+                                    background-color: transparent;
+                                    border-radius: 20px;
+                                    height: 36px;
+                                    outline: 0;
+                                    position: absolute;
+                                }
+                                    </style>
+                                    <div class="setDataPopupForm">
+                                        <div class="setDataPopupFormInputs">
+                                            <label class="setDataPopupInputLabel">Name</label>
+                                            <input class="setDataPopupInputColor" type="color">
+                                            <input class="setDataPopupInputText" type="text">
+                                            <textarea class="setDataPopupTextAreaText" placeholder="Note contact info"></textarea>
+                                        </div>
+                                        <div class="setDataPopupButtons">
+                                            <div class="setDataPopupButtonClose"><span>Close</span></div>
+                                            <div class="setDataPopupButtonSave"><span>Save</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>`;
+
+    },
+    closeEditPopup: function(){
+        if(document.querySelectorAll('#setDataPopupDiv').length) {
+            document.querySelector('#setDataPopupDiv').remove();
+        }
+        if(document.querySelectorAll('.simpleNoteNameEdit').length) {
+            let editPopupNameOpen = document.querySelector('.simpleNoteNameEdit');
+            editPopupNameOpen.style.display = 'flex';
+        }
+        if(document.querySelectorAll('.simpleNotePhoneEdit').length) {
+            let editPopupNameOpen = document.querySelector('.simpleNotePhoneEdit');
+            editPopupNameOpen.style.display = 'flex';
+        }
+        if(document.querySelectorAll('.simpleNoteEmailEdit').length) {
+            let editPopupNameOpen = document.querySelector('.simpleNoteEmailEdit');
+            editPopupNameOpen.style.display = 'flex';
+        }
+        if(document.querySelectorAll('.simpleNoteFirstNameEdit').length) {
+            let editPopupNameOpen = document.querySelector('.simpleNoteFirstNameEdit');
+            editPopupNameOpen.style.display = 'flex';
+        }
+        if(document.querySelectorAll('.simpleNoteLastNameEdit').length) {
+            let editPopupNameOpen = document.querySelector('.simpleNoteLastNameEdit');
+            editPopupNameOpen.style.display = 'flex';
+        }
+        if(document.querySelectorAll('.simpleNoteDetailEdit').length) {
+            let editPopupDetailOpen = document.querySelector('.simpleNoteDetailEdit');
+            editPopupDetailOpen.style.display = 'flex';
+        }
+        if(document.querySelectorAll('.simpleNoteDetailsText').length) {
+            document.querySelector('.simpleNoteDetailsText').style.display = "-webkit-box";
         }
     },
     loadMessages: async function(contactId) {
@@ -849,7 +1191,7 @@ var APP = {
         let contactRecordMap = await APP.contactMap(contactId);
         if(contactRecordMap && contactRecordMap.id) {
             await ZOHO.CRM.API.updateRecord({Entity: APP.extensionContacts, APIData: contactRecordMap, Trigger:["workflow"]}).then(function(data){
-                console.log(data);
+                // // console.log(data);
             });
         }
         else {
@@ -857,12 +1199,12 @@ var APP = {
                 if(data && data.data) {
                     contactRecordMap.id = data.data[0].id;
                     await ZOHO.CRM.API.updateRecord({Entity: APP.extensionContacts, APIData: contactRecordMap, Trigger:["workflow"]}).then(function(data){
-                        console.log(data);
+                        // // console.log(data);
                     });
                 }
                 else {
                     await ZOHO.CRM.API.insertRecord({Entity: APP.extensionContacts, APIData: contactRecordMap, Trigger:["workflow"]}).then(function(data){
-                        console.log(data);
+                        // // console.log(data);
                     });
                 }
             });
@@ -871,13 +1213,16 @@ var APP = {
     histroyAction: async function(contactId, messageId) {
         let histroyRecordMap = await APP.histroryMap(contactId, messageId);
         if(histroyRecordMap && histroyRecordMap.id) {
+            if(histroyRecordMap[APP.extensionFieldReactionFrom] || histroyRecordMap[APP.extensionFieldReactionTo]) {
+                delete histroyRecordMap[APP.extensionFieldTimestamp];
+            }
             await ZOHO.CRM.API.updateRecord({Entity: APP.extensionHistory, APIData: histroyRecordMap, Trigger:["workflow"]}).then(function(data){
-                console.log(data);
+                // console.log(data);
             });
         }
         else {
             await ZOHO.CRM.API.insertRecord({Entity: APP.extensionHistory, APIData: histroyRecordMap, Trigger:["workflow"]}).then(function(data){
-                console.log(data);
+                // console.log(data);
             });
         }
     },
@@ -893,9 +1238,9 @@ var APP = {
                 delete APP.contacts[APP.currentContactId].notifications[key];
                 setTimeout(() => {
                     APP.database.ref('incomingMessages/'+key).remove().then(() => {
-                        console.log("Data deleted successfully");
+                        // console.log("Data deleted successfully");
                     }).catch((error) => {
-                        console.log("Error deleting data: ", error);
+                        // console.log("Error deleting data: ", error);
                     });
                 }, 2000);
             });
@@ -1027,102 +1372,7 @@ var APP = {
           notificationBox.style.bottom = `${viewportHeight - clickY}px`;
         }
     },
-    showRecordDetailsView: async function(module) {
-        if(!module || module == "nulls"){
-            $(".contact-info").html('');
-            return;
-        }
-        $(".contact-info").html(APP.loader);
-        if(module == "Leads") {
-            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
-        $("#leadSelectOption").addClass("rowOptionsButtonSelected");
-        // ZOHO.CRM.API.updateRecord({
-        //     Entity: "Contacts",
-        //     APIData: updateData
-        // });
-        }
-        else if(module == "Contacts") {
-            $(".rowOptionsButtonSelected").removeClass("rowOptionsButtonSelected");
-        $("#contactSelectOption").addClass("rowOptionsButtonSelected");
-        }
-        
-        let contactFieldList = ["First_Name", "Last_Name", "Account_Name", "Email", "Phone", "Mobile", "Secondary_Email", "Description", "Lead_Source", "Assistant", "Asst_Phone", "Home_Phone", "Other_Phone", "Created_Time", "id", "Full_Name"];
-        let leadFieldList = ["First_Name", "Last_Name", "Company", "Email", "Phone", "Mobile", "Description", "Website", "Lead_Status", "Lead_Source", "Created_Time", "id", "Full_Name"];
-        let fieldArr = module == "Leads" ? leadFieldList : contactFieldList;
-        await ZOHO.CRM.API.searchRecord({Entity: module,Type:"phone",Query:APP.currentContactId.replaceAll(" ", ""),delay:false})
-        .then(function(data){
-            if(!data || !data.data) {
-                $(".contact-info").html("");
-                return;
-            }
-            record = data.data[0];
-            APP.contacts[APP.currentContactId].details.Name = record.Full_Name;
-            if(module == "Leads") {
-                APP.leadRecord = record;
-            }
-            else if(module == "Contacts") {
-                APP.contactRecord = record;
-            }
-            console.log(record); 
-            let fieldFlowElement = "";
-            fieldArr.forEach(function(field) {
-                let fieldValue = field == "Created_Time" && record[field] ? new Date(record[field]).toDateString() : field == "Account_Name" && record[field] && record[field].name ? record[field].name : record[field] ? record[field] : "";
-                if(fieldValue) {
-                    fieldFlowElement += `<div class="field-row">
-                <div class="field-label">${field.replaceAll('_', ' ')}</div>
-                <div class="field-value">${fieldValue}</div>
-            </div>`;   
-                }
-            });
-            let recordDetailsViewElement = `<div class="record-container">
-                                        <div class="record-header">
-                                            <div>
-                                            <div class="record-title">
-                                                <img src="person.png" class="record-avatar">
-                                                <div>
-                                                <h1 class="record-name">${record["Full_Name"]}</h1>
-                                                </div>
-                                                <div class="rowOptions" id="createModuleSelectOption">
-                                                    ${module == "Contacts" ? `<button class="rowOptionsButton" id="contactCreateSelectOption">
-                                                        <div class="rowOptionsButtonIn">
-                                                        <span>Create Deal</span>
-                                                        </div>
-                                                    </button>` : ''}
-                                                    ${module == "Leads" ? `<button class="rowOptionsButton" id="leadCreateSelectOption">
-                                                        <div class="rowOptionsButtonIn">
-                                                        <span>Create Contact</span>
-                                                        </div>
-                                                    </button>` : ''}
-                                                </div>
-                                            </div>
-                                            </div>
-                                            <div class="record-actions">
-                                            <button class="btn btn-outline">Edit</button>
-                                            <button class="btn btn-primary">Save</button>
-                                            </div>
-                                        </div>
-                                        <div class="record-sections">
-                                            <div class="section">
-                                            <h2 class="section-title">${module.substring(0, module.length-1)} Information</h2>
-                                            ${fieldFlowElement}
-                                            </div>
-                                        </div>
-                                        </div>`;
-            $(".contact-info").html(recordDetailsViewElement);
-            if(module == "Contacts" && document.querySelector("#contactCreateSelectOption")) {
-                document.querySelector("#contactCreateSelectOption").addEventListener('click', (e) => {
-                    APP.contactToDealCreateConfirmation(APP.contactRecord);
-                });
-            }
-            else if(module == "Leads" && document.querySelector("#leadCreateSelectOption")) {
-                document.querySelector("#leadCreateSelectOption").addEventListener('click', (e) => {
-                    APP.leadToContactCreateConfirmation(APP.contactRecord);
-                });
-            }
-        });
-    },
     leadToContactCreateConfirmation: function() {
-
 
         let k = APP.loader+`<div style="
         z-index: 100000000;
@@ -1153,7 +1403,7 @@ var APP = {
             // }, 1000);
             
         }).catch(function(error) {
-            console.log("Error in contact to deal conversion:", error);
+            // console.log("Error in contact to deal conversion:", error);
             let errorStr = error.data[0].details.api_name+" "+error.data[0].message;
             $("#dealMapConfirmCondainer .map-container").html(`<div style="
                 z-index: 100000000;
@@ -1263,10 +1513,10 @@ var APP = {
                 // setTimeout(() => {
                     APP.updateContactAfterConversion(contactRecord.id, dealResponse.data[0].details.id);
                 // }, 1000);
-                console.log("Deal created successfully with ID:", dealResponse);
+                // console.log("Deal created successfully with ID:", dealResponse);
                 
         }).catch(function(error) {
-            console.log("Error in contact to deal conversion:", error);
+            // console.log("Error in contact to deal conversion:", error);
             throw error; // Re-throw for caller to handle
         });
     },
@@ -1295,9 +1545,9 @@ var APP = {
             APP.contactAction(APP.currentContactId);
             ZOHO.CRM.API.deleteRecord({Entity:"Leads",RecordID: lead_id})
             .then(function(data){
-                console.log(data)
+                // console.log(data)
             });
-            console.log("lead updated after conversion");
+            // console.log("lead updated after conversion");
             $("#dealMapConfirmCondainer .map-container").html(`<div style="
                 z-index: 100000000;
                 height: 100%;
@@ -1331,7 +1581,7 @@ var APP = {
             Entity: "Contacts",
             APIData: updateData
         }).then(function(response) {
-            console.log("Contact updated after conversion");
+            // console.log("Contact updated after conversion");
             $("#dealMapConfirmCondainer .map-container").html(`<div style="
                 z-index: 100000000;
                 height: 100%;
@@ -1383,7 +1633,7 @@ var APP = {
         let contacts = Array.from(document.querySelectorAll('.chat-item'));
         if (contacts.length < 2) return;
         const contactToMove = contacts.find(c => c.getAttribute('data-id') === contactId.toString());
-        // console.log(contactToMove);
+        // // console.log(contactToMove);
         if (!contactToMove || contacts[0].getAttribute('data-id') === contactId.toString()) return;
         
         // Remove the contact from its current position
@@ -1411,45 +1661,14 @@ var APP = {
             }, 500);
         }
     },
-    renderMessages: function(contactid) {
-        var chatHeader = document.getElementById('chat-header');
-        var chat = Object.values(APP.contacts).find(c => c.id == contactid);
-        
-        if (!chat) return;
-        
-        // Update chat header
-        var chatHeaderInfo = chatHeader.querySelector('.chat-header-info');
-        chatHeaderInfo.innerHTML = `
-        <div class="chat-header-info-head">
-            <img src="${chat.avatar ? chat.avatar: 'person.png'}" alt="${contactid}" class="profile-pic">
-            <div class="chat-header-name"><span class="chat-header-nameText">${chat.details.Name ? chat.details.Name : contactid}</span><span class="chat-header-nameId">+${chat.id}</span></div>
-        </div>
-        <div class="chat-header-info-body">
-            <div class="rowOptions" id="createModuleSelectOptionInRecord">
-                ${APP.module == "Contacts" ? `<button class="rowOptionsButton" id="contactCreateSelectOption">
-                    <div class="rowOptionsButtonIn">
-                    <span>Create Deal</span>
-                    </div>
-                </button>` : ''}
-                ${APP.module == "Leads" ? `<button class="rowOptionsButton" id="leadCreateSelectOption">
-                    <div class="rowOptionsButtonIn">
-                    <span>Create Contact</span>
-                    </div>
-                </button>` : ''}
-            </div>
-        </div>
-        `;
-
-        if(APP.module == "Contacts" && document.querySelector("#contactCreateSelectOption")) {
-            document.querySelector("#contactCreateSelectOption").addEventListener('click', (e) => {
-                APP.contactToDealCreateConfirmation(APP.contactRecord);
-            });
-        }
-        else if(APP.module == "Leads" && document.querySelector("#leadCreateSelectOption")) {
-            document.querySelector("#leadCreateSelectOption").addEventListener('click', (e) => {
-                APP.leadToContactCreateConfirmation(APP.contactRecord);
-            });
-        }
+    svg: {
+        openlink: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h240q17 0 28.5 11.5T480-800q0 17-11.5 28.5T440-760H200v560h560v-240q0-17 11.5-28.5T800-480q17 0 28.5 11.5T840-440v240q0 33-23.5 56.5T760-120H200Zm560-584L416-360q-11 11-28 11t-28-11q-11-11-11-28t11-28l344-344H600q-17 0-28.5-11.5T560-800q0-17 11.5-28.5T600-840h200q17 0 28.5 11.5T840-800v200q0 17-11.5 28.5T800-560q-17 0-28.5-11.5T760-600v-104Z"/></svg>`,
+        contactinfo: `<svg elementid="option" xmlns="http://www.w3.org/2000/svg" height="25" viewBox="0 96 960 960" width="25" style="fill: #77848d;width: 25px;height: 23px;"><path d="M720 843q26 0 43.5-17.5T781 782q0-26-17.5-43.5T720 721q-26 0-43.5 17.5T659 782q0 26 17.5 43.5T720 843Zm0 122q31 0 57.5-14t43.5-40q-23-13-49-20t-52-7q-26 0-52 7t-49 20q17 26 43.5 40t57.5 14Zm0 106q-95 0-161.5-66.5T492 843q0-95 66.5-161.5T720 615q95 0 161.5 66.5T948 843q0 95-66.5 161.5T720 1071ZM317 462h326q22 0 37.5-15.5T696 409q0-22-15.5-37.5T643 356H317q-22 0-37.5 15.5T264 409q0 22 15.5 37.5T317 462Zm121 507H194q-45 0-75.5-30.5T88 863V293q0-45 30.5-75.5T194 187h572q45 0 75.5 30.5T872 293v283q-34-20-73.5-30.5T720 535h-12q-6 0-12 1-10-7-25-9t-28-2H317q-22 0-37.5 15.5T264 578q0 22 15.5 37.5T317 631h179q-14 14-25 30t-21 33H317q-22 0-37.5 15.5T264 747q0 22 15.5 37.5T317 800h98q-2 11-2.5 21.5T412 843q0 33 6 64.5t20 61.5Z"></path></svg>`,
+        close: `<svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="" fill="currentColor" enable-background="new 0 0 24 24"><title>x</title><path d="M19.6004 17.2L14.3004 11.9L19.6004 6.60005L17.8004 4.80005L12.5004 10.2L7.20039 4.90005L5.40039 6.60005L10.7004 11.9L5.40039 17.2L7.20039 19L12.5004 13.7L17.8004 19L19.6004 17.2Z"></path></svg>`,
+        lead: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="40" height="40" xml:space="preserve" version="1.1" viewBox="0 0 40 40"> <image width="40" height="40" xlink:href="data:image/png;base64,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"/> </svg>`,
+        contact: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="40" height="40" xml:space="preserve" version="1.1" viewBox="0 0 40 40"> <image width="40" height="40" xlink:href="data:image/png;base64,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"/> </svg>`,
+        opentab: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="40" height="40" xml:space="preserve" version="1.1" viewBox="0 0 40 40"> <image width="40" height="40" xlink:href="data:image/png;base64,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"/> </svg>`,
+        svg: ``
     },
     addedStatus: `<svg viewBox="0 0 16 15" width="16" preserveAspectRatio="xMidYMid meet" class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 16 15"><title>msg-time</title><path fill="currentColor" d="M9.75,7.713H8.244V5.359c0-0.276-0.224-0.5-0.5-0.5H7.65c-0.276,0-0.5,0.224-0.5,0.5v2.947 c0,0.276,0.224,0.5,0.5,0.5h0.094c0.001,0,0.002-0.001,0.003-0.001S7.749,8.807,7.75,8.807h2c0.276,0,0.5-0.224,0.5-0.5V8.213 C10.25,7.937,10.026,7.713,9.75,7.713z M9.75,2.45h-3.5c-1.82,0-3.3,1.48-3.3,3.3v3.5c0,1.82,1.48,3.3,3.3,3.3h3.5 c1.82,0,3.3-1.48,3.3-3.3v-3.5C13.05,3.93,11.57,2.45,9.75,2.45z M11.75,9.25c0,1.105-0.895,2-2,2h-3.5c-1.104,0-2-0.895-2-2v-3.5 c0-1.104,0.896-2,2-2h3.5c1.105,0,2,0.896,2,2V9.25z"></path></svg>`,
     sentStatus: `<svg viewBox="0 0 12 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none"><title>msg-check</title><path d="M11.1549 0.652832C11.0745 0.585124 10.9729 0.55127 10.8502 0.55127C10.7021 0.55127 10.5751 0.610514 10.4693 0.729004L4.28038 8.36523L1.87461 6.09277C1.8323 6.04622 1.78151 6.01025 1.72227 5.98486C1.66303 5.95947 1.60166 5.94678 1.53819 5.94678C1.407 5.94678 1.29275 5.99544 1.19541 6.09277L0.884379 6.40381C0.79128 6.49268 0.744731 6.60482 0.744731 6.74023C0.744731 6.87565 0.79128 6.98991 0.884379 7.08301L3.88047 10.0791C4.02859 10.2145 4.19574 10.2822 4.38194 10.2822C4.48773 10.2822 4.58929 10.259 4.68663 10.2124C4.78396 10.1659 4.86436 10.1003 4.92784 10.0156L11.5738 1.59863C11.6458 1.5013 11.6817 1.40186 11.6817 1.30029C11.6817 1.14372 11.6183 1.01888 11.4913 0.925781L11.1549 0.652832Z" fill="currentcolor"></path></svg>`,
@@ -1648,7 +1867,7 @@ var APP = {
     sendMessage: async function(){
         if(APP.isBulk){
             if(APP.selectedContacts.length == 0){
-                console.log("selected contacts: 0");
+                // console.log("selected contacts: 0");
                 return;
             }
             APP.renderLoaderPopupForBulkSending();
@@ -1660,7 +1879,7 @@ var APP = {
                     await APP.sendMessageToContact(contactId);
                 }
                 catch(error){
-                    console.log(error);
+                    // console.log(error);
                 }
             }
             setTimeout(() => {
@@ -1869,7 +2088,7 @@ var APP = {
             let contactName = "incoming from "+ contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldName] ? APP.contacts[contactId].details[APP.extensionFieldName] : data.contacts && data.contacts[0] && data.contacts[0].profile && data.contacts[0].profile.name ? data.contacts[0].profile.name : contactId;
             let owner = contactId && APP.contacts[contactId] && APP.contacts[contactId].details && APP.contacts[contactId].details[APP.extensionFieldOwner] && APP.contacts[contactId].details[APP.extensionFieldOwner].id ? APP.contacts[contactId].details[APP.extensionFieldOwner].id : '';
             let to = data.metadata.display_phone_number;
-            let time = Number(data.messages[0].timestamp) * 1000;
+            let time = contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id] && APP.contacts[contactId].messages[message_id][APP.extensionFieldTimestamp] ? Number(APP.contacts[contactId].messages[message_id][APP.extensionFieldTimestamp]) * 1000 : Number(data.messages[0].timestamp) * 1000;
             let text = data.messages[0].text && data.messages[0].text.body ? data.messages[0].text.body : '';            
             let encodeText = encodeURIComponent(encodeURIComponent(text));
             let reactionFrom = data.messages[0].reaction && data.messages[0].reaction.emoji ? data.messages[0].reaction.emoji : "";
@@ -1967,9 +2186,9 @@ var APP = {
                 delete APP.contacts[contactId].notifications[key];
                 setTimeout(() => {
                     APP.database.ref('incomingMessages/'+key).remove().then(() => {
-                        // console.log("Data deleted successfully");
+                        // // console.log("Data deleted successfully");
                     }).catch((error) => {
-                        console.log("Error deleting data: ", error);
+                        // console.log("Error deleting data: ", error);
                     });
                 }, 2000);
             }
@@ -1982,7 +2201,7 @@ var APP = {
             await APP.addContactList(contactId);
             
         }, (error) => {
-            console.log("Listener error:", error);
+            // console.log("Listener error:", error);
         });
 
 
@@ -2031,14 +2250,14 @@ var APP = {
             }
             setTimeout(() => {
                 APP.database.ref('outgoingMessages/'+key).remove().then(() => {
-                    console.log("Data deleted successfully");
+                    // console.log("Data deleted successfully");
                 }).catch((error) => {
-                    console.log("Error deleting data: ", error);
+                    // console.log("Error deleting data: ", error);
                 });
             }, 2000);
 
         }, (error) => {
-            console.log("Listener error:", error);
+            // console.log("Listener error:", error);
         });
 
     },
@@ -2049,8 +2268,8 @@ var APP = {
         $(".message-input").append($(thisSelected).text());
     },
     emojiSectionClick: function(section) {
-        $(".smiley-groups-heading").removeClass("selected");
-        $($(".smiley-groups-heading")[section]).addClass("selected");
+        $("._icon.selected").removeClass("selected")
+        $($("._icon")[section]).addClass("selected");
         $("#emojiMainDiv").scrollTop(0);
         $("#emojiMainDiv").scrollTop($($(".smiley-groups-heading")[section]).parent().position().top);
     },
@@ -2070,8 +2289,8 @@ var APP = {
         });
 
         APP.at = APP.credential[APP.extensionAPIAt];
+        $('.accessKeyPopup .popupInitBodyInput').val(APP.at);
         await APP.renderWhatsappTemplates();
-        // $('.accessKeyPopup .popupInitBodyInput').val(APP.at);
     },
     settingsPopupOpen: function() {
         $('.accessKeyPopup.popupInit').css('opacity', '1').css('z-index', '800').find('.popupInitBody').css('transform', 'scaleX(1) scaleY(1)');
@@ -2088,7 +2307,7 @@ var APP = {
         $(".accessKeyPopup .popupInitBodyMainIn").css("display", "none");
         $(".accessKeyPopup .popupInitBodyMainOut").css("display", "block");        
         $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Saving...");
-        return await ZOHO.CRM.CONNECTOR.invokeAPI("crm.set", {"apiname": APP.extensionAPIAt, "value": value}).then(function(res) {
+        return await ZOHO.CRM.CONNECTOR.invokeAPI("crm.set", {"apiname": APP.extensionAPIAt, "value": value}).then(async function(res) {
             if(res && JSON.parse(res) && JSON.parse(res).status_code && JSON.parse(res).status_code == "200"){
                 APP.at = accesskey;
                 $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Saved");
@@ -2100,6 +2319,7 @@ var APP = {
                         $(".accessKeyPopup .popupInitBodyMainOut .popupInitBodyTitleText").text("Saving...");
                     }
                 }, 1000);
+                await APP.renderWhatsappTemplates();
                 return true;
             }
             else {
@@ -2129,206 +2349,14 @@ var APP = {
     addNumberPopupClose: function() {
         $('.addNumberPopup.popupInit').css('opacity', '0').css('z-index', '0').find('.popupInitBody').css('transform', 'scaleX(0) scaleY(0)');
     },
-    unusedCodes: function() {
-
-        var emojiBtn = document.getElementById('emoji-btn');
-        var emojiPicker = document.getElementById('emoji-picker');
-        var emojiGrid = document.getElementById('emoji-grid');
-        var attachmentBtn = document.getElementById('attachment-btn');
-        var attachmentOptions = document.getElementById('attachment-options');
-        var attachPhoto = document.getElementById('attach-photo');
-        var mediaPreview = document.getElementById('media-preview');
-        var previewImage = document.getElementById('preview-image');
-        var previewCancel = document.getElementById('preview-cancel');
-        var previewSend = document.getElementById('preview-send');
-        var chatHeader = document.getElementById('chat-header');
-        var contactDetails = document.getElementById('contact-details');
-        var backButton = document.getElementById('back-button');
-        var profilePic = document.getElementById('profile-pic');
-        var settingsPage = document.getElementById('settings-page');
-        var settingsBack = document.getElementById('settings-back');
-        var notification = document.getElementById('notification');
-
-        // Attach photo
-        attachPhoto.addEventListener('click', () => {
-            attachmentOptions.style.display = 'none';
-            // In a real app, this would open a file picker
-            // For demo, we'll simulate selecting an image
-            previewImage.src = 'https://via.placeholder.com/300x200';
-            mediaPreview.style.display = 'block';
-        });
-        
-        function handleAttachment(type) {
-            switch (type) {
-                case 'photo':
-                    // Simulate photo upload
-                    showNotification('Uploading photo...');
-                    setTimeout(() => {
-                        const newMessage = {
-                            id: Date.now(),
-                            text: '',
-                            time: getCurrentTime(),
-                            outgoing: true,
-                            status: 'delivered',
-                            attachment: {
-                                type: 'photo',
-                                url: 'https://picsum.photos/300/200?' + Math.random()
-                            }
-                        };
-                        currentContact.messages.push(newMessage);
-                        renderMessages(currentContact.messages);
-                        
-                        // Simulate reply
-                        setTimeout(() => {
-                            const replyMessage = {
-                                id: Date.now(),
-                                text: 'Nice photo!',
-                                time: getCurrentTime(),
-                                outgoing: false,
-                                status: 'delivered'
-                            };
-                            currentContact.messages.push(replyMessage);
-                            renderMessages(currentContact.messages);
-                            showNotification(`New message from ${currentContact.name}`);
-                        }, 2000);
-                    }, 1000);
-                    break;
-                case 'document':
-                    // Simulate document upload
-                    showNotification('Uploading document...');
-                    setTimeout(() => {
-                        const newMessage = {
-                            id: Date.now(),
-                            text: '',
-                            time: getCurrentTime(),
-                            outgoing: true,
-                            status: 'delivered',
-                            attachment: {
-                                type: 'document',
-                                name: 'Document_' + Math.floor(Math.random() * 1000) + '.pdf',
-                                size: (Math.random() * 5 + 1).toFixed(1) + ' MB'
-                            }
-                        };
-                        currentContact.messages.push(newMessage);
-                        renderMessages(currentContact.messages);
-                    }, 1000);
-                    break;
-                case 'audio':
-                    showNotification('Recording audio...');
-                    break;
-                case 'location':
-                    showNotification('Sharing location...');
-                    break;
-                case 'contact':
-                    showNotification('Sharing contact...');
-                    break;
-            }
-        }
-
-        // Media preview actions
-        previewCancel.addEventListener('click', () => {
-            mediaPreview.style.display = 'none';
-        });
-        
-        previewSend.addEventListener('click', () => {
-            var chat = Object.values(APP.contacts).find(c => c.id == APP.currentContactId);
-            var newMessage = {
-                text: '[Photo]',
-                time: APP.getCurrentTime(),
-                incoming: false,
-                status: 'delivered'
-            };
-            chat.messages.push(newMessage);
-            chat.lastMessage = 'You: [Photo]';
-            chat.time = 'Just now';
-            APP.renderMessages(APP.currentContactId);
-            APP.renderChatList();
-            mediaPreview.style.display = 'none';
-            
-            // Simulate reply after 1-3 seconds
-            setTimeout(() => {
-                var replies = [
-                    'Nice photo!',
-                    'Thanks for sharing!',
-                    'Where was this taken?',
-                    'Looking good!'
-                ];
-                var randomReply = replies[Math.floor(Math.random() * replies.length)];
-                
-                var replyMessage = {
-                    text: randomReply,
-                    time: APP.getCurrentTime(),
-                    incoming: true
-                };
-                
-                chat.messages.push(replyMessage);
-                chat.lastMessage = randomReply;
-                chat.time = 'Just now';
-                APP.renderMessages(APP.currentContactId);
-                APP.renderChatList();
-                
-                // Show notification if chat is not active
-                if (chat.id !== APP.currentContactId) {
-                    APP.showNotification(`${chat.name}: ${randomReply}`);
-                }
-            }, 1000 + Math.random() * 2000);
-        });
-
-        
-
-    attachmentBtn = document.getElementById('attachment-btn');
-    attachmentOptions = document.getElementById('attachment-options');
-
-    // Attachment options
-    attachmentBtn.addEventListener('click', toggleAttachmentOptions);
-    attachmentOptions.querySelectorAll('.attachment-option').forEach(option => {
-        option.addEventListener('click', () => {
-            const type = option.getAttribute('data-type');
-            handleAttachment(type);
-            toggleAttachmentOptions();
-        });
-    });
-
-    // Toggle attachment options
-    function toggleAttachmentOptions(e) {
-            e.stopPropagation();
-            attachmentOptions.classList.toggle('show');
-            emojiPicker.classList.remove('show');
-        }
-        
-        // Click outside to close popups
-        // Close dropdowns when clicking elsewhere
-        
-        
-        
-        // Profile pic click to show settings
-        if(profilePic)
-        profilePic.addEventListener('click', () => {
-            settingsPage.style.display = 'flex';
-            sidebar.style.display = 'none';
-            chatArea.style.display = 'none';
-            contactDetails.style.display = 'none';
-        });
-        
-        // Back button from settings
-        settingsBack.addEventListener('click', () => {
-            settingsPage.style.display = 'none';
-            sidebar.style.display = 'flex';
-            chatArea.style.display = 'flex';
-        });
-
-
-    },
-
     updateSendModeType: function(type){
         $(".whatsapp-container").removeClass(APP.sendModeType);
         $(".whatsapp-container").addClass(type);
         APP.sendModeType = type;
         APP.isBulk = type == "bulk"? true: false;
         APP.resetBulkInitConfigs();
-        console.log("current send mode: "+ APP.sendModeType);
+        // console.log("current send mode: "+ APP.sendModeType);
     },
-
     resetBulkInitConfigs: function(){
         APP.resetMessageInputContainer();
         $(".selectAll-checkbox-inp").prop("checked", false);
@@ -2353,8 +2381,10 @@ var APP = {
             $(".chat-header").show();
             $(".messages-container").show();
             $(".bulk-selected-chats-list-div").remove();
-            document.getElementById("chat-area").insertAdjacentHTML("afterbegin", `<div class="initialChatDiv">Start Conversation</div>`);
-            APP.initialChatDiv = document.querySelector(".initialChatDiv");
+            if(APP.initialChatDiv) {
+                document.getElementById("chat-area").insertAdjacentHTML("afterbegin", `<div class="initialChatDiv">Start Conversation</div>`);
+                APP.initialChatDiv = document.querySelector(".initialChatDiv");
+            }
         }
     },
 
@@ -2382,7 +2412,7 @@ var APP = {
             APP.selectedContacts = [];
             APP.renderSelectedBulkContacts(null, false);
         }
-        console.log("Bulk selection updated:", APP.selectedContacts);
+        // console.log("Bulk selection updated:", APP.selectedContacts);
     },
     
     handleOnContactSelectionOnChange: function(contactId, isChecked){
@@ -2457,27 +2487,27 @@ var APP = {
             };
             
             await ZOHO.CRM.HTTP.get(request).then(async function(resp) {
-                console.log(resp);
+                // console.log(resp);
                 if(resp && JSON.parse(resp) && JSON.parse(resp).data && JSON.parse(resp).data.length > 0){
                     let templates = JSON.parse(resp).data;
-                    console.log(templates);
+                    // console.log(templates);
                     templates.forEach( async (template) => {
                         template.display_name = template.name.replace(/_/g, " ");
                         template.display_text_content = "";
                         let previewContent = "";
                         template.components.forEach((component) => {
                             if (component.type === "HEADER" && component.text) {
-                              previewContent += `${component.text}\n\n`;
+                              previewContent += `${component.text}`;
                             }
                             if (component.type === "BODY" && component.text) {
-                              previewContent += `${component.text}\n\n`;
+                              previewContent += `${component.text}`;
                             }
                             if (component.type === "FOOTER" && component.text) {
-                              previewContent += `${component.text}\n\n`;
+                              previewContent += `${component.text}`;
                             }
                             if (component.type === "BUTTONS") {
                               component.buttons.forEach((button) => {
-                                previewContent += `${button.text}\n\n`;
+                                previewContent += `${button.text}`;
                               });
                             }
                         });
@@ -2488,7 +2518,7 @@ var APP = {
                     });
                 }
                 else{
-                    console.log("error in fetching templates");
+                    // console.log("error in fetching templates");
                 }
             });
         } 
@@ -2559,8 +2589,9 @@ var APP = {
 
     renderWhatsappTemplates: async function(templates) {
         await APP.fetchTemplates();
-        if(APP.whatsappTemplates.length == 0){
-            console.log("No templates available");
+        document.getElementById("templates-list-outer").innerHTML = "";
+        if(Object.keys(APP.whatsappTemplates).length == 0){
+            // console.log("No templates available");
             return;
         }
         let templateList = document.createElement('div');
@@ -2569,42 +2600,42 @@ var APP = {
             let templateData = APP.whatsappTemplates[template];
             let templateItem = document.createElement('div');
             templateItem.className = 'template-item';
-            templateItem.innerHTML = `
-                <div class="template-name" onclick="APP.handleTemplateOnClick('${template}')">${templateData.display_name}</div>
-            `;
+            templateItem.innerHTML = `<div class="template-name" onclick="APP.handleTemplateOnClick('${template}')">${templateData.display_name}</div>`;
             templateList.appendChild(templateItem);
         });
         document.getElementById("templates-list-outer").appendChild(templateList);
     },
 
     showWhatsappTemplates: function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        $("#templates-list-outer").toggle();
-        return;
+        // event.preventDefault();
+        // event.stopPropagation();
+        // $("#templates-list-outer").toggle();
+        // return;
     },
 
     handleTemplateOnClick: function(templateName) {
         $("#templates-list-outer").hide();
-        let template = APP.whatsappTemplates[templateName];
+        let template = JSON.parse(JSON.stringify(APP.whatsappTemplates[templateName]));
         if(template){
-            console.log("Selected template: ", template);
+            // console.log("Selected template: ", template);
             APP.selectedTemplate = template;
-            const formattedText = template.display_text_content.replace(/\n/g, "<br>");
-            $("#message-input").html(formattedText);
+            template.display_text_content = template.display_text_content.trim().replace(/\n/g, "<br>");
+            $("#message-input").html(template.name);
             if(template.placeholders){
-                let placeholders = template.placeholders;
-                let placeholderInputs = "";
-                placeholders.forEach((placeholder) => {
-                    placeholderInputs += `<input type="text" data-id="${placeholder.name}" data-type="${placeholder.type}" class="template-placeholder-input" placeholder="{{${placeholder.name}}}" />`;
-                });
+                template = APP.PlaceholderValuesInMessageText(template);
                 $("#templates-placeholders").empty();
                 $("#templates-placeholders").show();
-                $("#templates-placeholders").html(placeholderInputs);
+                $("#templates-placeholders").html(template.display_text_content);
+                // let placeholders = template.placeholders;
+                // let placeholderInputs = "";
+                // placeholders.forEach((placeholder) => {
+                //     placeholderInputs += `<input type="text" data-id="${placeholder.name}" data-type="${placeholder.type}" class="template-placeholder-input" placeholder="{{${placeholder.name}}}" />`;
+                // });
+                
             }
         }
         else{
-            console.log("Template not found");
+            // console.log("Template not found");
         }
     },
 
@@ -2614,7 +2645,7 @@ var APP = {
         $(".template-placeholder-input").each(function () {
             const sectionType = $(this).data("type"); 
             const parameterName = $(this).data("id"); 
-            const parameterValue = $(this).val(); 
+            const parameterValue = $(this).val();
             if(!parameterValue) {
                 isNotValid = true;
                 return false;
@@ -2634,7 +2665,6 @@ var APP = {
     
         return isNotValid? false: components;
     },
-
     updatePlaceholderValuesInMessageText: function(messageText) {
         let updatedText = messageText;
         $(".template-placeholder-input").each(function () {
@@ -2644,7 +2674,56 @@ var APP = {
         });
         return updatedText;
     },
-
+    PlaceholderValuesInMessageText: function(template) {
+        if(template.placeholders) {
+            let headerContent = "";
+            let bodyContent = "";
+            let footerContent = "";
+            let buttonContent = "";
+            template.components.forEach((component) => {
+                if(component.type == "HEADER") {
+                    headerContent = component.text;
+                }
+                else if(component.type == "BODY") {
+                    bodyContent = component.text;
+                }
+                else if(component.type == "FOOTER") {
+                    footerContent = component.text;
+                }
+                else if(component.type == "BUTTONS") {
+                    component.buttons.forEach((button) => {
+                        buttonContent += `<span>${button.text}</span>`;
+                    });
+                }
+            });
+            template.placeholders.forEach((placeholder) => {
+                if(placeholder.type == "header") {
+                    headerContent = headerContent.replace(`{{${placeholder.name}}}`, `<input type="text" data-id="${placeholder.name}" data-type="${placeholder.type}" class="template-placeholder-input" placeholder="{{${placeholder.name}}}" />`);
+                }
+                else if(placeholder.type == "body") {
+                    bodyContent = bodyContent.replace(`{{${placeholder.name}}}`, `<input type="text" data-id="${placeholder.name}" data-type="${placeholder.type}" class="template-placeholder-input" placeholder="{{${placeholder.name}}}" />`);
+                }
+                else if(placeholder.type == "footer") {
+                    footerContent = footerContent.replace(`{{${placeholder.name}}}`, `<input type="text" data-id="${placeholder.name}" data-type="${placeholder.type}" class="template-placeholder-input" placeholder="{{${placeholder.name}}}" />`);
+                }
+            });
+            let messageContent = "";
+            if(headerContent) {
+                messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowHeader">${headerContent}</div>`;
+            }
+            if(bodyContent) {
+                messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowBody">${bodyContent}</div>`;
+            }
+            if(footerContent) {
+                messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowFooter">${footerContent}</div>`;
+            }
+            if(buttonContent) {
+                messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowButton">${buttonContent}</div>`;
+            }
+            template.display_text_content = messageContent;
+        }
+        return template;
+    },
     handleReplyMessageBtnOnClick: function(messageId, contactId, returnElem=false) {
         // add message content to message-reply-tag element in ui.
         if(!messageId) return;
@@ -2716,19 +2795,19 @@ var APP = {
         .then(function (response) {
             
             if (response && response.data) {
-                console.log("Search Results:", response.data);
+                // console.log("Search Results:", response.data);
                 let record = response.data[0];
                 if (record) {
                     APP.contacts[contactId].messages[messageId] = record;
                     return record;
                 } 
                 else {
-                    console.log("No matching records found.");
+                    // console.log("No matching records found.");
                     return null;
                 }
             } 
             else {
-                console.log("No matching records found.");
+                // console.log("No matching records found.");
                 return null;
             }
         })

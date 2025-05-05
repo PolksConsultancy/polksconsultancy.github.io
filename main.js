@@ -3013,7 +3013,7 @@ var APP = {
     },
 
     startListenerForCRMFieldsPlaceholder: function () {
-        const chatBox = document.querySelector(".chat-box");
+        const chatBox = document.querySelector(".chat-area");
         const fieldsPopup = document.getElementById("fields-popup");
     
         chatBox.addEventListener("keydown", (e) => {

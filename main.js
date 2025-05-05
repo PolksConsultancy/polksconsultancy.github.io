@@ -1905,6 +1905,7 @@ var APP = {
         if(!contactId) return;
         if(!APP.contacts[contactId]) return;
         if(!APP.contacts[contactId].messages) APP.contacts[contactId].messages = {};
+        let recordDetails = APP.contacts[contactId]?.details || {};
         let messageInput = document.getElementById('message-input');
         let messageText = messageInput.innerText.trim();
     
@@ -1913,11 +1914,12 @@ var APP = {
         if(APP.selectedTemplate && APP.selectedTemplate.display_text_content) {
             messageText = APP.selectedTemplate.display_text_content;
             if(APP.selectedTemplate.placeholders && APP.selectedTemplate.placeholders.length > 0){
-                parameters = await APP.getAllCurrentTemplateParameters();
+                parameters = await APP.getAllCurrentTemplateParameters(recordDetails);
                 messageText = APP.updatePlaceholderValuesInMessageText(messageText);
                 if(parameters == false) return;
             }
         }
+        messageText = APP.replacePlaceholdersWithValues(messageText, recordDetails);
 
         let message_id = new Date().getTime()+"";
         let from = "";
@@ -2648,7 +2650,7 @@ var APP = {
         }
     },
 
-    getAllCurrentTemplateParameters: function() {
+    getAllCurrentTemplateParameters: function(recordDetails) {
         const components = [];
         let isNotValid = false;
         $(".template-placeholder-input").each(function () {
@@ -2664,7 +2666,7 @@ var APP = {
                 section = { type: sectionType, parameters: [] };
                 components.push(section);
             }
-    
+            parameterValue = APP.replacePlaceholdersWithValues(parameterValue, recordDetails);
             section.parameters.push({
                 type: "text", 
                 text: parameterValue,
@@ -3121,6 +3123,22 @@ var APP = {
         }
         APP.setFieldsPopupCaretPosition(APP.activeInput, beforeTrigger.length + selectedField.length + 11);
         APP.hideCRMFieldsPlaceholderPopup();
+    },
+
+    replacePlaceholdersWithValues: function(template, contact) {
+        return template.replace(/\${contact\.(.+?)}/g, (_, path) => {
+            const value = APP.getValueFromPath(contact, path);
+            return value !== undefined ? value : "--";
+        });
+    },
+
+    getValueFromPath: function(obj, path) {
+        return path.split(".").reduce((acc, key) => {
+            if (acc && acc[key] !== undefined) {
+                return acc[key];
+            }
+            return undefined;
+        }, obj);
     },
 
 };

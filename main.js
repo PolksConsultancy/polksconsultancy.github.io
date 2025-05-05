@@ -2656,7 +2656,7 @@ var APP = {
         $(".template-placeholder-input").each(function () {
             const sectionType = $(this).data("type"); 
             const parameterName = $(this).data("id"); 
-            const parameterValue = $(this).val();
+            let parameterValue = $(this).val();
             if(!parameterValue) {
                 isNotValid = true;
                 return false;

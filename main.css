@@ -4818,7 +4818,7 @@ div#templates-placeholders {
     margin: auto;
     position: relative;
     align-items: flex-start;
-    width: calc(100% + -40px);
+    width: calc(100% - 30px);
     background-color: white;
     padding: 10px;
     box-sizing: border-box;
@@ -4833,8 +4833,23 @@ div#templates-placeholders {
     position: relative;
     z-index: 200;
     border-radius: 7.5px;
-    margin: 0 20px;
+    margin-bottom: 2px;
 }
+
+.clear-template-btn {
+    position: absolute;
+    right: 15px;
+    background: #ebebeb;
+    padding: 1px 6px 3px 7px;
+    border-radius: 4px;
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #565656;
+}
+
 input.template-placeholder-input {
     display: inline-block;
     padding: 2px 5px 3px 5px;
@@ -5379,3 +5394,29 @@ span.recordFieldEditText {
 .recordFieldEditOuter:hover {
     border: 1px solid #d5d9dc;
 }
+
+
+.fields-popup {
+    position: absolute;
+    display: none;
+    background: white;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+  
+  .fields-popup ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .fields-popup li {
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .fields-popup li:hover {
+    background-color: #f0f0f0;
+  }

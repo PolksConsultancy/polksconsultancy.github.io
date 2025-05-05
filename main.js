@@ -2397,7 +2397,7 @@ var APP = {
 
     resetMessageInputContainer: function(){
         APP.selectedTemplate = null;
-        $("#message-input").html("");
+        $("#message-input").html("").attr('contenteditable', 'true');
         $("#templates-placeholders").empty();
         $("#templates-placeholders").hide();
         APP.removeReplyTagMessage();
@@ -2629,7 +2629,7 @@ var APP = {
             let clearTemplateBtn = `<div class="clear-template-btn" onclick="APP.resetMessageInputContainer();">x</div>`;
             APP.selectedTemplate = template;
             template.display_text_content = template.display_text_content.trim().replace(/\n/g, "<br>");
-            $("#message-input").html(template.name);
+            $("#message-input").html(template.name).attr('contenteditable', 'false');
             $("#templates-placeholders").empty();
             $("#templates-placeholders").show();
             $("#templates-placeholders").html(`${clearTemplateBtn}${template.display_html_content}`);

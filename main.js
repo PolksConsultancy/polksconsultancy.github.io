@@ -2934,6 +2934,53 @@ var APP = {
         input.focus();
     },
 
+    getFieldsPopupCaretPosition: function (input) {
+        if (input.tagName === "DIV") {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                return range.startOffset;
+            }
+            return 0;
+        } else {
+            return input.selectionStart;
+        }
+    },
+    
+    getCaretCoordinates: function (element) {
+        let x = 0, y = 0;
+    
+        if (element.tagName === "DIV") {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0).cloneRange();
+                range.collapse(true);
+                const rect = range.getClientRects()[0];
+                if (rect) {
+                    x = rect.left;
+                    y = rect.top;
+                }
+            }
+        } else {
+            const rect = element.getBoundingClientRect();
+            const scrollOffset = element.scrollTop || window.scrollY;
+            const cursorPos = APP.getFieldsPopupCaretPosition(element);
+            const inputValue = element.value.substring(0, cursorPos);
+            const tempSpan = document.createElement("span");
+            tempSpan.style.position = "absolute";
+            tempSpan.style.visibility = "hidden";
+            tempSpan.style.whiteSpace = "pre";
+            tempSpan.style.font = getComputedStyle(element).font;
+            tempSpan.textContent = inputValue.replace(/ /g, "\u00A0");
+            document.body.appendChild(tempSpan);
+            const spanRect = tempSpan.getBoundingClientRect();
+            x = spanRect.right;
+            y = rect.top + scrollOffset;
+            document.body.removeChild(tempSpan);
+        }
+        return { x, y };
+    },
+
     filterCRMFieldsInPlaceholderPopup: function (query) {
         if (!query) {
             return APP.contactFieldsForPlaceHolders;
@@ -2965,23 +3012,22 @@ var APP = {
         APP.triggerPos = 0;
     },
 
-    startListenerForCRMFieldsPlaceholder: function() {
-        const chatBox = document.querySelector(".chat-area");
+    startListenerForCRMFieldsPlaceholder: function () {
+        const chatBox = document.querySelector(".chat-box");
         const fieldsPopup = document.getElementById("fields-popup");
-
+    
         chatBox.addEventListener("keydown", (e) => {
             if (e.target.tagName === "INPUT" || e.target.id === "message-input") {
                 APP.activeInput = e.target;
-
+    
                 if (e.key === "#") {
                     APP.triggerPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
                     APP.popupActive = true;
-
-                    const rect = APP.activeInput.getBoundingClientRect();
-                    const lineHeight = 20;
-                    APP.showCRMFieldsPlaceholderPopup( rect.left, rect.top + rect.height + lineHeight, APP.contactFieldsForPlaceHolders );
+    
+                    const { x, y } = APP.getCaretCoordinates(APP.activeInput);
+                    APP.showCRMFieldsPlaceholderPopup(x, y, APP.contactFieldsForPlaceHolders);
                 }
-
+    
                 if (APP.popupActive) {
                     if (e.key === "Enter") {
                         e.preventDefault();
@@ -2990,17 +3036,17 @@ var APP = {
                             APP.handleFieldSelection(selectedField.textContent);
                         }
                     }
-
+    
                     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
                         e.preventDefault();
                         const items = Array.from(fieldsPopup.querySelectorAll("li"));
-                        const selectedIndex = items.findIndex((item) => item.classList.contains("selected") );
+                        const selectedIndex = items.findIndex((item) => item.classList.contains("selected"));
                         items.forEach((item) => item.classList.remove("selected"));
-                        let newIndex = e.key === "ArrowDown" ? (selectedIndex + 1) % items.length : (selectedIndex - 1 + items.length) % items.length;
+                        const newIndex = e.key === "ArrowDown" ? (selectedIndex + 1) % items.length : (selectedIndex - 1 + items.length) % items.length;
                         items[newIndex].classList.add("selected");
                     }
                 }
-
+    
                 if (e.key === "Backspace" || e.key === "Delete") {
                     const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
                     const value = APP.activeInput.innerText || APP.activeInput.value;
@@ -3011,38 +3057,33 @@ var APP = {
                 }
             }
         });
-        
-        // Handle input for filtering popup
+    
         chatBox.addEventListener("input", (e) => {
-            if (APP.popupActive && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+            if (APP.popupActive && (e.target.tagName === "INPUT" || e.target.id === "message-input")) {
                 const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
                 const value = APP.activeInput.innerText || APP.activeInput.value;
                 const textAfterTrigger = value.substring(APP.triggerPos, cursorPos);
-
+    
                 if (!value.includes("#") || cursorPos <= APP.triggerPos) {
                     APP.hideCRMFieldsPlaceholderPopup();
                     return;
                 }
-
+    
                 const filteredFields = APP.filterCRMFieldsInPlaceholderPopup(textAfterTrigger);
-                if(filteredFields.length > 0) {
-                    const rect = APP.activeInput.getBoundingClientRect();
-                    const lineHeight = 20;
-                    APP.showCRMFieldsPlaceholderPopup( rect.left, rect.top + rect.height + lineHeight, filteredFields );
-                }
-                else {
+                if (filteredFields.length > 0) {
+                    const { x, y } = APP.getCaretCoordinates(APP.activeInput);
+                    APP.showCRMFieldsPlaceholderPopup(x, y, filteredFields);
+                } else {
                     APP.hideCRMFieldsPlaceholderPopup();
                 }
             }
         });
-        
-        // Handle popup item click
+    
         fieldsPopup.addEventListener("click", (e) => {
             if (e.target.tagName === "LI") {
                 APP.handleFieldSelection(e.target.textContent);
             }
         });
-
     },
 
     handleFieldSelection(selectedField) {

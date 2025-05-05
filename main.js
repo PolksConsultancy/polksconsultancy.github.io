@@ -1,3 +1,4 @@
+
 document.writeln('<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>');
 document.writeln('<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&display=swap">');
 document.writeln('<script src="ZohoEmbededAppSDK.js?v=3"></script>');
@@ -1904,12 +1905,13 @@ var APP = {
     
         if(!messageText) return;
         let parameters = [];
-        if(APP.selectedTemplate && APP.selectedTemplate.placeholders && APP.selectedTemplate.placeholders.length > 0) {
-            parameters = await APP.getAllCurrentTemplateParameters();
+        if(APP.selectedTemplate && APP.selectedTemplate.display_text_content) {
+            messageText = APP.selectedTemplate.display_text_content;
             if(APP.selectedTemplate.placeholders && APP.selectedTemplate.placeholders.length > 0){
+                parameters = await APP.getAllCurrentTemplateParameters();
                 messageText = APP.updatePlaceholderValuesInMessageText(messageText);
+                if(parameters == false) return;
             }
-            if(parameters == false) return;
         }
 
         let message_id = new Date().getTime()+"";
@@ -2514,6 +2516,7 @@ var APP = {
                         template.display_text_content = previewContent;
                         let placeholders = await APP.getPlaceHoldersListFromTemplate(template);
                         template.placeholders = placeholders;
+                        template = await APP.PlaceholderValuesInMessageText(template);
                         APP.whatsappTemplates[template.name] = template;
                     });
                 }
@@ -2618,24 +2621,25 @@ var APP = {
         let template = JSON.parse(JSON.stringify(APP.whatsappTemplates[templateName]));
         if(template){
             // console.log("Selected template: ", template);
+            let clearTemplateBtn = `<div class="clear-template-btn" onclick="APP.resetMessageInputContainer();">x</div>`;
             APP.selectedTemplate = template;
             template.display_text_content = template.display_text_content.trim().replace(/\n/g, "<br>");
             $("#message-input").html(template.name);
-            if(template.placeholders){
-                template = APP.PlaceholderValuesInMessageText(template);
-                $("#templates-placeholders").empty();
-                $("#templates-placeholders").show();
-                $("#templates-placeholders").html(template.display_text_content);
-                // let placeholders = template.placeholders;
-                // let placeholderInputs = "";
-                // placeholders.forEach((placeholder) => {
-                //     placeholderInputs += `<input type="text" data-id="${placeholder.name}" data-type="${placeholder.type}" class="template-placeholder-input" placeholder="{{${placeholder.name}}}" />`;
-                // });
-                
-            }
+            $("#templates-placeholders").empty();
+            $("#templates-placeholders").show();
+            $("#templates-placeholders").html(`${clearTemplateBtn}${template.display_html_content}`);
+            // if(template.placeholders){
+            //     template = APP.PlaceholderValuesInMessageText(template);
+            //     $("#templates-placeholders").html(`${clearTemplateBtn}${template.display_html_content}`);
+            //     // let placeholders = template.placeholders;
+            //     // let placeholderInputs = "";
+            //     // placeholders.forEach((placeholder) => {
+            //     //     placeholderInputs += `<input type="text" data-id="${placeholder.name}" data-type="${placeholder.type}" class="template-placeholder-input" placeholder="{{${placeholder.name}}}" />`;
+            //     // });
+            // }
         }
         else{
-            // console.log("Template not found");
+            console.log("Template not found");
         }
     },
 
@@ -2720,7 +2724,7 @@ var APP = {
             if(buttonContent) {
                 messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowButton">${buttonContent}</div>`;
             }
-            template.display_text_content = messageContent;
+            template.display_html_content = messageContent;
         }
         return template;
     },

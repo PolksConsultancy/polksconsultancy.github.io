@@ -2994,7 +2994,7 @@ var APP = {
         } 
         else {
             const rect = element.getBoundingClientRect();
-            const lineHeight = 20;
+            const lineHeight = -20;
             x = rect.left;
             y = rect.top + rect.height + lineHeight;
         }

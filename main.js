@@ -3003,7 +3003,7 @@ var APP = {
         // Handle input for filtering popup
         chatBox.addEventListener("input", (e) => {
             if (APP.popupActive && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
-                const cursorPos = APP.getCaretPgetFieldsPopupCaretPositionosition(APP.activeInput);
+                const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
                 const value = APP.activeInput.value;
                 const textAfterTrigger = value.substring(APP.triggerPos, cursorPos);
 

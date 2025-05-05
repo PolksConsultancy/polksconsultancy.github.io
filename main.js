@@ -475,6 +475,9 @@ var APP = {
         if(APP.filterModes[APP.filterMode].contacts.length < APP.contactsPerPage+1) {
             APP.loadContacts();
         }
+        if(APP.isBulk){
+            APP.updateSendModeType("bulk");
+        }
     },
     loadContacts: async function() {
         if(APP.filterModes[APP.filterMode].pageCompleted) {

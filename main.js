@@ -273,7 +273,7 @@ var APP = {
         if (fieldsPopup.style.display === "block" && !fieldsPopup.contains(e.target) && (!APP.activeInput || !APP.activeInput.contains(e.target))) {
             APP.hideCRMFieldsPlaceholderPopup();
         }
-
+       
 
     },
     loader: function(elementId) {
@@ -3050,6 +3050,14 @@ var APP = {
                 APP.activeInput = e.target;
     
                 if (e.key === "#") {
+                    if(APP.isBulk && APP.filterMode && (APP.filterMode == "contacts" || APP.filterMode == "leads") ){
+                        APP.contactFieldsForPlaceHolders = APP.filterMode == "contacts"? APP.contactFieldList: APP.leadFieldList;
+                    }
+                    else if(APP.isBulk){
+                        APP.activeInput = null;
+                        alert("Please select contacts or leads option in your filters.");
+                        return;
+                    }
                     APP.triggerPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
                     APP.popupActive = true;
     

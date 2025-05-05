@@ -2932,19 +2932,28 @@ var APP = {
     setFieldsPopupCaretPosition: function (input, pos) {
         input.setSelectionRange(pos, pos);
         input.focus();
-        input.scrollTop = input.scrollHeight;
     },
 
     filterCRMFieldsInPlaceholderPopup: function (query) {
-        return APP.contactFieldsForPlaceHolders.filter((field) => field.startsWith(query));
+        if (!query) {
+            return APP.contactFieldsForPlaceHolders;
+        }
+        if(query.startsWith("#")){
+            query = query.substring(1);
+        }
+        let result = APP.contactFieldsForPlaceHolders.filter((field) =>
+            field.toLowerCase().startsWith(query.toLowerCase())
+        );
+        return result.length? result: APP.contactFieldsForPlaceHolders;
     },
 
     showCRMFieldsPlaceholderPopup: function (x, y, fields) {
         const fieldsPopup = document.getElementById("fields-popup");
         fieldsPopup.style.left = `${x}px`;
-        fieldsPopup.style.top = `${y}px`;
+        fieldsPopup.style.top = `calc(${y}px - ${fieldsPopup.offsetHeight}px - 8px)`;
         fieldsPopup.style.display = "block";
-        fieldsPopup.innerHTML = `<ul>${fields.map((field) => `<li>${field}</li>`).join("")}</ul>`;
+        fieldsPopup.innerHTML = `<ul>${fields .map((field, index) => `<li data-index="${index}">${field}</li>`) .join("")}</ul>`;
+        APP.popupActive = true;
     },
 
     hideCRMFieldsPlaceholderPopup: function() {
@@ -2968,23 +2977,26 @@ var APP = {
                     APP.popupActive = true;
 
                     const rect = APP.activeInput.getBoundingClientRect();
-                    const lineHeight = 20; // Approximate line height for popup positioning
-                    APP.showCRMFieldsPlaceholderPopup(rect.left, rect.top + rect.height + lineHeight, APP.contactFieldsForPlaceHolders);
+                    const lineHeight = 20;
+                    APP.showCRMFieldsPlaceholderPopup( rect.left, rect.top + rect.height + lineHeight, APP.contactFieldsForPlaceHolders );
                 }
 
-                // Handle Enter key to select a placeholder
-                if (APP.popupActive && e.key === "Enter") {
-                    e.preventDefault();
-                    const selectedField = fieldsPopup.querySelector("li.selected");
-                    if (selectedField) {
-                        const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
-                        const value = APP.activeInput.value;
-                        const beforeTrigger = value.substring(0, APP.triggerPos - 1);
-                        const afterTrigger = value.substring(cursorPos);
+                if (APP.popupActive) {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        const selectedField = fieldsPopup.querySelector("li.selected");
+                        if (selectedField) {
+                            APP.handleFieldSelection(selectedField.textContent);
+                        }
+                    }
 
-                        APP.activeInput.value = beforeTrigger + "${contact." + selectedField.textContent + "}" + afterTrigger;
-                        APP.setFieldsPopupCaretPosition(APP.activeInput, beforeTrigger.length + selectedField.textContent.length + 11);
-                        APP.hideCRMFieldsPlaceholderPopup();
+                    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                        e.preventDefault();
+                        const items = Array.from(fieldsPopup.querySelectorAll("li"));
+                        const selectedIndex = items.findIndex((item) => item.classList.contains("selected") );
+                        items.forEach((item) => item.classList.remove("selected"));
+                        let newIndex = e.key === "ArrowDown" ? (selectedIndex + 1) % items.length : (selectedIndex - 1 + items.length) % items.length;
+                        items[newIndex].classList.add("selected");
                     }
                 }
 
@@ -2992,7 +3004,6 @@ var APP = {
                     const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
                     const value = APP.activeInput.value;
                     const textAfterTrigger = value.substring(APP.triggerPos, cursorPos);
-
                     if (APP.popupActive && textAfterTrigger === "") {
                         APP.hideCRMFieldsPlaceholderPopup();
                     }
@@ -3013,11 +3024,12 @@ var APP = {
                 }
 
                 const filteredFields = APP.filterCRMFieldsInPlaceholderPopup(textAfterTrigger);
-                const rect = APP.activeInput.getBoundingClientRect();
-                const lineHeight = 20;
-                if (filteredFields.length > 0) {
-                    APP.showCRMFieldsPlaceholderPopup(rect.left, rect.top + rect.height + lineHeight, filteredFields);
-                } else {
+                if(filteredFields.length > 0) {
+                    const rect = APP.activeInput.getBoundingClientRect();
+                    const lineHeight = 20;
+                    APP.showCRMFieldsPlaceholderPopup( rect.left, rect.top + rect.height + lineHeight, filteredFields );
+                }
+                else {
                     APP.hideCRMFieldsPlaceholderPopup();
                 }
             }
@@ -3026,18 +3038,21 @@ var APP = {
         // Handle popup item click
         fieldsPopup.addEventListener("click", (e) => {
             if (e.target.tagName === "LI") {
-                const selectedField = e.target.textContent;
-                const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
-                const value = APP.activeInput.value;
-                const beforeTrigger = value.substring(0, APP.triggerPos - 1);
-                const afterTrigger = value.substring(cursorPos);
-
-                APP.activeInput.value = beforeTrigger + "${contact." + selectedField + "}" + afterTrigger;
-                APP.setFieldsPopupCaretPosition(APP.activeInput, beforeTrigger.length + selectedField.length + 11);
-                APP.hideCRMFieldsPlaceholderPopup();
+                APP.handleFieldSelection(e.target.textContent);
             }
         });
 
+    },
+
+    handleFieldSelection(selectedField) {
+        const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
+        const value = APP.activeInput.value;
+        const beforeTrigger = value.substring(0, APP.triggerPos - 1);
+        const afterTrigger = value.substring(cursorPos);
+
+        APP.activeInput.value = beforeTrigger + "${contact." + selectedField + "}" + afterTrigger;
+        APP.setFieldsPopupCaretPosition(APP.activeInput, beforeTrigger.length + selectedField.length + 11);
+        APP.hideCRMFieldsPlaceholderPopup();
     },
 
 };

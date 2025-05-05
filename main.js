@@ -3064,6 +3064,7 @@ var APP = {
                         items.forEach((item) => item.classList.remove("selected"));
                         const newIndex = e.key === "ArrowDown" ? (selectedIndex + 1) % items.length : (selectedIndex - 1 + items.length) % items.length;
                         items[newIndex].classList.add("selected");
+                        items[newIndex].scrollIntoView({ behavior: "smooth", block: "nearest", });
                     }
                 }
     

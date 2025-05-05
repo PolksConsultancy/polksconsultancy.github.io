@@ -2925,15 +2925,6 @@ var APP = {
     popupActive: false,
     contactFieldsForPlaceHolders: [],
 
-    getFieldsPopupCaretPosition: function (input){
-        return input.selectionStart;
-    },
-
-    setFieldsPopupCaretPosition: function (input, pos) {
-        input.setSelectionRange(pos, pos);
-        input.focus();
-    },
-
     getFieldsPopupCaretPosition: function (input) {
         if (input.tagName === "DIV") {
             const selection = window.getSelection();
@@ -2942,8 +2933,47 @@ var APP = {
                 return range.startOffset;
             }
             return 0;
-        } else {
+        } 
+        else {
             return input.selectionStart;
+        }
+    },
+
+    setFieldsPopupCaretPosition: function (input, pos) {
+        if (input.tagName === "DIV") {
+            const range = document.createRange();
+            const selection = window.getSelection();
+    
+            let offset = pos;
+            let found = false;
+            Array.from(input.childNodes).forEach((node) => {
+                if (found) return;
+                if (node.nodeType === Node.TEXT_NODE) {
+                    if (node.textContent.length >= offset) {
+                        range.setStart(node, offset);
+                        range.collapse(true);
+                        found = true;
+                    } else {
+                        offset -= node.textContent.length;
+                    }
+                } else {
+                    range.setStart(node, 0);
+                    range.collapse(true);
+                }
+            });
+    
+            if (!found) {
+                range.selectNodeContents(input);
+                range.collapse(false);
+            }
+    
+            selection.removeAllRanges();
+            selection.addRange(range);
+            input.focus();
+        } 
+        else {
+            input.setSelectionRange(pos, pos);
+            input.focus();
         }
     },
     
@@ -2961,7 +2991,8 @@ var APP = {
                     y = rect.top;
                 }
             }
-        } else {
+        } 
+        else {
             const rect = element.getBoundingClientRect();
             const scrollOffset = element.scrollTop || window.scrollY;
             const cursorPos = APP.getFieldsPopupCaretPosition(element);
@@ -3000,7 +3031,7 @@ var APP = {
         
         fieldsPopup.style.display = "block";
         fieldsPopup.style.left = `${x}px`;
-        fieldsPopup.style.top = `calc(${y}px - ${fieldsPopup.offsetHeight}px - 50px)`;
+        fieldsPopup.style.top = `calc(${y}px - ${fieldsPopup.offsetHeight}px - 10px)`;
         APP.popupActive = true;
     },
 

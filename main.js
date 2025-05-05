@@ -2949,10 +2949,11 @@ var APP = {
 
     showCRMFieldsPlaceholderPopup: function (x, y, fields) {
         const fieldsPopup = document.getElementById("fields-popup");
-        fieldsPopup.style.left = `${x}px`;
-        fieldsPopup.style.top = `calc(${y}px - ${fieldsPopup.offsetHeight}px - 8px)`;
-        fieldsPopup.style.display = "block";
         fieldsPopup.innerHTML = `<ul>${fields .map((field, index) => `<li data-index="${index}">${field}</li>`) .join("")}</ul>`;
+        
+        fieldsPopup.style.display = "block";
+        fieldsPopup.style.left = `${x}px`;
+        fieldsPopup.style.top = `calc(${y}px - ${fieldsPopup.offsetHeight}px - 50px)`;
         APP.popupActive = true;
     },
 

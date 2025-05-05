@@ -268,6 +268,9 @@ var APP = {
             APP.filterModeChangeAction(e.target.closest('.rowOptionsButton'));
         }
 
+        // templates crm contacts fields popup
+
+
     },
     loader: function(elementId) {
         if(!$(".loaderStyle").length) {
@@ -425,6 +428,7 @@ var APP = {
 
         await APP.firebaseSetup();
         await APP.realtimeListener();
+        await APP.startListenerForCRMFieldsPlaceholder();
 
         $(APP.loaderElement).remove();
         
@@ -846,6 +850,7 @@ var APP = {
         let contactFieldList = ["First_Name", "Last_Name", "Account_Name", "Email", "Phone", "Mobile", "Secondary_Email", "Description", "Lead_Source", "Assistant", "Asst_Phone", "Home_Phone", "Other_Phone", "Created_Time", "Full_Name"];
         let leadFieldList = ["First_Name", "Last_Name", "Company", "Email", "Phone", "Mobile", "Description", "Website", "Lead_Status", "Lead_Source", "Created_Time", "Full_Name"];
         let fieldArr = contact.details[APP.extensionFieldModule] == "Leads" ? leadFieldList : contactFieldList;
+        APP.contactFieldsForPlaceHolders = fieldArr;
         await ZOHO.CRM.API.searchRecord({Entity: contact.details[APP.extensionFieldModule]+"s",Type:"phone",Query: contactId.replaceAll(" ", ""),delay:false}).then(async function(data){
             if(!data || !data.data) {
                 $(".contact-info").html("");
@@ -2910,6 +2915,129 @@ var APP = {
             messagesContainer.insertBefore(dateLabel, firstChild);
             APP.firstMessageLabelDate = formattedDate;
         }
+    },
+
+
+
+
+    activeInput: null,
+    triggerPos: 0,
+    popupActive: false,
+    contactFieldsForPlaceHolders: [],
+
+    getFieldsPopupCaretPosition: function (input){
+        return input.selectionStart;
+    },
+
+    setFieldsPopupCaretPosition: function (input, pos) {
+        input.setSelectionRange(pos, pos);
+        input.focus();
+        input.scrollTop = input.scrollHeight;
+    },
+
+    filterCRMFieldsInPlaceholderPopup: function (query) {
+        return APP.contactFieldsForPlaceHolders.filter((field) => field.startsWith(query));
+    },
+
+    showCRMFieldsPlaceholderPopup: function (x, y, fields) {
+        const fieldsPopup = document.getElementById("fields-popup");
+        fieldsPopup.style.left = `${x}px`;
+        fieldsPopup.style.top = `${y}px`;
+        fieldsPopup.style.display = "block";
+        fieldsPopup.innerHTML = `<ul>${fields.map((field) => `<li>${field}</li>`).join("")}</ul>`;
+    },
+
+    hideCRMFieldsPlaceholderPopup: function() {
+        const fieldsPopup = document.getElementById("fields-popup");
+        fieldsPopup.style.display = "none";
+        APP.popupActive = false;
+        APP.activeInput = null;
+        APP.triggerPos = 0;
+    },
+
+    startListenerForCRMFieldsPlaceholder: function() {
+        const chatBox = document.querySelector(".chat-area");
+        const fieldsPopup = document.getElementById("fields-popup");
+
+        chatBox.addEventListener("keydown", (e) => {
+            if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+                APP.activeInput = e.target;
+
+                if (e.key === "#") {
+                    APP.triggerPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
+                    APP.popupActive = true;
+
+                    const rect = APP.activeInput.getBoundingClientRect();
+                    const lineHeight = 20; // Approximate line height for popup positioning
+                    APP.showCRMFieldsPlaceholderPopup(rect.left, rect.top + rect.height + lineHeight, APP.contactFieldsForPlaceHolders);
+                }
+
+                // Handle Enter key to select a placeholder
+                if (APP.popupActive && e.key === "Enter") {
+                    e.preventDefault();
+                    const selectedField = fieldsPopup.querySelector("li.selected");
+                    if (selectedField) {
+                        const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
+                        const value = APP.activeInput.value;
+                        const beforeTrigger = value.substring(0, APP.triggerPos - 1);
+                        const afterTrigger = value.substring(cursorPos);
+
+                        APP.activeInput.value = beforeTrigger + "${contact." + selectedField.textContent + "}" + afterTrigger;
+                        APP.setFieldsPopupCaretPosition(APP.activeInput, beforeTrigger.length + selectedField.textContent.length + 11);
+                        APP.hideCRMFieldsPlaceholderPopup();
+                    }
+                }
+
+                if (e.key === "Backspace" || e.key === "Delete") {
+                    const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
+                    const value = APP.activeInput.value;
+                    const textAfterTrigger = value.substring(APP.triggerPos, cursorPos);
+
+                    if (APP.popupActive && textAfterTrigger === "") {
+                        APP.hideCRMFieldsPlaceholderPopup();
+                    }
+                }
+            }
+        });
+        
+        // Handle input for filtering popup
+        chatBox.addEventListener("input", (e) => {
+            if (APP.popupActive && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+                const cursorPos = APP.getCaretPgetFieldsPopupCaretPositionosition(APP.activeInput);
+                const value = APP.activeInput.value;
+                const textAfterTrigger = value.substring(APP.triggerPos, cursorPos);
+
+                if (!value.includes("#") || cursorPos <= APP.triggerPos) {
+                    APP.hideCRMFieldsPlaceholderPopup();
+                    return;
+                }
+
+                const filteredFields = APP.filterCRMFieldsInPlaceholderPopup(textAfterTrigger);
+                const rect = APP.activeInput.getBoundingClientRect();
+                const lineHeight = 20;
+                if (filteredFields.length > 0) {
+                    APP.showCRMFieldsPlaceholderPopup(rect.left, rect.top + rect.height + lineHeight, filteredFields);
+                } else {
+                    APP.hideCRMFieldsPlaceholderPopup();
+                }
+            }
+        });
+        
+        // Handle popup item click
+        fieldsPopup.addEventListener("click", (e) => {
+            if (e.target.tagName === "LI") {
+                const selectedField = e.target.textContent;
+                const cursorPos = APP.getFieldsPopupCaretPosition(APP.activeInput);
+                const value = APP.activeInput.value;
+                const beforeTrigger = value.substring(0, APP.triggerPos - 1);
+                const afterTrigger = value.substring(cursorPos);
+
+                APP.activeInput.value = beforeTrigger + "${contact." + selectedField + "}" + afterTrigger;
+                APP.setFieldsPopupCaretPosition(APP.activeInput, beforeTrigger.length + selectedField.length + 11);
+                APP.hideCRMFieldsPlaceholderPopup();
+            }
+        });
+
     },
 
 };

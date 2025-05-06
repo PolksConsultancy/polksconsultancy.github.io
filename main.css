@@ -4744,7 +4744,7 @@ div#templates-list-outer {
     display: none;
     width: max-content;
     position: absolute;
-    bottom: calc(100% + -5px);
+    bottom: calc(100% + 2px);
     left: 15px;
     min-width: 200px;
     min-height: 100px;
@@ -4782,7 +4782,8 @@ div#templates-list-outer:empty:before {
 }
 
 #chat-area:has(div#templates-list-outer[style="display: block;"]) div#templates-placeholders {
-    display: none;
+    opacity: 0.4;
+    pointer-events: none;
 }
 
 .template-item {
@@ -5411,4 +5412,215 @@ span.recordFieldEditText {
 
 #fields-popup li.selected {
     background: #f0f0f0;
+}
+
+
+
+
+
+
+
+.setDataPopupMainOuter {
+    box-sizing: border-box;
+    position: relative;
+}
+
+.setDataPopupMainOuter.setDataPopupNumberOuter {
+    box-sizing: border-box;
+    position: relative;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: #ffffffc2;
+    display: flex;
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+
+.setDataPopupOuter {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 1px 2px 0px rgb(60 64 67 / 30%), 0px 2px 6px 2px rgb(60 64 67 / 15%);
+    color: #000000de;
+    overflow: auto;
+    position: relative;
+    z-index: 40;
+    border: rgba(0, 0, 0, 0);
+    outline: 2px solid rgba(0, 0, 0, 0);
+    padding: 24px 32px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.setDataPopupOuter.setNumberPopupOuter {
+    width: 30%;
+    min-width: 200px;
+}
+
+.setDataPopupFormInputs {
+    padding-bottom: 20px;
+    display: block;
+    position: relative;
+}
+
+.setDataPopupForm {
+    font-family: 'Roboto';
+}
+
+/* Chrome, Safari, Edge, Opera */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+label.setDataPopupInputLabel {
+    color: #0000008c;
+    display: block;
+    font-size: 13px;
+    padding-bottom: 8px;
+    user-select: none;
+}
+
+input.setDataPopupInputText,
+textarea.setDataPopupTextAreaText {
+    font-family: "SF Pro Text", "SF Pro Icons", system, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "Lucida Grande", "Ubuntu", "Cantarell", "Fira Sans", sans-serif;
+    border: transparent;
+    outline: 2px solid transparent;
+    background: #fff;
+    border: 0;
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: #000000de;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    margin: 0;
+    max-width: 100%;
+    padding: 8px 12px;
+    -webkit-transition: box-shadow .15s;
+    transition: box-shadow .15s;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    box-shadow: 0 0 0 2px transparent inset, 0 0 0 1px #0000001f inset;
+    width: 390px;
+    max-height: 36px;
+    width: 100%;
+}
+
+input.setDataPopupInputText {
+    padding: 8px 12px;
+}
+
+textarea.setDataPopupTextAreaText {
+    height: 100px;
+    min-height: 100px;
+    max-height: 300px;
+    min-width: 100%;
+    max-width: 100%;
+    font-size: 15px;
+    resize: none;
+}
+
+.setDataPopupButtons {
+    display: flex;
+    flex-flow: row;
+    justify-content: flex-end;
+}
+
+.setDataPopupButtonClose,
+.setDataPopupButtonSave,
+.setDataPopupButtonTitle {
+    font-family: "SF Pro Text", "SF Pro Icons", system, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "Lucida Grande", "Ubuntu", "Cantarell", "Fira Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    -webkit-appearance: button;
+    background: transparent;
+    box-sizing: border-box;
+    position: relative;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    outline: none;
+    border: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    display: inline-block;
+    white-space: nowrap;
+    text-decoration: none;
+    vertical-align: baseline;
+    text-align: center;
+    margin: 0;
+    min-width: 64px;
+    line-height: 28px;
+    padding: 0 16px;
+    border-radius: 4px;
+    overflow: visible;
+    --mdc-shape-small: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 0;
+    border-radius: var(--mdc-shape-small);
+    text-transform: none;
+    letter-spacing: .25px;
+    min-width: 60px;
+    -webkit-transition: box-shadow .2s ease, background-color .2s ease;
+    transition: box-shadow .2s ease, background-color .2s ease;
+    --mdc-text-button-label-text-color: #0000008c;
+    box-shadow: 0 0 0 0 rgb(0 0 0 / 20%), 0 0 0 0 rgb(0 0 0 / 14%), 0 0 0 0 rgb(0 0 0 / 12%);
+    color: #0000008c;
+}
+
+.setDataPopupButtonSave {
+    background-color: #1a73e8;
+    box-shadow: none;
+    color: #fff;
+    --theme-color-focus-outline: #fff;
+    outline-offset: -4px;
+    margin-left: 8px;
+}
+
+.setDataPopupButtonClose:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.setDataPopupButtonTitle:hover {
+    background: #e7fce3;
+    color: #359c86;
+}
+
+.setDataPopupButtonSave:hover {
+    background-color: #1967d2;
+}
+
+.setDataPopupButtonTitle {
+    position: absolute;
+    left: 10px;
+    transition: 0.2s;
+    background: #e7fce3;
+    color: #359c86;
+}
+
+input.setDataPopupInputText:focus,
+textarea.setDataPopupTextAreaText:focus {
+    box-shadow: 0 0 0 2px #1a73e8 inset, 0 0 0 1px #0000001f inset;
+}
+
+input.setDataPopupInputColor {
+    width: 33px;
+    border: 0;
+    padding: 7px;
+    margin: 0;
+    background-color: transparent;
+    border-radius: 20px;
+    height: 36px;
+    outline: 0;
+    position: absolute;
 }

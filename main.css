@@ -5423,6 +5423,7 @@ span.recordFieldEditText {
 .setDataPopupMainOuter {
     box-sizing: border-box;
     position: relative;
+    margin: 10px 0px;
 }
 
 .setDataPopupMainOuter.setDataPopupNumberOuter {
@@ -5450,7 +5451,7 @@ span.recordFieldEditText {
     z-index: 40;
     border: rgba(0, 0, 0, 0);
     outline: 2px solid rgba(0, 0, 0, 0);
-    padding: 24px 32px;
+    padding: 15px 15px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -5623,4 +5624,9 @@ input.setDataPopupInputColor {
     height: 36px;
     outline: 0;
     position: absolute;
+}
+
+.field-row:has(.setDataPopupMainOuter) .field-value,
+.field-row:has(.setDataPopupMainOuter) .recordFieldEditOuter {
+    display: none;
 }

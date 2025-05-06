@@ -3070,7 +3070,7 @@ var APP = {
     },
 
     updateRecordFieldValueInUI: function(fieldId, fieldValue) {
-        let fieldDiv = document.querySelector(`.record-sections .field-row.${fieldId}`);
+        let fieldDiv = document.querySelector(`.record-sections .field-row.${fieldId} .field-value`);
         if(fieldDiv){
             fieldDiv.innerHTML = fieldValue;
         }

@@ -3045,7 +3045,7 @@ var APP = {
                                         </div>
                                         <div class="setDataPopupButtons">
                                             <div class="setDataPopupButtonClose" onclick="$('#setDataPopupDiv').remove();"><span>Close</span></div>
-                                            <div class="setDataPopupButtonSave" onclick="APP.handleRecordFieldUpdate(event, ${contactId}, ${module}, ${recordId}, ${fieldId});"><span>Save</span></div>
+                                            <div class="setDataPopupButtonSave" onclick='APP.handleRecordFieldUpdate(event, "${contactId}", "${module}", "${recordId}", "${fieldId}");'><span>Save</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -3075,6 +3075,7 @@ var APP = {
             ZOHO.CRM.API.updateRecord({ Entity: module, APIData: data })
             .then(function (response) {
                 if (response.code == 200) {
+                    APP.showNotification("Record updated successfully");
                     resolve(response.data);
                 } 
                 else {

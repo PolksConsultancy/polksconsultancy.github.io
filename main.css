@@ -5630,3 +5630,9 @@ input.setDataPopupInputColor {
 .field-row:has(.setDataPopupMainOuter) .recordFieldEditOuter {
     display: none;
 }
+
+.field-row.lookup .recordFieldEditOuter,
+.field-row.datetime .recordFieldEditOuter,
+.field-row.not-allow-edit .recordFieldEditOuter {
+    display: none;
+}

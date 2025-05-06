@@ -889,7 +889,7 @@ var APP = {
                 let fieldValue = field == "Created_Time" && APP.selectedRecord[field] ? new Date(APP.selectedRecord[field]).toDateString() : field == "Account_Name" && APP.selectedRecord[field] && APP.selectedRecord[field].name ? APP.selectedRecord[field].name : APP.selectedRecord[field] ? APP.selectedRecord[field] : "";
                 let fieldData = moduleFieldsList[field];
                 // if(fieldValue) {
-                    fieldFlowElement += `<div class="field-row ${fieldData.data_type}${fieldData.view_type && !fieldData.view_type.edit? " not-allow-edit": ""}" data-field-api="${field}" data-field-type="${fieldData.data_type}">
+                    fieldFlowElement += `<div class="field-row ${fieldData.api_name} ${fieldData.data_type}${fieldData.view_type && !fieldData.view_type.edit? " not-allow-edit": ""}" data-field-api="${field}" data-field-type="${fieldData.data_type}">
                                             <div class="field-label">
                                                 <div>${field.replaceAll('_', ' ')}</div>
                                                 <div class="recordFieldEditOuter" data-record-id="${APP.selectedRecord.id}" data-field-api="${field}" onclick='APP.editPopupDiv(event, "${contactId.trim()}", "${recordModule}", "${APP.selectedRecord.id}", "${field}");'>
@@ -3063,20 +3063,16 @@ var APP = {
                 id: recordId,
                 [fieldId]: fieldValue
         };
-        await APP.updateRecord(module+"s", data);
+        let respStatus = await APP.updateRecord(module+"s", data);
         APP.contacts[contactId][module][fieldId] = fieldValue;
-        
+        if(respStatus) APP.updateRecordFieldValueInUI(fieldId, fieldValue);
         $("#setDataPopupDiv").remove();
     },
 
-    updateRecordFieldValueInUI: function(contactId, module, fieldId, fieldValue) {
-        let fieldDiv = document.querySelector(`.contact_${contactId} .${module}_${fieldId}`);
+    updateRecordFieldValueInUI: function(fieldId, fieldValue) {
+        let fieldDiv = document.querySelector(`.record-sections .field-row.${fieldId}`);
         if(fieldDiv){
             fieldDiv.innerHTML = fieldValue;
-            let fieldLabel = fieldDiv.closest(".field-row").querySelector(".field-label");
-            if(fieldLabel) {
-                fieldLabel.innerHTML = fieldId.replace(/_/g, " ");
-            }
         }
     },
 
@@ -3084,17 +3080,17 @@ var APP = {
         return await new Promise(async (resolve, reject) => {
             ZOHO.CRM.API.updateRecord({ Entity: module, APIData: data })
             .then(function (response) {
-                if (response.code == 200) {
+                if (response && response.data) {
                     APP.showNotification("Record updated successfully");
-                    resolve(response.data);
+                    resolve(true);
                 } 
                 else {
-                    resolve([]);
+                    resolve(false);
                 }
             })
             .catch(function (error) {
                 console.error("Error updating record:", error);
-                reject(error);
+                resolve(false);
             });
         });
     },

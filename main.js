@@ -851,7 +851,7 @@ var APP = {
                                         </div>`;
         $("#contactid-"+contactId+" .contactListContntHeadName").html(`<span title="${contact.details.Name}" class="contactListContntHeadNameText">${contact.details.Name}</span>${APP.contactModuleIconChoose(contact.details[APP.extensionFieldModule])}`);
     },
-
+    
     contactFieldList: ["First_Name", "Last_Name", "Account_Name", "Email", "Phone", "Mobile", "Secondary_Email", "Description", "Lead_Source", "Assistant", "Asst_Phone", "Home_Phone", "Other_Phone", "Created_Time", "Full_Name"],
     leadFieldList: ["First_Name", "Last_Name", "Company", "Email", "Phone", "Mobile", "Description", "Website", "Lead_Status", "Lead_Source", "Created_Time", "Full_Name"],
         
@@ -2931,7 +2931,7 @@ var APP = {
             APP.firstMessageLabelDate = formattedDate;
         }
     },
-
+    
 
 
 

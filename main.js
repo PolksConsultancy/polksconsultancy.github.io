@@ -883,11 +883,13 @@ var APP = {
             APP.contacts[contactId][contact.details[APP.extensionFieldModule]] = APP.selectedRecord;
             await APP.contactHeaderSetup(contactId);
 
+            let moduleFieldsList = await APP.moduleFieldsList(recordModule+"s");
             let fieldFlowElement = "";
             fieldArr.forEach(function(field) {
                 let fieldValue = field == "Created_Time" && APP.selectedRecord[field] ? new Date(APP.selectedRecord[field]).toDateString() : field == "Account_Name" && APP.selectedRecord[field] && APP.selectedRecord[field].name ? APP.selectedRecord[field].name : APP.selectedRecord[field] ? APP.selectedRecord[field] : "";
-                if(fieldValue) {
-                    fieldFlowElement += `<div class="field-row">
+                let fieldData = moduleFieldsList[field];
+                // if(fieldValue) {
+                    fieldFlowElement += `<div class="field-row ${fieldData.data_type}${fieldData.view_type && !fieldData.view_type.edit? " not-allow-edit": ""}" data-field-api="${field}" data-field-type="${fieldData.data_type}">
                                             <div class="field-label">
                                                 <div>${field.replaceAll('_', ' ')}</div>
                                                 <div class="recordFieldEditOuter" data-record-id="${APP.selectedRecord.id}" data-field-api="${field}" onclick='APP.editPopupDiv(event, "${contactId.trim()}", "${recordModule}", "${APP.selectedRecord.id}", "${field}");'>
@@ -899,7 +901,7 @@ var APP = {
                                             </div>
                                             <div class="field-value">${fieldValue}</div>
                                         </div>`;   
-                }
+                // }
             });
             let recordDetailsViewElement = `<div class="record-container">
                                         <div class="record-header">

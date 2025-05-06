@@ -703,8 +703,8 @@ var APP = {
         historyRecordData[APP.extensionFieldReactionFrom] = message[APP.extensionFieldReactionFrom] ? message[APP.extensionFieldReactionFrom] : "";
         historyRecordData[APP.extensionFieldReactionTo] = message[APP.extensionFieldReactionTo] ? message[APP.extensionFieldReactionTo] : "";
         historyRecordData[APP.extensionFieldModule] = message[APP.extensionFieldModule] ? message[APP.extensionFieldModule] : "";
-        historyRecordData[APP.extensionFieldLead] = message[APP.extensionFieldLead] ? message[APP.extensionFieldLead] : "";        
-        historyRecordData[APP.extensionFieldContact] = message[APP.extensionFieldContact] ? message[APP.extensionFieldContact] : "";
+        historyRecordData[APP.extensionFieldLead] = message?.[APP.extensionFieldLead]?.id || "";        
+        historyRecordData[APP.extensionFieldContact] = message?.[APP.extensionFieldContact]?.id || "";
         historyRecordData[APP.extensionFieldReplyMessageId] = message[APP.extensionFieldReplyMessageId] ? message[APP.extensionFieldReplyMessageId] : "";
 
         historyRecordData = Object.entries(historyRecordData).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
@@ -1766,7 +1766,10 @@ var APP = {
         }
         if(APP.selectedModule && APP.selectedRecord) {
             message[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-            message[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+            message[APP.extensionAPI+APP.selectedModule.substring(0, APP.selectedModule.length-1)] = {
+                id: APP.selectedRecord.id,
+                module: APP.selectedModule
+            };
         }
 
         APP.contacts[contactId].messages[message_id] = message;

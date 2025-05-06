@@ -996,10 +996,10 @@ var APP = {
             APP.contacts[contactId].pageCompleted = true;
         }
         if((data && data.data && data.data.length) || (latestRecordsList && latestRecordsList.length)) {
-            let data = [...data.data, ...latestRecordsList];
+            let messages = [...data.data, ...latestRecordsList];
             let loadedMessagesCount = data.length;
             let loadedMessages = [];
-            data.forEach(async (messageRecord) => {
+            messages.forEach(async (messageRecord) => {
                 if(messageRecord[APP.extensionFieldMsgId] && !APP.contacts[contactId].messages[messageRecord[APP.extensionFieldMsgId]]) {
                     APP.contacts[contactId].messages[messageRecord[APP.extensionFieldMsgId]] = messageRecord;
                     loadedMessages.push(messageRecord);

@@ -3050,7 +3050,7 @@ var APP = {
                                     </div>
                                 </div>
                                 </div>`;
-        e.target.closest(".field-row").insertAdjacentHTML("afterend", popupHtmlContent);
+        e.target.closest(".field-row").insertAdjacentHTML("beforeend", popupHtmlContent);
     },
 
     handleRecordFieldUpdate: async function(e, contactId, module, recordId, fieldId) {

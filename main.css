@@ -5636,3 +5636,11 @@ input.setDataPopupInputColor {
 .field-row.not-allow-edit .recordFieldEditOuter {
     display: none;
 }
+
+.setDataPopupSelectText {
+    width: 100%;
+    border: 1px solid #ebebeb;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}

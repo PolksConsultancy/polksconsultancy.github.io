@@ -225,26 +225,26 @@ var APP = {
         }
 
         if(e.target.closest('.recordFieldEditOuter')) {
-            let thisEditElement = e.target.closest('.recordFieldEditOuter');
-            APP.closeEditPopup();
-            this.parentNode.insertAdjacentHTML('afterend', editPopupDiv);
-            let editPopupId = document.querySelector('#setDataPopupDiv');
-            editPopupId.style.padding = "0 0 30px 0px";
-            let editPopupOuter = document.querySelector('.setDataPopupOuter');
-            editPopupOuter.style.padding = "20px 20px 18px 20px";
-            document.querySelector(".setDataPopupButtonSave").setAttribute("action-id", "name");
+            // let thisEditElement = e.target.closest('.recordFieldEditOuter');
+            // APP.closeEditPopup();
+            // this.parentNode.insertAdjacentHTML('afterend', editPopupDiv);
+            // let editPopupId = document.querySelector('#setDataPopupDiv');
+            // editPopupId.style.padding = "0 0 30px 0px";
+            // let editPopupOuter = document.querySelector('.setDataPopupOuter');
+            // editPopupOuter.style.padding = "20px 20px 18px 20px";
+            // document.querySelector(".setDataPopupButtonSave").setAttribute("action-id", "name");
     
-            document.querySelector('.setDataPopupInputText').style.display = "block";
-            document.querySelector('.setDataPopupTextAreaText').style.display = "none";
-            document.querySelector('.setDataPopupInputColor').style.display = "none";
+            // document.querySelector('.setDataPopupInputText').style.display = "block";
+            // document.querySelector('.setDataPopupTextAreaText').style.display = "none";
+            // document.querySelector('.setDataPopupInputColor').style.display = "none";
     
-            document.querySelector('.setDataPopupInputText').setAttribute("placeholder", document.querySelector('.simpleNoteHeadText').innerText);
-            document.querySelector('.setDataPopupInputText').setAttribute("value", document.querySelector('.simpleNoteHeadText').innerText);
+            // document.querySelector('.setDataPopupInputText').setAttribute("placeholder", document.querySelector('.simpleNoteHeadText').innerText);
+            // document.querySelector('.setDataPopupInputText').setAttribute("value", document.querySelector('.simpleNoteHeadText').innerText);
             
-            document.querySelector('.setDataPopupInputText').focus();
-            document.querySelector('.setDataPopupInputText').setSelectionRange(document.querySelector('.setDataPopupInputText').value.length, document.querySelector('.setDataPopupInputText').value.length);
+            // document.querySelector('.setDataPopupInputText').focus();
+            // document.querySelector('.setDataPopupInputText').setSelectionRange(document.querySelector('.setDataPopupInputText').value.length, document.querySelector('.setDataPopupInputText').value.length);
     
-            this.style.display = 'none';
+            // this.style.display = 'none';
         }
 
         thisElement = $("#filterMode-all");
@@ -348,6 +348,18 @@ var APP = {
             }
         });
         return `<select id="map_Stage">${Stage}</select>`;
+    },
+    
+    modulesFieldsListMap: {},
+    moduleFieldsList: async function(module) {
+        if(!APP.modulesFieldsListMap[module]){
+            let moduleFieldsList = await APP.getFieldsFunction(module)
+            APP.modulesFieldsListMap[module] = {};
+            moduleFieldsList.forEach(function(field) {
+                APP.modulesFieldsListMap[module][field.api_name] = field;
+            });
+        }
+        return APP.modulesFieldsListMap[module];
     },
     popupResize: async function() {
         return await ZOHO.CRM.UI.Resize({height:"600",width:"1000"}).then(function(data){
@@ -858,7 +870,8 @@ var APP = {
     contactDetailsSetup: async function(contactId) {
         let contact = APP.contacts[contactId];
         $(".contact-info").html(APP.loader);
-        let fieldArr = contact.details[APP.extensionFieldModule] == "Leads" ? APP.leadFieldList : APP.contactFieldList;
+        let recordModule = contact.details[APP.extensionFieldModule];
+        let fieldArr = recordModule == "Lead" ? APP.leadFieldList : APP.contactFieldList;
         APP.contactFieldsForPlaceHolders = fieldArr;
         await ZOHO.CRM.API.searchRecord({Entity: contact.details[APP.extensionFieldModule]+"s",Type:"phone",Query: contactId.replaceAll(" ", ""),delay:false}).then(async function(data){
             if(!data || !data.data) {
@@ -877,7 +890,7 @@ var APP = {
                     fieldFlowElement += `<div class="field-row">
                                             <div class="field-label">
                                                 <div>${field.replaceAll('_', ' ')}</div>
-                                                <div class="recordFieldEditOuter" data-record-id="${APP.selectedRecord.id}" data-field-api="${field}" onclick="APP.editPopupDiv(event);">
+                                                <div class="recordFieldEditOuter" data-record-id="${APP.selectedRecord.id}" data-field-api="${field}" onclick="APP.editPopupDiv(event, "${contactId}", "${recordModule+"s"}", "${APP.selectedRecord.id}", "${field}");">
                                                     <div class="recordFieldEdit">
                                                         <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"></path><path d="m20.41 4.94-1.35-1.35c-.78-.78-2.05-.78-2.83 0L13.4 6.41 3 16.82V21h4.18l10.46-10.46 2.77-2.77c.79-.78.79-2.05 0-2.83zm-14 14.12L5 19v-1.36l9.82-9.82 1.41 1.41-9.82 9.83z"></path></svg>
                                                         <span class="recordFieldEditText">edit</span>
@@ -913,222 +926,7 @@ var APP = {
             $(".contact-info").html(recordDetailsViewElement);
         });
     },
-    function(e) {
-        APP.editPopupDiv = `<div class="setDataPopupMainOuter" id="setDataPopupDiv">
-                                <div class="setDataPopupOuter">
-                                    <style>
-                                    .setDataPopupMainOuter {
-                                        box-sizing: border-box;
-                                        position: relative;
-                                    }
-                                    .setDataPopupMainOuter.setDataPopupNumberOuter {
-                                        box-sizing: border-box;
-                                        position: relative;
-                                        position: fixed;
-                                        width: 100%;
-                                        height: 100%;
-                                        top: 0;
-                                        left: 0;
-                                        background-color: #ffffffc2;
-                                        display: flex;
-                                        z-index: 100;
-                                        align-items: center;
-                                        justify-content: center;
-                                    }
-                                    .setDataPopupOuter {
-                                        background-color: #fff;
-                                        border-radius: 8px;
-                                        box-shadow: 0px 1px 2px 0px rgb(60 64 67 / 30%), 0px 2px 6px 2px rgb(60 64 67 / 15%);
-                                        color: #000000de;
-                                        overflow: auto;
-                                        position: relative;
-                                        z-index: 40;
-                                        border: rgba(0,0,0,0);
-                                        outline: 2px solid rgba(0,0,0,0);
-                                        padding: 24px 32px;
-                                        width: 100%;
-                                        box-sizing: border-box;
-                                    }
-                                    .setDataPopupOuter.setNumberPopupOuter {
-                                        width: 30%;
-                                        min-width: 200px;
-                                    }
-                                    .setDataPopupFormInputs {
-                                        padding-bottom: 20px;
-                                        display: block;
-                                        position: relative;
-                                    }
-                                    .setDataPopupForm {
-                                        font-family: 'Roboto';
-                                    }
 
-                                    /* Chrome, Safari, Edge, Opera */
-                                input[type=number]::-webkit-outer-spin-button,
-                                input[type=number]::-webkit-inner-spin-button {
-                                -webkit-appearance: none;
-                                margin: 0;
-                                }
-
-                                /* Firefox */
-                                input[type=number] {
-                                -moz-appearance: textfield;
-                                }
-
-                                label.setDataPopupInputLabel {
-                                color: #0000008c;
-                                display: block;
-                                font-size: 13px;
-                                padding-bottom: 8px;
-                                user-select: none;
-                                }
-
-                                input.setDataPopupInputText, textarea.setDataPopupTextAreaText {
-                                font-family: "SF Pro Text", "SF Pro Icons", system, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "Lucida Grande", "Ubuntu", "Cantarell", "Fira Sans", sans-serif;
-                                border: transparent;
-                                outline: 2px solid transparent;
-                                background: #fff;
-                                border: 0;
-                                border-radius: 4px;
-                                box-sizing: border-box;
-                                color: #000000de;
-                                font-size: 16px;
-                                font-weight: 400;
-                                line-height: 20px;
-                                margin: 0;
-                                max-width: 100%;
-                                padding: 8px 12px;
-                                -webkit-transition: box-shadow .15s;
-                                transition: box-shadow .15s;
-                                vertical-align: middle;
-                                -webkit-appearance: none;
-                                box-shadow: 0 0 0 2px transparent inset, 0 0 0 1px #0000001f inset;
-                                width: 390px;
-                                max-height: 36px;
-                                width: 100%;
-                                }
-
-                                input.setDataPopupInputText {
-                                    padding: 8px 12px;
-                                }
-
-                                textarea.setDataPopupTextAreaText {
-                                    height: 100px;
-                                    min-height: 100px;
-                                    max-height: 300px;
-                                    min-width: 100%;
-                                    max-width: 100%;
-                                    font-size: 15px;
-                                    resize: none;
-                                }
-
-                                .setDataPopupButtons {
-                                display: flex;
-                                flex-flow: row;
-                                justify-content: flex-end;
-                                }
-
-                                .setDataPopupButtonClose, .setDataPopupButtonSave, .setDataPopupButtonTitle {
-                                font-family: "SF Pro Text", "SF Pro Icons", system, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "Lucida Grande", "Ubuntu", "Cantarell", "Fira Sans", sans-serif;
-                                font-size: 14px;
-                                font-weight: 500;
-                                -webkit-appearance: button;
-                                background: transparent;
-                                box-sizing: border-box;
-                                position: relative;
-                                -webkit-user-select: none;
-                                user-select: none;
-                                cursor: pointer;
-                                outline: none;
-                                border: none;
-                                -webkit-tap-highlight-color: rgba(0,0,0,0);
-                                display: inline-block;
-                                white-space: nowrap;
-                                text-decoration: none;
-                                vertical-align: baseline;
-                                text-align: center;
-                                margin: 0;
-                                min-width: 64px;
-                                line-height: 28px;
-                                padding: 0 16px;
-                                border-radius: 4px;
-                                overflow: visible;
-                                --mdc-shape-small: 8px;
-                                padding-left: 10px;
-                                padding-right: 10px;
-                                border: 0;
-                                border-radius: var(--mdc-shape-small);
-                                text-transform: none;
-                                letter-spacing: .25px;
-                                min-width: 60px;
-                                -webkit-transition: box-shadow .2s ease,background-color .2s ease;
-                                transition: box-shadow .2s ease,background-color .2s ease;
-                                --mdc-text-button-label-text-color: #0000008c;
-                                box-shadow: 0 0 0 0 rgb(0 0 0 / 20%), 0 0 0 0 rgb(0 0 0 / 14%), 0 0 0 0 rgb(0 0 0 / 12%);
-                                color: #0000008c;
-                                }
-
-                                .setDataPopupButtonSave {
-                                    background-color: #1a73e8;
-                                    box-shadow: none;
-                                    color: #fff;
-                                    --theme-color-focus-outline: #fff;
-                                    outline-offset: -4px;
-                                    margin-left: 8px;
-                                }
-
-                                .setDataPopupButtonClose:hover {
-                                    background: rgba(0,0,0,0.06);
-                                }
-
-                                .setDataPopupButtonTitle:hover {
-                                    background: #e7fce3;
-                                    color: #359c86;
-                                }
-
-                                .setDataPopupButtonSave:hover {
-                                    background-color: #1967d2;
-                                }
-
-                                .setDataPopupButtonTitle {
-                                    position: absolute;
-                                    left: 10px;
-                                    transition: 0.2s;
-                                    background: #e7fce3;
-                                    color: #359c86;
-                                }
-
-                                input.setDataPopupInputText:focus, textarea.setDataPopupTextAreaText:focus {
-                                    box-shadow: 0 0 0 2px #1a73e8 inset, 0 0 0 1px #0000001f inset;
-                                }
-
-                                input.setDataPopupInputColor {
-                                    width: 33px;
-                                    border: 0;
-                                    padding: 7px;
-                                    margin: 0;
-                                    background-color: transparent;
-                                    border-radius: 20px;
-                                    height: 36px;
-                                    outline: 0;
-                                    position: absolute;
-                                }
-                                    </style>
-                                    <div class="setDataPopupForm">
-                                        <div class="setDataPopupFormInputs">
-                                            <label class="setDataPopupInputLabel">Name</label>
-                                            <input class="setDataPopupInputColor" type="color">
-                                            <input class="setDataPopupInputText" type="text">
-                                            <textarea class="setDataPopupTextAreaText" placeholder="Note contact info"></textarea>
-                                        </div>
-                                        <div class="setDataPopupButtons">
-                                            <div class="setDataPopupButtonClose"><span>Close</span></div>
-                                            <div class="setDataPopupButtonSave"><span>Save</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                </div>`;
-
-    },
     closeEditPopup: function(){
         if(document.querySelectorAll('#setDataPopupDiv').length) {
             document.querySelector('#setDataPopupDiv').remove();
@@ -2519,13 +2317,13 @@ var APP = {
                         let previewContent = "";
                         template.components.forEach((component) => {
                             if (component.type === "HEADER" && component.text) {
-                              previewContent += `${component.text}`;
+                              previewContent += `${component.text}\n\n`;
                             }
                             if (component.type === "BODY" && component.text) {
-                              previewContent += `${component.text}`;
+                              previewContent += `${component.text}\n\n`;
                             }
                             if (component.type === "FOOTER" && component.text) {
-                              previewContent += `${component.text}`;
+                              previewContent += `${component.text}\n\n`;
                             }
                             if (component.type === "BUTTONS") {
                               component.buttons.forEach((button) => {
@@ -2733,13 +2531,13 @@ var APP = {
             });
             let messageContent = "";
             if(headerContent) {
-                messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowHeader">${headerContent}</div>`;
+                messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowHeader">${headerContent}</div><br><br>`;
             }
             if(bodyContent) {
-                messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowBody">${bodyContent}</div>`;
+                messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowBody">${bodyContent}</div><br>`;
             }
             if(footerContent) {
-                messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowFooter">${footerContent}</div>`;
+                messageContent += `<br><div class="mesgtemplateShowDiv mesgtemplateShowFooter">${footerContent}</div><br>`;
             }
             if(buttonContent) {
                 messageContent += `<div class="mesgtemplateShowDiv mesgtemplateShowButton">${buttonContent}</div>`;
@@ -3216,6 +3014,78 @@ var APP = {
                 reject(error);
             });
         });
-    }
+    },
+
+    editPopupDiv: async function(e, contactId, module, recordId, fieldId) {
+        if(!recordId) return;
+        if(!APP.contacts[contactId][module]) return;
+        let moduleFieldsList = await APP.moduleFieldsList(module);
+        let inputHtml = "";
+        if(["email", "phone", "string", "text", "number"].includes(moduleFieldsList[fieldId].data_type) || ["Email", "First_Name", "Last_Name", "Full_Name", "Phone", "Mobile", "Secondary_Email", "Asst_Phone", "Home_Phone", "Other_Phone"].includes){
+            inputHtml = `<input type="text" class="setDataPopupInputText recordEditFormInput" required data-field="${fieldId}" value="${APP.contacts[contactId][module][fieldId]}">`;
+        }
+        else if(["textarea"].includes(moduleFieldsList[fieldId].data_type) || ["Description"].includes(fieldId)){
+            inputHtml = `<textarea class="setDataPopupTextAreaText recordEditFormInput" required data-field="${fieldId}" required>${APP.contacts[contactId][module][fieldId]}</textarea>`;
+        }
+        else if(["picklist"].includes(moduleFieldsList[fieldId].data_type) || ["Lead_Source"].includes(fieldId)){
+            inputHtml = `<select class="setDataPopupSelectText recordEditFormInput" required data-field="${fieldId}" required>
+                        <option value="">Select</option>`;
+            moduleFieldsList[fieldId].pick_list_values.forEach((option) => {
+                inputHtml += `<option value="${option.actual_value}">${option.display_value}</option>`;
+            });
+            inputHtml += `</select>`;
+        }
+
+        let popupHtmlContent = `<div class="setDataPopupMainOuter" id="setDataPopupDiv">
+                                <div class="setDataPopupOuter">
+                                    <div class="setDataPopupForm">
+                                        <div class="setDataPopupFormInputs">
+                                            <label class="setDataPopupInputLabel">${fieldId.replace(/_/g, " ")}</label>
+                                            ${inputHtml}
+                                        </div>
+                                        <div class="setDataPopupButtons">
+                                            <div class="setDataPopupButtonClose" onclick="$('#setDataPopupDiv').remove();"><span>Close</span></div>
+                                            <div class="setDataPopupButtonSave" onclick="APP.handleRecordFieldUpdate(event, ${contactId}, ${module}, ${recordId}, ${fieldId});"><span>Save</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>`;
+        document.querySelector(".recordFieldEditOuter").adjestAdjacentHTML("afterend", popupHtmlContent);
+    },
+
+    handleRecordFieldUpdate: async function(e, contactId, module, recordId, fieldId) {
+        e.preventDefault();
+        let fieldValue = document.querySelector(".recordEditFormInput").value;
+        if(!fieldValue) return;
+        let data = {
+            data: [
+                {
+                    id: recordId,
+                    [fieldId]: fieldValue
+                }
+            ]
+        };
+        await APP.updateRecord(module, data);
+        APP.contacts[contactId][module][fieldId] = fieldValue;
+        $("#setDataPopupDiv").remove();
+    },
+
+    updateRecord: async function(module, data) {
+        return await new Promise(async (resolve, reject) => {
+            ZOHO.CRM.API.updateRecord({ Entity: module, APIData: data })
+            .then(function (response) {
+                if (response.code == 200) {
+                    resolve(response.data);
+                } 
+                else {
+                    resolve([]);
+                }
+            })
+            .catch(function (error) {
+                console.error("Error updating record:", error);
+                reject(error);
+            });
+        });
+    },
 
 };

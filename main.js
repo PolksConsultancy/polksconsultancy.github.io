@@ -978,17 +978,28 @@ var APP = {
     },
     getMessages: async function(contactId) {
         return await ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory,Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${contactId})`, per_page:APP.messagesPerPage, page:APP.contacts[contactId].currentPage}).then(async function(data) {
-            return await APP.getMessagesResponse(data, contactId);
+            return await APP.getMessagesResponse(data, contactId, APP.contacts[contactId].currentPage == 1 ? true : false)
         });
     },
-    getMessagesResponse: function(data, contactId) {
+    getMessagesResponse: async function(data, contactId, isInitLoad=true) {
+        let latestRecordsList = [];
+        try{
+            if(isInitLoad){
+                latestRecordsList = await APP.fetchRelatedRecordsList(contactId);
+            }
+        }
+        catch(error){
+            console.log(error);
+        }
+
         if(data && data.info && !data.info.more_records) {
             APP.contacts[contactId].pageCompleted = true;
         }
-        if(data && data.data) {
-            let loadedMessagesCount = data.data.length;
+        if((data && data.data && data.data.length) || (latestRecordsList && latestRecordsList.length)) {
+            let data = [...data.data, ...latestRecordsList];
+            let loadedMessagesCount = data.length;
             let loadedMessages = [];
-            data.data.forEach(async (messageRecord) => {
+            data.forEach(async (messageRecord) => {
                 if(messageRecord[APP.extensionFieldMsgId] && !APP.contacts[contactId].messages[messageRecord[APP.extensionFieldMsgId]]) {
                     APP.contacts[contactId].messages[messageRecord[APP.extensionFieldMsgId]] = messageRecord;
                     loadedMessages.push(messageRecord);
@@ -1718,7 +1729,10 @@ var APP = {
         if(!contactId) return;
         if(!APP.contacts[contactId]) return;
         if(!APP.contacts[contactId].messages) APP.contacts[contactId].messages = {};
-        let recordDetails = APP.contacts[contactId].details && APP.contacts[contactId][APP.contacts[contactId].details[APP.extensionFieldModule]] || {};
+
+        let selectedModule = APP.contacts[contactId].details[APP.extensionFieldModule] || "";
+        let recordDetails = APP.contacts[contactId][selectedModule] || {};
+        let selectedRecord = recordDetails;
         let messageInput = document.getElementById('message-input');
         let messageText = messageInput.innerText.trim();
     
@@ -1764,11 +1778,11 @@ var APP = {
         if(APP.replyTagMessageId){
             message[APP.extensionFieldReplyMessageId] = APP.replyTagMessageId;
         }
-        if(APP.selectedModule && APP.selectedRecord) {
-            message[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-            message[APP.extensionAPI+APP.selectedModule.substring(0, APP.selectedModule.length-1)] = {
-                id: APP.selectedRecord.id,
-                module: APP.selectedModule
+        if(selectedModule && selectedRecord && selectedRecord.id) {
+            message[APP.extensionFieldModule] = selectedModule;
+            message[APP.extensionAPI+ selectedModule] = {
+                id: selectedRecord.id,
+                module: selectedModule+"s"
             };
         }
 
@@ -1790,9 +1804,9 @@ var APP = {
         contact[APP.extensionFieldLastMessage] = contactId && APP.contacts[contactId] && APP.contacts[contactId].messages && APP.contacts[contactId].messages[message_id] ? APP.contacts[contactId].messages[message_id] : message;
         contact[APP.extensionFieldActiveTime] = time;
         contact[APP.extensionFieldStatus] = "";
-        if(APP.selectedModule && APP.selectedRecord) {
-            contact[APP.extensionFieldModule] = APP.selectedModule.substring(0, APP.selectedModule.length-1);
-            contact[APP.extensionAPI+APP.selectedModule] = APP.selectedRecord.id;
+        if(selectedModule && selectedRecord && selectedRecord.id) {
+            contact[APP.extensionFieldModule] = selectedModule;
+            contact[APP.extensionAPI+ selectedModule] = selectedRecord.id;
         }
 
         contact = Object.entries(contact).reduce((acc, [k, v]) => v ? {...acc, [k]:v} : acc , {});
@@ -2620,21 +2634,17 @@ var APP = {
             Query: searchCriteria,
         })
         .then(function (response) {
-            
             if (response && response.data) {
-                // console.log("Search Results:", response.data);
                 let record = response.data[0];
                 if (record) {
                     APP.contacts[contactId].messages[messageId] = record;
                     return record;
                 } 
                 else {
-                    // console.log("No matching records found.");
                     return null;
                 }
             } 
             else {
-                // console.log("No matching records found.");
                 return null;
             }
         })
@@ -3097,5 +3107,34 @@ var APP = {
             });
         });
     },
+
+    fetchRelatedRecordsList: async function(contactId) {
+        return await new Promise(async (resolve, reject)=>{
+            let module = APP.contacts[contactId].details[APP.extensionFieldModule];
+            let recordId = APP.contacts[contactId][module]? APP.contacts[contactId][module].id: "";
+            await ZOHO.CRM.API.getRelatedRecords({
+                Entity: module+"s",
+                RecordID: recordId,
+                RelatedList: APP.extensionHistory, 
+                per_page: 20,
+                page: 1,
+                sort_order: "desc",
+                sort_by: "Created_Time",
+            })
+            .then(function(data){
+                if(data && data.data && data.data.length > 0){
+                    let records = data.data;
+                    resolve(records);
+                    return;
+                }
+                resolve([]);
+                return;
+            })
+            .catch(function(error){
+                console.log("Error in fetching related records", error);
+                resolve([]);
+            });
+        });
+    }
 
 };

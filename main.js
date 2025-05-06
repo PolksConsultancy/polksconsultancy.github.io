@@ -899,7 +899,7 @@ var APP = {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="field-value">${fieldValue}</div>
+                                            <div class="field-value">${fieldValue? fieldValue: "None"}</div>
                                         </div>`;   
                 // }
             });
@@ -3023,11 +3023,11 @@ var APP = {
         if(!APP.contacts[contactId][module]) return;
         let moduleFieldsList = await APP.moduleFieldsList(module+"s");
         let inputHtml = "";
-        if(["email", "phone", "string", "text", "number"].includes(moduleFieldsList[fieldId].data_type) || ["Email", "First_Name", "Last_Name", "Full_Name", "Phone", "Mobile", "Secondary_Email", "Asst_Phone", "Home_Phone", "Other_Phone"].includes){
-            inputHtml = `<input type="text" class="setDataPopupInputText recordEditFormInput" required data-field="${fieldId}" value="${APP.contacts[contactId][module][fieldId]}">`;
+        if(["email", "phone", "string", "text", "number"].includes(moduleFieldsList[fieldId].data_type) || ["Email", "First_Name", "Last_Name", "Full_Name", "Phone", "Mobile", "Secondary_Email", "Asst_Phone", "Home_Phone", "Other_Phone"].includes(fieldId)){
+            inputHtml = `<input type="text" class="setDataPopupInputText recordEditFormInput" required data-field="${fieldId}" value="${APP.contacts[contactId][module][fieldId] || ""}">`;
         }
         else if(["textarea"].includes(moduleFieldsList[fieldId].data_type) || ["Description"].includes(fieldId)){
-            inputHtml = `<textarea class="setDataPopupTextAreaText recordEditFormInput" required data-field="${fieldId}" required>${APP.contacts[contactId][module][fieldId]}</textarea>`;
+            inputHtml = `<textarea class="setDataPopupTextAreaText recordEditFormInput" required data-field="${fieldId}" required>${APP.contacts[contactId][module][fieldId] || ""}</textarea>`;
         }
         else if(["picklist"].includes(moduleFieldsList[fieldId].data_type) || ["Lead_Source"].includes(fieldId)){
             inputHtml = `<select class="setDataPopupSelectText recordEditFormInput" required data-field="${fieldId}" required>
@@ -3059,17 +3059,25 @@ var APP = {
         e.preventDefault();
         let fieldValue = document.querySelector(".recordEditFormInput").value;
         if(!fieldValue) return;
-        let data = {
-            data: [
-                {
-                    id: recordId,
-                    [fieldId]: fieldValue
-                }
-            ]
+        let data = { 
+                id: recordId,
+                [fieldId]: fieldValue
         };
         await APP.updateRecord(module+"s", data);
         APP.contacts[contactId][module][fieldId] = fieldValue;
+        
         $("#setDataPopupDiv").remove();
+    },
+
+    updateRecordFieldValueInUI: function(contactId, module, fieldId, fieldValue) {
+        let fieldDiv = document.querySelector(`.contact_${contactId} .${module}_${fieldId}`);
+        if(fieldDiv){
+            fieldDiv.innerHTML = fieldValue;
+            let fieldLabel = fieldDiv.closest(".field-row").querySelector(".field-label");
+            if(fieldLabel) {
+                fieldLabel.innerHTML = fieldId.replace(/_/g, " ");
+            }
+        }
     },
 
     updateRecord: async function(module, data) {

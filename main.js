@@ -997,21 +997,20 @@ var APP = {
         }
         if((data && data.data && data.data.length) || (latestRecordsList && latestRecordsList.length)) {
             let messages = [...data.data, ...latestRecordsList];
-            let loadedMessagesCount = data.length;
             let loadedMessages = [];
             messages.forEach(async (messageRecord) => {
                 if(messageRecord[APP.extensionFieldMsgId] && !APP.contacts[contactId].messages[messageRecord[APP.extensionFieldMsgId]]) {
                     APP.contacts[contactId].messages[messageRecord[APP.extensionFieldMsgId]] = messageRecord;
                     loadedMessages.push(messageRecord);
                 }
-                loadedMessagesCount -= 1;
-                if(!loadedMessagesCount) {
-                    loadedMessages.sort((a, b) => new Date(b[APP.extensionFieldTimestamp]) - new Date(a[APP.extensionFieldTimestamp]));
-                    loadedMessages.forEach(async function(message) {
-                        await APP.addMessage(message[APP.extensionFieldMsgId], contactId, "loaded");
-                    });
-                }
             });
+            
+            if(loadedMessages.length > 0) {
+                loadedMessages.sort((a, b) => new Date(b[APP.extensionFieldTimestamp]) - new Date(a[APP.extensionFieldTimestamp]));
+                loadedMessages.forEach(async function(message) {
+                    await APP.addMessage(message[APP.extensionFieldMsgId], contactId, "loaded");
+                });
+            }
         }
     },
     contactAction: async function(contactId) {

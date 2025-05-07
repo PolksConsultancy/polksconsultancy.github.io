@@ -633,7 +633,7 @@ var APP = {
         let img = contact.details && contact.details.avatar ? contact.details.avatar : "person.png";
         let ownerImg = contact.details && contact.details.Owner && contact.details.Owner.id && APP.allUsers[contact.details.Owner.id].image_link ? APP.allUsers[contact.details.Owner.id].image_link : "user-thumbnail.png";
         let name = contact.details && contact.details.Name ? contact.details.Name : contactId;
-        let time = lastMessage && lastMessage[APP.extensionFieldTimestamp] ? APP.formatWhatsAppTime(lastMessage[APP.extensionFieldTimestamp]) : 'New';
+        let time = lastMessage && lastMessage[APP.extensionFieldTimestamp] ? APP.formatWhatsAppTime(lastMessage[APP.extensionFieldTimestamp]) : (contact.details && contact.details[APP.extensionFieldActiveTime])? APP.formatWhatsAppTime(contact.details[APP.extensionFieldActiveTime]): 'New';
         let user = lastMessage && lastMessage[APP.extensionFieldDirection] && lastMessage[APP.extensionFieldDirection] == "incoming" ? '' : contact.details && contact.details.Owner && contact.details.Owner.name && APP.currentUser.id != contact.details.Owner.id ? contact.details.Owner.name : 'You';
         let status = lastMessage && lastMessage[APP.extensionFieldDirection] && lastMessage[APP.extensionFieldDirection] == "incoming" ? '' : lastMessage && lastMessage[APP.extensionFieldStatus] ? lastMessage[APP.extensionFieldStatus] == "sent" ? APP.sentStatus : lastMessage[APP.extensionFieldStatus] == "delivered" ? APP.deliveredStatus : lastMessage[APP.extensionFieldStatus] == "read" ? APP.readStatus : APP.addedStatus : APP.addedStatus;          
         let message = lastMessage && lastMessage[APP.extensionFieldMessage] ? lastMessage[APP.extensionFieldMessage] : 'Start Coversation';

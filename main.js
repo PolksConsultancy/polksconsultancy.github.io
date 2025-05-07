@@ -2496,7 +2496,7 @@ var APP = {
         const components = [];
         let isNotValid = false;
         if(APP.selectedTemplate && APP.selectedTemplate.attachments && APP.selectedTemplate.attachments.url){
-            let section = { type: "HEADER", parameters: [] };
+            let section = { type: "header", parameters: [] };
             section.parameters.push({
                 "type": "image",
                 "image": {

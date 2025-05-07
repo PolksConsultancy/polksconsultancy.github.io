@@ -817,7 +817,7 @@ var APP = {
             await APP.contactDetailsSetup(contactId);
 
             APP.isMessageLoading = false;
-            APP.messagesPerPage = 200;
+            APP.messagesPerPage = 20;
             APP.lastMessageDirection = "";
 
             if(contactElement.querySelector(".unread-count")) {

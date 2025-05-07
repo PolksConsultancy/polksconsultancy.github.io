@@ -1746,6 +1746,7 @@ var APP = {
             }
         }
         messageText = APP.replacePlaceholdersWithValues(messageText, recordDetails);
+        messageText = messageText.replace(/<br>/g, "\n");
 
         let message_id = new Date().getTime()+"";
         let from = "";
@@ -2333,9 +2334,20 @@ var APP = {
                         template.display_name = template.name.replace(/_/g, " ");
                         template.display_text_content = "";
                         let previewContent = "";
+                        let attachments = {};
                         template.components.forEach((component) => {
-                            if (component.type === "HEADER" && component.text) {
-                              previewContent += `${component.text}\n\n`;
+                            if (component.type === "HEADER") {
+                                if(component.text) {
+                                    previewContent += `${component.text}\n\n`;
+                                }
+                                if(component.format && component.format === "IMAGE") {
+                                    if(component.example && component.example.header_handle && component.example.header_handle.length > 0) {
+                                        attachments = {
+                                            type: "image",
+                                            url: component.example.header_handle[0],
+                                        }
+                                    }
+                                }
                             }
                             if (component.type === "BODY" && component.text) {
                               previewContent += `${component.text}\n\n`;
@@ -2352,6 +2364,7 @@ var APP = {
                         template.display_text_content = previewContent;
                         let placeholders = await APP.getPlaceHoldersListFromTemplate(template);
                         template.placeholders = placeholders;
+                        template.attachments = attachments;
                         template = await APP.PlaceholderValuesInMessageText(template);
                         APP.whatsappTemplates[template.name] = template;
                     });
@@ -2482,26 +2495,38 @@ var APP = {
     getAllCurrentTemplateParameters: function(recordDetails) {
         const components = [];
         let isNotValid = false;
-        $(".template-placeholder-input").each(function () {
-            const sectionType = $(this).data("type"); 
-            const parameterName = $(this).data("id"); 
-            let parameterValue = $(this).val();
-            if(!parameterValue) {
-                isNotValid = true;
-                return false;
-            }
-            let section = components.find(comp => comp.type === sectionType);
-            if (!section) {
-                section = { type: sectionType, parameters: [] };
-                components.push(section);
-            }
-            parameterValue = APP.replacePlaceholdersWithValues(parameterValue, recordDetails);
+        if(APP.selectedTemplate && APP.selectedTemplate.attachments && APP.selectedTemplate.attachments.url){
+            let section = { type: "HEADER", parameters: [] };
             section.parameters.push({
-                type: "text", 
-                text: parameterValue,
-                parameter_name: parameterName
+                "type": "image",
+                "image": {
+                    "link": APP.selectedTemplate.attachments.url,
+                }
             });
-        });
+            components.push(section);
+        }
+        if($(".template-placeholder-input").length > 0){
+            $(".template-placeholder-input").each(function () {
+                const sectionType = $(this).data("type"); 
+                const parameterName = $(this).data("id"); 
+                let parameterValue = $(this).val();
+                if(!parameterValue) {
+                    isNotValid = true;
+                    return false;
+                }
+                let section = components.find(comp => comp.type === sectionType);
+                if (!section) {
+                    section = { type: sectionType, parameters: [] };
+                    components.push(section);
+                }
+                parameterValue = APP.replacePlaceholdersWithValues(parameterValue, recordDetails);
+                section.parameters.push({
+                    type: "text", 
+                    text: parameterValue,
+                    parameter_name: parameterName
+                });
+            });
+        }
     
         return isNotValid? false: components;
     },

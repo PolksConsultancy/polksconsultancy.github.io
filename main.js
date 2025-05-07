@@ -481,7 +481,7 @@ var APP = {
             APP.filterMode = "all";
         }
         APP.contactList.innerHTML = "";
-        APP.filterModes[APP.filterMode].contacts.forEach(async contactId => {
+        APP.filterModes[APP.filterMode].contacts.sort((a, b) => new Date(APP.contacts[Number(b)].details[APP.extensionFieldActiveTime]) - new Date(APP.contacts[Number(a)].details[APP.extensionFieldActiveTime])).forEach(async contactId => {
             await APP.addContactList(contactId, "loaded");
         });
         if(APP.filterModes[APP.filterMode].contacts.length < APP.contactsPerPage+1) {

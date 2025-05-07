@@ -508,13 +508,29 @@ var APP = {
     getContacts: async function() {
         if(APP.filterMode == "leads" || APP.filterMode == "contacts") {
             let filterModule = APP.filterMode[0].toUpperCase()+APP.filterMode.substring(1).substring(0, APP.filterMode.length-2);
-            return await ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts,Type:"criteria",Query:`(${APP.extensionFieldModule}:equals:${filterModule})`, per_page:APP.contactsPerPage, page:APP.filterModes[APP.filterMode].currentPage}).then(async function(data){
+            return await ZOHO.CRM.API.searchRecord({
+                Entity:APP.extensionContacts,
+                Type:"criteria",
+                Query:`(${APP.extensionFieldModule}:equals:${filterModule})`, 
+                per_page:APP.contactsPerPage, 
+                page:APP.filterModes[APP.filterMode].currentPage,
+                sort_by: APP.extensionFieldActiveTime,
+                sort_order:"desc"
+            }).then(async function(data){
                 return await APP.getContactsResponse(data);
             });
         }
         else if(APP.filterMode == "yours" || APP.filterMode == "users") {
             let userId = APP.filterMode == "yours" ? APP.currentUser.id : APP.selectedUser.id;
-            return await ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts,Type:"criteria",Query:`(${APP.extensionFieldOwner}:equals:${userId})`, per_page:APP.contactsPerPage, page:APP.filterModes[APP.filterMode].currentPage}).then(async function(data){
+            return await ZOHO.CRM.API.searchRecord({
+                Entity:APP.extensionContacts,
+                Type:"criteria",
+                Query:`(${APP.extensionFieldOwner}:equals:${userId})`, 
+                per_page:APP.contactsPerPage, 
+                page:APP.filterModes[APP.filterMode].currentPage,
+                sort_by: APP.extensionFieldActiveTime,
+                sort_order:"desc"
+            }).then(async function(data){
                 return await APP.getContactsResponse(data);
             });
         }
@@ -534,7 +550,13 @@ var APP = {
             }
             if(searchQuery) {
                 searchQuery = searchQuery.slice(2);
-                return await ZOHO.CRM.API.searchRecord({Entity:APP.extensionContacts,Type:"criteria",Query:`(${searchQuery})`}).then(async function(data) {
+                return await ZOHO.CRM.API.searchRecord({
+                    Entity:APP.extensionContacts,
+                    Type:"criteria",
+                    Query:`(${searchQuery})`,
+                    sort_by: APP.extensionFieldActiveTime,
+                    sort_order:"desc",
+                }).then(async function(data) {
                     if(data.data) {
                         data.data.forEach(function(selectedRecord) {
                             if(selectedRecord[APP.extensionFieldWhatsAppNumber]) {
@@ -1021,7 +1043,14 @@ var APP = {
             });
         }
         else {
-            await ZOHO.CRM.API.searchRecord({Entity: APP.extensionContacts, Type:"phone",Query: contactId, delay:false}).then( async function(data){
+            await ZOHO.CRM.API.searchRecord({
+                Entity: APP.extensionContacts, 
+                Type:"phone",
+                Query: contactId, 
+                delay:false,
+                sort_by: APP.extensionFieldActiveTime,
+                sort_order: "desc",
+            }).then( async function(data){
                 if(data && data.data) {
                     contactRecordMap.id = data.data[0].id;
                     await ZOHO.CRM.API.updateRecord({Entity: APP.extensionContacts, APIData: contactRecordMap, Trigger:["workflow"]}).then(function(data){
@@ -2191,6 +2220,9 @@ var APP = {
     updateSendModeType: function(type){
         $(".whatsapp-container").removeClass(APP.sendModeType);
         $(".whatsapp-container").addClass(type);
+        $("#contact-details").hide();
+        $(".contactItem.active").removeClass("active");
+        APP.currentContactId = "";
         APP.sendModeType = type;
         APP.isBulk = type == "bulk"? true: false;
         APP.resetBulkInitConfigs();

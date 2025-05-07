@@ -1739,7 +1739,7 @@ var APP = {
         let parameters = [];
         if(APP.selectedTemplate && APP.selectedTemplate.display_text_content) {
             messageText = APP.selectedTemplate.display_text_content;
-            if(APP.selectedTemplate.placeholders && APP.selectedTemplate.placeholders.length > 0){
+            if((APP.selectedTemplate.placeholders && APP.selectedTemplate.placeholders.length > 0) || (APP.selectedTemplate.attachments && APP.selectedTemplate.attachments.url)) {
                 parameters = await APP.getAllCurrentTemplateParameters(recordDetails);
                 messageText = APP.updatePlaceholderValuesInMessageText(messageText);
                 if(parameters == false) return;

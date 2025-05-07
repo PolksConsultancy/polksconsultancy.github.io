@@ -1623,7 +1623,7 @@ var APP = {
 
         const msgDate = new Date(message[APP.extensionFieldTimestamp]).getTime();
         const formattedDate = APP.formatDateForStickyDateLabel(msgDate);
-        const previousScrollHeight = messageContainer.scrollHeight;
+        const previousScrollHeight = messagesContainer.scrollHeight;
 
         if($("#"+msgId).length) {
             $("#"+msgId).html(messageElement.innerHTML);
@@ -1640,13 +1640,13 @@ var APP = {
             }
             messagesContainer.appendChild(messageElement);
         }
-        
+
         if(!isLoadMore){
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         else{
-            const newScrollHeight = messageContainer.scrollHeight;
-            messageContainer.scrollTop += newScrollHeight - previousScrollHeight;
+            const newScrollHeight = messagesContainer.scrollHeight;
+            messagesContainer.scrollTop += newScrollHeight - previousScrollHeight;
         }
 
         // Add right-click menu for messages

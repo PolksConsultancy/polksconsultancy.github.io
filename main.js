@@ -1641,14 +1641,6 @@ var APP = {
             messagesContainer.appendChild(messageElement);
         }
 
-        if(!isLoadMore){
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-        else{
-            const newScrollHeight = messagesContainer.scrollHeight;
-            messagesContainer.scrollTop += newScrollHeight - previousScrollHeight;
-        }
-
         // Add right-click menu for messages
         // messageElement.addEventListener('contextmenu', (e) => {
         //     e.preventDefault();
@@ -1658,6 +1650,16 @@ var APP = {
             APP.replyMessageUIContent(messageId, contactId);
         }
         APP.handleMessagesOrderBasedOnTimeInChat();
+
+        if(!isLoadMore){
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        else{
+            const newScrollHeight = messagesContainer.scrollHeight;
+            messagesContainer.scrollTop += newScrollHeight - previousScrollHeight;
+        }
+
+        
     },
     showNotification: function(message) {
         notification.textContent = message;

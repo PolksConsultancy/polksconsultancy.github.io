@@ -999,7 +999,15 @@ var APP = {
         }, 1000);
     },
     getMessages: async function(contactId) {
-        return await ZOHO.CRM.API.searchRecord({Entity:APP.extensionHistory,Type:"criteria",Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${contactId})`, per_page:APP.messagesPerPage, page:APP.contacts[contactId].currentPage}).then(async function(data) {
+        return await ZOHO.CRM.API.searchRecord({
+            Entity:APP.extensionHistory,
+            Type:"criteria",
+            Query:`(${APP.extensionFieldWhatsAppNumber}:equals:${contactId})`, 
+            per_page:APP.messagesPerPage, 
+            page:APP.contacts[contactId].currentPage,
+            sort_by: APP.extensionFieldTimestamp,
+            sort_order: "desc",
+        }).then(async function(data) {
             return await APP.getMessagesResponse(data, contactId, APP.contacts[contactId].currentPage == 1 ? true : false)
         });
     },

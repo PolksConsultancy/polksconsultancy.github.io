@@ -1659,7 +1659,6 @@ var APP = {
             messagesContainer.scrollTop += newScrollHeight - previousScrollHeight;
         }
 
-        
     },
     showNotification: function(message) {
         notification.textContent = message;
@@ -2687,9 +2686,14 @@ var APP = {
         let msgId = message[APP.extensionFieldMsgId] ? encodeURIComponent(message[APP.extensionFieldMsgId].replaceAll(".", "_").replaceAll("=", "-")) : "";
         let replyMessageHTML = await APP.handleReplyMessageBtnOnClick(replyMessageId, contactId, true);
         let mensionDiv = $(`#${msgId} .message-content-main-div-in .reply-message-content-out`);
+
+        const messagesContainer = document.getElementById("messages-container");
+        const previousScrollHeight = messagesContainer.scrollHeight;
         if(mensionDiv){
             mensionDiv.prepend(`<div class="reply-message-content-in">${replyMessageHTML}</div>`);
         }
+        const newScrollHeight = messagesContainer.scrollHeight;
+        messagesContainer.scrollTop += newScrollHeight - previousScrollHeight;
     },
 
     fetchMessageRecordByID: async function(messageId, contactId) {

@@ -1264,7 +1264,6 @@ var APP = {
         }).then(function(contactResponse) {
             setTimeout(() => {
                 APP.updateLeadAfterConversion(leadRecord.id, contactResponse.data[0].details.id);
-                APP.showNotification("Contact created successfully");
             }, 1000);
             
         }).catch(function(error) {
@@ -1377,7 +1376,6 @@ var APP = {
             }).then(function(dealResponse) {
                 setTimeout(() => {
                     APP.updateContactAfterConversion(contactRecord.id, dealResponse.data[0].details.id);
-                    APP.showNotification("Deal created successfully");
                 }, 1000);
                 console.log("Deal created successfully with ID:", dealResponse);
                 
@@ -1430,6 +1428,7 @@ var APP = {
             setTimeout(() => {
                 $("#dealMapConfirmCondainer").remove();
                 $("#contactSelectOption").click();
+                APP.showNotification("Contact created successfully");
             }, 1000);
         }).catch(function(error) {
             console.warn("Failed to update contact after conversion", error);
@@ -1463,6 +1462,7 @@ var APP = {
             ">Created.</div>`);
             setTimeout(() => {
                 $("#dealMapConfirmCondainer").remove();
+                APP.showNotification("Deal created successfully");
             }, 1000);
         }).catch(function(error) {
             console.warn("Failed to update contact after conversion", error);

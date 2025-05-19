@@ -1842,7 +1842,7 @@ img.accountInfoIcon {
     background-color: #f5f1eb;
     transition: background-color .3s ease;
     transform-origin: left top;
-    /* width: 0%; */
+    width: 70%;
 }
 
 .chat-header {
@@ -1897,6 +1897,7 @@ img.accountInfoIcon {
     height: calc(100% - 132px);
     width: 100%;
     box-sizing: border-box;
+    position: relative;
 }
 
 .outgoing {
@@ -4669,12 +4670,14 @@ div#template-btn {
 }
 
 div#message-reply-tag {
-    width: calc(100% - 65px);
+    width: calc(100% - 0px);
     position: relative;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    margin: 0 15px;
+    /* margin: 0 15px; */
+    padding: 0 16px 0px 16px;
+    box-sizing: border-box;
 }
 
 div#template-btn svg {
@@ -4728,16 +4731,17 @@ div#contactloader {
 }
 
 .message-reply-tag-inner {
-    padding: 10px 20px;
+    padding: 10px 40px;
     display: flex;
     position: relative;
     align-items: center;
     justify-content: center;
-    gap: 19px;
+    /* gap: 19px; */
     background: white;
     zoom: 0.85;
     box-shadow: 0 0px 4px 0 rgba(10, 10, 10, .12);
     width: 100%;
+    box-sizing: border-box;
 }
 
 .reply-message-content {
@@ -4766,6 +4770,13 @@ div#contactloader {
 
 .reply-message-text {
     font-size: 15px;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    overflow: hidden;
+    width: 100%;
+    white-space: nowrap;
 }
 
 .reply-message-author {
@@ -5482,3 +5493,10 @@ span.message-text-to-reply {
     flex-direction: row-reverse;
     justify-content: flex-end;
 }
+
+.message-content {
+    width: 100%;
+    position: relative;
+}
+
+.close-reply-message {padding-left: 7px;}

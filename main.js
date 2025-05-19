@@ -874,7 +874,7 @@ var APP = {
                                                 ${contact.details[APP.extensionFieldModule] == "Lead" ? `
                                                     <button class="rowOptionsButton" id="leadCreateSelectOption">
                                                         <div class="rowOptionsButtonIn">
-                                                            <span>Create Contact</span>
+                                                            <span>Convert to Contact</span>
                                                         </div>
                                                     </button>` : ''}
                                                 <div id="recordDetailsSelectOption">
@@ -1262,9 +1262,9 @@ var APP = {
             Entity: "Contacts",
             APIData: leadRecord
         }).then(function(contactResponse) {
-            setTimeout(() => {
+            // setTimeout(() => {
                 APP.updateLeadAfterConversion(leadRecord.id, contactResponse.data[0].details.id);
-            }, 1000);
+            // }, 1000);
             
         }).catch(function(error) {
             // console.log("Error in contact to deal conversion:", error);
@@ -1374,10 +1374,10 @@ var APP = {
                 Entity: "Deals",
                 APIData: contactRecord
             }).then(function(dealResponse) {
-                setTimeout(() => {
+                // setTimeout(() => {
                     APP.updateContactAfterConversion(contactRecord.id, dealResponse.data[0].details.id);
-                }, 1000);
-                console.log("Deal created successfully with ID:", dealResponse);
+                // }, 1000);
+                // console.log("Deal created successfully with ID:", dealResponse);
                 
         }).catch(function(error) {
             // console.log("Error in contact to deal conversion:", error);
@@ -1395,7 +1395,7 @@ var APP = {
         ZOHO.CRM.API.updateRecord({
             Entity: "Leads",
             APIData: updateData
-        }).then(function(response) {
+        }).then(async function(response) {
             if($("#leadSelectOption").length) {
                 $("#leadSelectOption").hide();
             }
@@ -1406,8 +1406,8 @@ var APP = {
             APP.contacts[APP.currentContactId].details[APP.extensionFieldContact] = contact_id;
             APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = "";
             APP.filterModes["leads"].contacts = APP.filterModes["leads"].contacts.filter(e => e !== lead_id);
-            APP.contactAction(APP.currentContactId);
-            ZOHO.CRM.API.deleteRecord({Entity:"Leads",RecordID: lead_id})
+            await APP.contactAction(APP.currentContactId);
+            await ZOHO.CRM.API.deleteRecord({Entity:"Leads",RecordID: lead_id})
             .then(function(data){
                 // console.log(data)
             });
@@ -1426,6 +1426,9 @@ var APP = {
                 left: 5px;
             ">Created.</div>`);
             setTimeout(() => {
+                APP.addContactList(APP.currentContactId);
+                // APP.contactHeaderSetup(APP.currentContactId);
+                APP.contactDetailsSetup(APP.currentContactId);
                 $("#dealMapConfirmCondainer").remove();
                 $("#contactSelectOption").click();
                 APP.showNotification("Contact created successfully");

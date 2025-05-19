@@ -1426,7 +1426,7 @@ var APP = {
                 left: 5px;
             ">Created.</div>`);
             setTimeout(() => {
-                APP.addContactList(APP.currentContactId);
+                APP.addContactList(APP.currentContactId, "loaded");
                 // APP.contactHeaderSetup(APP.currentContactId);
                 APP.contactDetailsSetup(APP.currentContactId);
                 $("#dealMapConfirmCondainer").remove();

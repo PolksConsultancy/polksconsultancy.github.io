@@ -1027,7 +1027,11 @@ var APP = {
             APP.contacts[contactId].pageCompleted = true;
         }
         if((data && data.data && data.data.length) || (latestRecordsList && latestRecordsList.length)) {
-            let messages = [...data.data, ...latestRecordsList];
+            let messages = [];
+            if(data.data && data.data.length){
+                messages = [...data.data];
+            }
+            messages = [...messages, ...latestRecordsList];
             let loadedMessages = [];
             messages.forEach(async (messageRecord) => {
                 if(messageRecord[APP.extensionFieldMsgId] && !APP.contacts[contactId].messages[messageRecord[APP.extensionFieldMsgId]]) {
@@ -1990,6 +1994,12 @@ var APP = {
             let reactionFrom = data.messages[0].reaction && data.messages[0].reaction.emoji ? data.messages[0].reaction.emoji : "";
             let reactionTo = "";
             let replyMessageId = data.messages[0].context && data.messages[0].context.id ? data.messages[0].context.id : "";
+
+            if(APP.module && !APP.contacts[from]){
+                console.log("Another contact message.");
+                APP.database.ref('incomingMessages/'+key).remove();
+                return;
+            }
 
             let message = {};
             message[APP.extensionFieldId] = "";
@@ -3205,7 +3215,7 @@ var APP = {
                 Entity: module+"s",
                 RecordID: recordId,
                 RelatedList: APP.extensionHistory, 
-                per_page: 20,
+                per_page: 50,
                 page: 1,
                 sort_order: "desc",
                 sort_by: "Created_Time",
@@ -3213,7 +3223,10 @@ var APP = {
             .then(function(data){
                 if(data && data.data && data.data.length > 0){
                     let records = data.data;
-                    resolve(records);
+                    const filteredRecords = records.filter(record => 
+                        record[APP.extensionFieldWhatsAppNumber] === contactId
+                    );
+                    resolve(filteredRecords);
                     return;
                 }
                 resolve([]);

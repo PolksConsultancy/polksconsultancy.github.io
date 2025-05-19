@@ -1844,6 +1844,7 @@ var APP = {
             APP.addMessage(message_id, contactId, "sendMessage");
             messageInput.textContent = '';
             $("#templates-placeholders").hide();
+            $('#message-reply-tag').hide();
         }
 
         let sendButton = document.getElementById('send-button');

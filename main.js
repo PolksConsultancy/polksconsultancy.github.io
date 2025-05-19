@@ -1,4 +1,5 @@
 
+
 document.writeln('<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>');
 document.writeln('<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&display=swap">');
 document.writeln('<script src="ZohoEmbededAppSDK.js?v=3"></script>');
@@ -1252,11 +1253,11 @@ var APP = {
     ">Creating..</div>`;
     $("body").append(`<div id="dealMapConfirmCondainer"><div class="map-container">${k}</div></div>`);
                             
-        APP.leadToContactCreate(APP.leadRecord);
+        APP.leadToContactCreate(APP.contacts[APP.currentContactId]['Lead']);
     },
     leadToContactCreate: function(leadRecord, initialRecord={}) {
         
-        leadRecord = leadRecord ? leadRecord : APP.leadRecord;
+        leadRecord = leadRecord ? leadRecord : (APP.contacts[APP.currentContactId]?APP.contacts[APP.currentContactId]['Lead'] : {});
         ZOHO.CRM.API.insertRecord({
             Entity: "Contacts",
             APIData: leadRecord
@@ -1331,7 +1332,7 @@ var APP = {
             </div>`);
                             
             document.querySelector("#map-btn-primary").addEventListener('click', (e) => {
-                APP.contactToDealCreate(APP.contactRecord);
+                APP.contactToDealCreate(APP.contacts[APP.currentContactId]['Contact']);
             });        
             document.querySelector("#map-btn-secondary").addEventListener('click', (e) => {
                 $("#dealMapConfirmCondainer").remove();
@@ -1340,7 +1341,7 @@ var APP = {
     contactToDealCreate: function(contactRecord, initialRecord={}) {
 
 
-        contactRecord = contactRecord ? contactRecord : APP.contactRecord;
+        contactRecord = contactRecord ? contactRecord : (APP.contacts[APP.currentContactId]?APP.contacts[APP.currentContactId]['Contact'] : {});
         let Deal_Name = document.getElementById("map_Deal_Name").value;
         let Stage = document.getElementById("map_Stage").value;
         let Closing_Date = document.getElementById("map_Closing_Date").value;

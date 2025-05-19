@@ -214,10 +214,10 @@ var APP = {
             APP.contactDetailsSetup("Contacts");
         }
         if(e.target.closest('#contactCreateSelectOption')) {
-            APP.contactToDealCreateConfirmation(APP.contactRecord);
+            APP.contactToDealCreateConfirmation();
         }
         if(e.target.closest('#leadCreateSelectOption')) {
-            APP.leadToContactCreateConfirmation(APP.contactRecord);
+            APP.leadToContactCreateConfirmation();
         }
 
         if($(e.target).attr('id') == "dealMapConfirmCondainer") {
@@ -1262,9 +1262,10 @@ var APP = {
             Entity: "Contacts",
             APIData: leadRecord
         }).then(function(contactResponse) {
-            // setTimeout(() => {
+            setTimeout(() => {
                 APP.updateLeadAfterConversion(leadRecord.id, contactResponse.data[0].details.id);
-            // }, 1000);
+                APP.showNotification("Contact created successfully");
+            }, 1000);
             
         }).catch(function(error) {
             // console.log("Error in contact to deal conversion:", error);
@@ -1374,10 +1375,11 @@ var APP = {
                 Entity: "Deals",
                 APIData: contactRecord
             }).then(function(dealResponse) {
-                // setTimeout(() => {
+                setTimeout(() => {
                     APP.updateContactAfterConversion(contactRecord.id, dealResponse.data[0].details.id);
-                // }, 1000);
-                // console.log("Deal created successfully with ID:", dealResponse);
+                    APP.showNotification("Deal created successfully");
+                }, 1000);
+                console.log("Deal created successfully with ID:", dealResponse);
                 
         }).catch(function(error) {
             // console.log("Error in contact to deal conversion:", error);

@@ -157,13 +157,16 @@ var APP = {
 
         thisElement = $(".message-text-to-react-icon");
         if(thisElement.is(e.target) || thisElement.has(e.target).length != 0) {
+            $(".message-text-to-react-out").removeClass("reactionOpened");
             $(".reactionPoupButton").css({transform: "scale(1)"});
-            $(e.target).parent().parent().parent().parent().addClass("reactionOpened");
             $(".reactionPoupButton .reactionButtonImg").attr("msgid", $(e.target).attr("msgid"));
             APP.positionNotificationBox(e.clientX + $(e.target).width()-e.offsetX, e.clientY + $(e.target).height()-e.layerY);
+            $(e.target).closest(".message-text-to-react-out").addClass("reactionOpened");
         }
         else {
             $(".reactionPoupButton").css({transform: "scale(0)"});
+            $(".reactionPoupButton .reactionButtonImg").attr("msgid", "");
+            $(".message-text-to-react-out").removeClass("reactionOpened");
         }
 
         // template

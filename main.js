@@ -778,9 +778,13 @@ var APP = {
             if(APP.initialChatDiv) APP.initialChatDiv.remove();
             $(".contactItem.active").removeClass("active");
             contactElement.setAttribute("class", "contactListIn contactItem active");
+            let messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = "";
 
             APP.currentContactId = contactElement.dataset.id;
             let contactId = APP.currentContactId;
+            APP.contacts[contactId].unread = 0;
+
             if(!APP.contacts[contactId].initied) {
                 if(APP.contacts[contactId].details[APP.extensionFieldContact]) {
                     APP.contacts[contactId].details[APP.extensionFieldModule] = "Contact";
@@ -828,16 +832,16 @@ var APP = {
                 contactElement.querySelector(".unread-count").remove();
             }
 
-            APP.contacts[contactId].unread = 0;
-
-            let messagesContainer = document.getElementById('messages-container');
-            messagesContainer.innerHTML = "";
-
             if(Object.keys(APP.contacts[contactId].messages).length) {
+                APP.isMessageLoading = true;
+                $('#messages-container').prepend(APP.loader("contactloader"));
+                APP.contactListloader = document.getElementById('contactloader');
                 let sortingContacts = Object.values(APP.contacts[contactId].messages).sort((a, b) => new Date(b[APP.extensionFieldTimestamp]) - new Date(a[APP.extensionFieldTimestamp]));
                 sortingContacts.forEach(async message => {
                     await APP.addMessage(message[APP.extensionFieldMsgId], contactId, "loaded");
                 });
+                APP.isMessageLoading = false;
+                APP.contactListloader.remove();
             }
             if(Object.keys(APP.contacts[contactId].messages).length < APP.messagesPerPage+1) {
                 await APP.loadMessages(contactId);

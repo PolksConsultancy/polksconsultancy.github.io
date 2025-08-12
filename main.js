@@ -1348,7 +1348,7 @@ var APP = {
 
 
         contactRecord = contactRecord ? contactRecord : APP.contacts[APP.currentContactId]['Contact'];
-        contactRecord = {};
+        updateContactRecord = {};
         let Deal_Name = document.getElementById("map_Deal_Name").value;
         let Stage = document.getElementById("map_Stage").value;
         let Closing_Date = document.getElementById("map_Closing_Date").value;
@@ -1370,16 +1370,16 @@ var APP = {
             left: 5px;
         ">Creating..</div>`);
         
-        contactRecord.Contact_Name = { id: contactRecord.id };
-        contactRecord.Deal_Name = contactRecord[Deal_Name] ? contactRecord[Deal_Name] : contactRecord.First_Name && contactRecord.Last_Name ? contactRecord.First_Name+" "+contactRecord.Last_Name : contactRecord.Last_Name;
-        contactRecord.Stage = Stage;
-        contactRecord.Closing_Date = Closing_Date ? new Date(Closing_Date).toISOString().split('T')[0] : "";
-        contactRecord.Amount = String(Amount);
-        contactRecord.Probability = Number(Probability);
-        contactRecord.Next_Step = Next_Step;
+        updateContactRecord.Contact_Name = { id: contactRecord.id };
+        updateContactRecord.Deal_Name = contactRecord[Deal_Name] ? contactRecord[Deal_Name] : contactRecord.First_Name && contactRecord.Last_Name ? contactRecord.First_Name+" "+contactRecord.Last_Name : contactRecord.Last_Name;
+        updateContactRecord.Stage = Stage;
+        updateContactRecord.Closing_Date = Closing_Date ? new Date(Closing_Date).toISOString().split('T')[0] : "";
+        updateContactRecord.Amount = String(Amount);
+        updateContactRecord.Probability = Number(Probability);
+        updateContactRecord.Next_Step = Next_Step;
         ZOHO.CRM.API.insertRecord({
                 Entity: "Deals",
-                APIData: contactRecord
+                APIData: updateContactRecord
             }).then(function(dealResponse) {
                 // setTimeout(() => {
                     APP.updateContactAfterConversion(contactRecord.id, dealResponse.data[0].details.id);

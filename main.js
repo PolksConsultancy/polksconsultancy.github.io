@@ -1263,7 +1263,7 @@ var APP = {
     },
     leadToContactCreate: function(leadRecord, initialRecord={}) {
         
-        leadRecord = leadRecord ? leadRecord : APP.contacts[APP.currentContactId]['Contact'];
+        leadRecord = leadRecord ? leadRecord : APP.contacts[APP.currentContactId]['Lead'];
         ZOHO.CRM.API.insertRecord({
             Entity: "Contacts",
             APIData: leadRecord

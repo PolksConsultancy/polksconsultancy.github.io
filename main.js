@@ -214,10 +214,10 @@ var APP = {
             APP.contactDetailsSetup("Contacts");
         }
         if(e.target.closest('#contactCreateSelectOption')) {
-            APP.contactToDealCreateConfirmation(APP.contactRecord);
+            APP.contactToDealCreateConfirmation(APP.contacts[APP.currentContactId]['Contact']);
         }
         if(e.target.closest('#leadCreateSelectOption')) {
-            APP.leadToContactCreateConfirmation(APP.contactRecord);
+            APP.leadToContactCreateConfirmation(APP.contacts[APP.currentContactId]['Contact']);
         }
 
         if($(e.target).attr('id') == "dealMapConfirmCondainer") {
@@ -1259,11 +1259,11 @@ var APP = {
     ">Creating..</div>`;
     $("body").append(`<div id="dealMapConfirmCondainer"><div class="map-container">${k}</div></div>`);
                             
-        APP.leadToContactCreate(APP.leadRecord);
+        APP.leadToContactCreate(APP.contacts[APP.currentContactId]['Contact']);
     },
     leadToContactCreate: function(leadRecord, initialRecord={}) {
         
-        leadRecord = leadRecord ? leadRecord : APP.leadRecord;
+        leadRecord = leadRecord ? leadRecord : APP.contacts[APP.currentContactId]['Contact'];
         ZOHO.CRM.API.insertRecord({
             Entity: "Contacts",
             APIData: leadRecord
@@ -1338,7 +1338,7 @@ var APP = {
             </div>`);
                             
             document.querySelector("#map-btn-primary").addEventListener('click', (e) => {
-                APP.contactToDealCreate(APP.contactRecord);
+                APP.contactToDealCreate(APP.contacts[APP.currentContactId]['Contact']);
             });        
             document.querySelector("#map-btn-secondary").addEventListener('click', (e) => {
                 $("#dealMapConfirmCondainer").remove();
@@ -1347,7 +1347,7 @@ var APP = {
     contactToDealCreate: function(contactRecord, initialRecord={}) {
 
 
-        contactRecord = contactRecord ? contactRecord : APP.contactRecord;
+        contactRecord = contactRecord ? contactRecord : APP.contacts[APP.currentContactId]['Contact'];
         let Deal_Name = document.getElementById("map_Deal_Name").value;
         let Stage = document.getElementById("map_Stage").value;
         let Closing_Date = document.getElementById("map_Closing_Date").value;

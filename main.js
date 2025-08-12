@@ -1399,28 +1399,8 @@ var APP = {
             id: lead_id,
             "Last_Conversion_Date": new Date().toISOString()
         };
-        
-        ZOHO.CRM.API.updateRecord({
-            Entity: "Leads",
-            APIData: updateData
-        }).then(function(response) {
-            if($("#leadSelectOption").length) {
-                $("#leadSelectOption").hide();
-            }
-            if($("#contactSelectOption").length) {
-                $("#contactSelectOption").show();
-            }
-            APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
-            APP.contacts[APP.currentContactId].details[APP.extensionFieldContact] = contact_id;
-            APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = "";
-            APP.filterModes["leads"].contacts = APP.filterModes["leads"].contacts.filter(e => e !== lead_id);
-            APP.contactAction(APP.currentContactId);
-            ZOHO.CRM.API.deleteRecord({Entity:"Leads",RecordID: lead_id})
-            .then(function(data){
-                // console.log(data)
-            });
-            // console.log("lead updated after conversion");
-            $("#dealMapConfirmCondainer .map-container").html(`<div style="
+
+        $("#dealMapConfirmCondainer .map-container").html(`<div style="
                 z-index: 100000000;
                 height: 100%;
                 position: absolute;
@@ -1437,9 +1417,47 @@ var APP = {
                 $("#dealMapConfirmCondainer").remove();
                 $("#contactSelectOption").click();
             }, 1000);
-        }).catch(function(error) {
-            console.warn("Failed to update contact after conversion", error);
-        });
+        
+        // ZOHO.CRM.API.updateRecord({
+        //     Entity: "Leads",
+        //     APIData: updateData
+        // }).then(function(response) {
+        //     if($("#leadSelectOption").length) {
+        //         $("#leadSelectOption").hide();
+        //     }
+        //     if($("#contactSelectOption").length) {
+        //         $("#contactSelectOption").show();
+        //     }
+        //     APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
+        //     APP.contacts[APP.currentContactId].details[APP.extensionFieldContact] = contact_id;
+        //     APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = "";
+        //     APP.filterModes["leads"].contacts = APP.filterModes["leads"].contacts.filter(e => e !== lead_id);
+        //     APP.contactAction(APP.currentContactId);
+        //     ZOHO.CRM.API.deleteRecord({Entity:"Leads",RecordID: lead_id})
+        //     .then(function(data){
+        //         // console.log(data)
+        //     });
+        //     // console.log("lead updated after conversion");
+        //     $("#dealMapConfirmCondainer .map-container").html(`<div style="
+        //         z-index: 100000000;
+        //         height: 100%;
+        //         position: absolute;
+        //         display: flex;
+        //         overflow: hidden;
+        //         align-items: center;
+        //         width: 100%;
+        //         justify-content: center;
+        //         bottom: 0;
+        //         padding: 0px 0px 35px 0px;
+        //         left: 5px;
+        //     ">Created.</div>`);
+        //     setTimeout(() => {
+        //         $("#dealMapConfirmCondainer").remove();
+        //         $("#contactSelectOption").click();
+        //     }, 1000);
+        // }).catch(function(error) {
+        //     console.warn("Failed to update contact after conversion", error);
+        // });
     },
     updateContactAfterConversion: function(contactId, dealId) {
         let updateData = {

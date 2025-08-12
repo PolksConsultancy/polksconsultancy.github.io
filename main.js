@@ -1348,6 +1348,7 @@ var APP = {
 
 
         contactRecord = contactRecord ? contactRecord : APP.contacts[APP.currentContactId]['Contact'];
+        contactRecord = {};
         let Deal_Name = document.getElementById("map_Deal_Name").value;
         let Stage = document.getElementById("map_Stage").value;
         let Closing_Date = document.getElementById("map_Closing_Date").value;

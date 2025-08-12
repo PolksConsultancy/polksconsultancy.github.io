@@ -1400,6 +1400,23 @@ var APP = {
             "Last_Conversion_Date": new Date().toISOString()
         };
 
+        if($("#leadSelectOption").length) {
+                $("#leadSelectOption").hide();
+            }
+            if($("#contactSelectOption").length) {
+                $("#contactSelectOption").show();
+            }
+            APP.contacts[APP.currentContactId].details[APP.extensionFieldModule] = "Contact";
+            APP.contacts[APP.currentContactId].details[APP.extensionFieldContact] = contact_id;
+            APP.contacts[APP.currentContactId].details[APP.extensionFieldLead] = "";
+            APP.filterModes["leads"].contacts = APP.filterModes["leads"].contacts.filter(e => e !== lead_id);
+            APP.contactAction(APP.currentContactId);
+
+        ZOHO.CRM.API.deleteRecord({Entity:"Leads",RecordID: lead_id})
+            .then(function(data){
+                // console.log(data)
+            });
+
         $("#dealMapConfirmCondainer .map-container").html(`<div style="
                 z-index: 100000000;
                 height: 100%;

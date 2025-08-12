@@ -1,4 +1,5 @@
-document.writeln('<script src="ZohoEmbededAppSDK.js?v=2"></script>'); document.writeln('<script src="encodeLib.js?v=3"></script>');
+
+document.writeln('<script src="ZohoEmbededAppSDK.js?v=2"></script>'); document.writeln('<script src="encodeLib.js?v=6"></script>');
 var ZOHOCRM = {
 
     recordIds: [],
@@ -1380,7 +1381,7 @@ var ZOHOCRM = {
                 padding: "20px 2px 0 2px"
             }
         };
-        encodeLib.insert(".chat-header", encodeLib.labelContent(addInput), {addOn: "append"});
+        encodeLib.insert(ZOHOCRM.BODY, encodeLib.labelContent(addInput), {addOn: "append"});
         encodeLib.insert(APP.BODY, encodeLib.content({id: "subHeader", padding: "0 4px", positionX: "end"}), {addOn: "prepend"});
         ZOHOCRM.toNumber = $("#toNumber");
         ZOHOCRM.toNumberError = $("#toNumberError");
@@ -1465,40 +1466,12 @@ var ZOHOCRM = {
             return errCheck;
         }
     },
-    phoneRecordChooseFunc: async function(dropdownThisElement, selectedKeyValueObj, dropdownOptionThisElement, prevDropdownOptionThisElement) {
+    phoneRecordChooseFunc: function(dropdownThisElement, selectedKeyValueObj, dropdownOptionThisElement, prevDropdownOptionThisElement) {
         ZOHOCRM.phoneRecord = { entity: $(dropdownThisElement).find(".selected").attr('entity'), api_name: $(dropdownThisElement).find(".selected").attr('api_name') };
         if(!ZOHOCRM.isBulk) {
             let selectedNumer = encodeLib.strToNumFillter($(dropdownThisElement).find(".selected").attr("num"));
-
-            $(".chat-messages").html('');
-
             ZOHOCRM.toNumber.val(selectedNumer).focus();
             if(selectedNumer && selectedNumer.length > 10 && selectedNumer.slice(0, selectedNumer.length-10)) {
-
-                let k = await ZOHOCRM.searchRecord(ZOHOCRM.extensionHistory, `(${SMS.extensionFieldContactNumber}:equals:${selectedNumer})`, type="criteria");
-
-            if(k) {
-                k.sort(function(a, b) {
-                    var keyA = new Date(a.Created_Time),
-                      keyB = new Date(b.Created_Time);
-                    // Compare the 2 dates
-                    if (keyA < keyB) return -1;
-                    if (keyA > keyB) return 1;
-                    return 0;
-                  });
-    
-                k.forEach(function(res) {
-    
-                    if(res.whatsappbusiness0__Direction && res.whatsappbusiness0__Direction == "Incoming") {
-                        SMS.SEND.addMessage('incoming', res.whatsappbusiness0__Message, res.Created_Time, null);
-                    }
-                    else {
-                        SMS.SEND.addMessage('outgoing', res.whatsappbusiness0__Message, res.Created_Time, null);
-                    }
-                    
-                });
-            }
-
                 let findFirstCountry = false;
                 encodeLib.rawCountryData.some(item => {
                     if(!findFirstCountry && item[1] === selectedNumer.slice(0, selectedNumer.length-10) && $(".toNumberCountrycode .enCountry__"+item[0]).length) {
@@ -1506,9 +1479,6 @@ var ZOHOCRM = {
                         $(".toNumberCountrycode .enCountry__"+item[0]).click();
                         ZOHOCRM.toNumber.val(selectedNumer.slice(-10)).focus();
                         findFirstCountry = true;
-
-                        
-
                         return;
                     }
                 });

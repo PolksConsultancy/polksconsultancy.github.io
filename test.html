@@ -6,11 +6,11 @@
             a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
             f.parentNode.insertBefore(a,f)})(window,document,'script', 'https://invitejs.trustpilot.com/tp.min.js', 'tp');
             tp('register', 'fdyKW57xRZ2Hk8yw');
-</script>
-
+    </script>
 </head>
 
 <body>
+    // just test purpose
     <script> 
         document.addEventListener('DOMContentLoaded', function() {
             let trustpilot_invitation = {
@@ -18,9 +18,9 @@
                 recipientName: 'Chris Ridgers',
                 referenceId: '1000052779',
                 source: 'InvitationScript',
-                };
-                let k = tp('createInvitation', trustpilot_invitation);
-                console.log(k);
+            };
+            let resp = tp('createInvitation', trustpilot_invitation);
+            console.log(resp);
         });
     </script>
 </body>

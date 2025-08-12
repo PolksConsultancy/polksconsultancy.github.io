@@ -1264,12 +1264,13 @@ var APP = {
     leadToContactCreate: function(leadRecord, initialRecord={}) {
         
         leadRecord = leadRecord ? leadRecord : APP.contacts[APP.currentContactId]['Lead'];
+        delete leadRecord.Layout;
         ZOHO.CRM.API.insertRecord({
             Entity: "Contacts",
             APIData: leadRecord
         }).then(function(contactResponse) {
             // setTimeout(() => {
-                APP.updateLeadAfterConversion(leadRecord.id, contactResponse.data[0].details.id);
+                APP.updateLeadAfterConversion(contactResponse.id, contactResponse.data[0].details.id);
             // }, 1000);
             
         }).catch(function(error) {
